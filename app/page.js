@@ -1,103 +1,80 @@
-import Image from "next/image";
+"use client"
+import React, { useState, useEffect } from "react";
+import Categories from './components/Home/Categories'
+import Articles from "./components/Home/Articles";
+import {
+  useGetCategoriesQuery,
+  useGetMyWribatesByCategoryQuery,
+} from "./services/authApi";
+import { setCategories } from "./features/categoriesSlice";
+import { useDispatch } from "react-redux";
 
-export default function Home() {
+// Replace with actual token
+
+const Home = () => {
+  const { data, isLoading, error } = useGetCategoriesQuery();
+  const [category, setCategory] = useState(null);
+  const dispatch = useDispatch();
+
+  const {
+    data: wribates,
+    isLoading: wribatesLoading,
+    error: wribatesError,
+  } = useGetMyWribatesByCategoryQuery(category, {
+    skip: !category,
+    refetchOnMountOrArgChange: true,
+  });
+
+  useEffect(() => {
+    if (data && data?.data && data?.data.length > 0) {
+      console.log(data);
+      console.log(data?.data[0]._id);
+
+      setCategory(data?.data[0].categoryName);
+      dispatch(setCategories(data?.data));
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (category) {
+      console.log(category);
+    }
+  }, [category]);
+
+  const handleCategoryChange = (name) => {
+    setCategory(name);
+  };
+
+  console.log(wribates);
+  // Reconnect only if the token changes
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="bg-gray-100">
+      {/* <Header /> */}
+      <Categories
+        categories={data?.data}
+        isLoading={isLoading}
+        category={category}
+        onChange={handleCategoryChange}
+      />
+      {wribatesLoading && <p>Wribates Loading</p>}
+      {!wribatesError && !wribatesLoading && wribates && (
+        <Articles
+          mainWribate={
+            wribates?.data?.ongoing[0] ||
+            wribates?.data?.completed[0] ||
+            wribates?.data?.freeWribates[0] ||
+            wribates?.data?.sponsoredWribates[0]
+          }
+          onGoing={wribates?.data?.ongoing}
+          completed={wribates?.data?.completed}
+          free={wribates?.data?.freeWribates}
+          sponsoredWribates={wribates?.data?.sponsoredWribates}
         />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
+      {wribatesError && <p>No Wribates Found</p>}
     </div>
   );
-}
+};
+
+export default Home;
