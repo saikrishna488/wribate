@@ -110,7 +110,7 @@ const LoginPage = () => {
         <div className="max-w-md w-full mx-auto">
           <div className="mb-6 flex flex-row justify-center items-center md:mb-8">
             <div className=" h-20">
-              <img src="/logo.PNG" className="h-full w-full object-cover" alt="" />
+              <img src="/logo/logo.png" className="h-full w-full object-cover" alt="" />
             </div>
           </div>
 
