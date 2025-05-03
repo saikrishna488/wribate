@@ -23,11 +23,11 @@ const NewsSections = ({
       <div className="lg:w-[60%] overflow-y-auto md:h-[calc(100vh-130px)] scrollbar-hide pr-2 pb-2 border-r-2  border-gray-200 ">
         <div className="pb-2 border-b-2 border-gray-200">
           <ArticleCard
-            id={mainWribate._id}
-            image={mainWribate.coverImage}
+            id={mainWribate?._id}
+            image={mainWribate?.coverImage}
             title={mainWribate?.title}
             isLarge={true}
-            category={mainWribate.category}
+            category={mainWribate?.category}
             tag={"Main"}
           />
         </div>
