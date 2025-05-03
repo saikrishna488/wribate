@@ -3,7 +3,7 @@
 import { ArrowRightIcon, BookOpenIcon, Lightbulb, GraduationCap, UsersIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Welcome from './Welcome';
-import WhatIsWribateSection from './WhatisWribate';
+import WhatIsWribateSection from './WhatIsWribate';
 // import { Inspiration } from 'next/font/google';
 import InspirationCarousel from './Inspiration';
 import WribateForYou from './WribateForYou';
