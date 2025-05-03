@@ -6,7 +6,7 @@ import Welcome from './Welcome';
 import WhatIsWribateSection from './WhatisWribate';
 // import { Inspiration } from 'next/font/google';
 import InspirationCarousel from './Inspiration';
-import WribateForYou from './WribateforYou';
+import WribateForYou from './WribateForYou';
 import WhyWribateSection from './WhyWribate';
 import WribateForStudents from './WribateForStudents';
 import WhoIsWribater from './WhoIsWribater';
