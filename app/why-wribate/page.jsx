@@ -1,6 +1,6 @@
 import React from 'react'
 import Sidebar from '../components/WhyWribate/Sidebar'
-import Mainsection from '../components/WhyWribate/Mainsection'
+import Mainsection from '../components/WhyWribate/MainSection'
 
 const page = () => {
   return (

@@ -15,7 +15,7 @@ import { timeAgo } from "../utils/dateFormat";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useAtom } from "jotai";
 import { userAtom } from "../states/GlobalStates";
-import { Suspense } from 'react';
+
 
 // Socket reference to be maintained throughout component lifecycle
 let socket = null;
@@ -230,7 +230,6 @@ const ChatUI = () => {
   );
 
   return (
-    <Suspense fallback={<div>Loading messages...</div>}>
       <div>
       {usersLoading && <p>Loading users...</p>}
       {users && (
@@ -436,7 +435,6 @@ const ChatUI = () => {
         </div>
       )}
     </div>
-    </Suspense>
     
   );
 };
