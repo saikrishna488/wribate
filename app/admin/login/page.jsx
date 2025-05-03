@@ -14,7 +14,7 @@ import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useAtom } from 'jotai';
-import { userAtom } from '@/app/states/globalstates';
+import { userAtom } from '@/app/states/GlobalStates';
 
 
 export default function AdminLogin() {

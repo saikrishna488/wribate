@@ -9,7 +9,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useRouter,useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAtom } from 'jotai';
-import { blogAtom, userAtom } from '@/app/states/globalstates';
+import { blogAtom, userAtom } from '@/app/states/GlobalStates';
 import axios from 'axios';
 
 export default function SimpleBlogPost() {
@@ -17,7 +17,7 @@ export default function SimpleBlogPost() {
     const [title, setTitle] = useState(editBlog.title ||'');
     const [content, setContent] = useState(editBlog.title || '');
     const [user] = useAtom(userAtom);
-    const [imagePreview, setImagePreview] = useState<any>(editBlog.image || null);
+    const [imagePreview, setImagePreview] = useState(editBlog.image || null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
     

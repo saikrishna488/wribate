@@ -13,7 +13,7 @@ import {
     Handshake
 } from 'lucide-react';
 import Link from 'next/link';
-import { expandAtom } from '../states/globalStates';
+import { expandAtom } from '../states/GlobalStates';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 

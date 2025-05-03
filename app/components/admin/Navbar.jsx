@@ -11,7 +11,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Menu, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { userAtom } from '@/app/states/globalstates';
+import { userAtom } from '@/app/states/GlobalStates';
 import { useAtom } from 'jotai';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useAtom } from "jotai";
-import { userAtom } from "../states/globalStates";
+import { userAtom } from "../states/GlobalStates";
 import axios from "axios";
 
 const LoginPage = () => {

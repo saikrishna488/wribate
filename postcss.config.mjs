@@ -1,11 +1,6 @@
 const config = {
-  plugins: [
-    require('@tailwindcss/postcss'),
-    require('tailwind-scrollbar'),
-  ],
-  variants: {
-    scrollbar: ['rounded'],
+  plugins: {
+    "@tailwindcss/postcss": {},
   },
 };
-
 export default config;

@@ -4,7 +4,7 @@ import SingleWribate from "./SingleWribate";
 import BatchedWribate from "./BatchedWribate";
 import { useSelector } from "react-redux";
 import { useAtom } from "jotai";
-import { userAtom } from "../states/globalStates";
+import { userAtom } from "../states/GlobalStates";
 import { useRouter } from "next/navigation";
 
 const CreateWribateForm = () => {

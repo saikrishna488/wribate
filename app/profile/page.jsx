@@ -14,7 +14,7 @@ import { baseApi } from "../services/baseApi";
 import { setCredentials } from "../features/authSlice"; // Import the new component
 import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
-import { userAtom } from "../states/globalStates";
+import { userAtom } from "../states/GlobalStates";
 import Link from "next/link";
 import toast from "react-hot-toast";
 

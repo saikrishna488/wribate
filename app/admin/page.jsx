@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { userAtom } from '../states/globalstates';
+import { userAtom } from '../states/GlobalStates';
 import { useAtom } from 'jotai';
 import toast from 'react-hot-toast';
 

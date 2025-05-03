@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAtom } from 'jotai';
-import { userAtom } from '../states/globalStates';
+import { userAtom } from '../states/GlobalStates';
 import { usePathname } from 'next/navigation';
 
 const Render = () => {

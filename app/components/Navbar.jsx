@@ -5,7 +5,7 @@ import { useAtom } from 'jotai';
 import { Menu, Edit, PlusCircle, User, Search, X,LogOut,FileText,MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { expandAtom, userAtom } from '../states/globalStates';
+import { expandAtom, userAtom } from '../states/GlobalStates';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import axios from 'axios';

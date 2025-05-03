@@ -3,7 +3,7 @@ import {
   useUpdateProfileMutation,
   useUploadImageMutation,
 } from "../services/authApi";
-import { formatToYMD } from "../utils/dateFormat";
+import formatToYMD from "../utils/dateFormat";
 import { setCredentials } from "../features/authSlice";
 import { useDispatch } from "react-redux";
 

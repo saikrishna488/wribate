@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User, ArrowUpCircle, PlayCircle, Plus, SearchX } from "lucide-react";
-import { debateAtom, userAtom } from "../states/globalStates";
+import { debateAtom, userAtom } from "../states/GlobalStates";
 import { useAtom } from "jotai";
 import toast from "react-hot-toast";
 import axios from "axios";
