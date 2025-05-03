@@ -19,6 +19,26 @@ const NewsSections = ({
     }
   };
 
+  const ads = [
+    {
+      src: "/Ads/01.png",
+      alt: "Ad 1",
+      link: "https://sponsor1.com"
+    },
+    {
+      src: "/Ads/02.png",
+      alt: "Ad 2",
+      link: "https://sponsor2.com"
+    },
+    {
+      src: "/Ads/03.png",
+      alt: "Ad 3",
+      link: "https://sponsor3.com"
+    }
+  ];
+
+
+
   return (
     <div className="flex flex-col lg:flex-row overflow-hidden md:p-2 p-1">
       {/* Main News Column - 60% width on large screens, full width on small */}
@@ -131,8 +151,22 @@ const NewsSections = ({
       )}
 
       {/* Featured News Column - individually scrollable */}
-      <div className="md:w-[20%] overflow-y-auto md:h-[calc(100vh-130px)] px-2 mt-4 lg:mt-0 scrollbar-thin">
-        
+      <div className="sticky md:w-[20%] md:block hidden top-20 space-y-4">
+        {ads.map((ad, index) => (
+          <a
+            key={index}
+            href={ad.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block mb-4"
+          >
+            <img
+              src={ad.src}
+              alt={ad.alt}
+              className="w-full h-auto shadow-md hover:opacity-90 transition"
+            />
+          </a>
+        ))}
       </div>
     </div>
   );

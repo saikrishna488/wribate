@@ -9,10 +9,23 @@ import { Calendar } from "lucide-react";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useAtom } from "jotai";
+import { debateAtom, userAtom } from "../states/GlobalStates";
 
 const SingleWribate = () => {
+  
+
+  const [uploadImage, { isLoading }] = useUploadImageMutation();
+  // const { userInfo } = useSelector((state) => state.auth);
+  const [user,setUser] = useAtom(userAtom);
+  const [createWribate, { isLoading: wribateCreating }] = useCreateWribateMutation();
+  const { data, isLoading: categoriesLoading } = useGetCategoriesQuery();
+  const [debate, setDebate] = useAtom(debateAtom);
+  const dateInputRef = useRef(null);
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
-    title: "",
+    title: debate?.title || "",
     coverImage: null,
     leadFor: "",
     leadAgainst: "",
@@ -23,19 +36,13 @@ const SingleWribate = () => {
     judge3: "",
     startDate: "",
     durationDays: 1,
-    category: "",
+    category: debate?.category || "",
     institution: "",
     scope: "Open",
     type: "Free",
     prizeAmount: "",
+    _id: user?._id || null
   });
-
-  const [uploadImage, { isLoading }] = useUploadImageMutation();
-  const { userInfo } = useSelector((state) => state.auth);
-  const [createWribate, { isLoading: wribateCreating }] = useCreateWribateMutation();
-  const { data, isLoading: categoriesLoading } = useGetCategoriesQuery();
-  const dateInputRef = useRef(null);
-  const router = useRouter();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -346,7 +353,6 @@ const SingleWribate = () => {
                 name="durationDays"
                 value={formData.durationDays}
                 onChange={handleInputChange}
-                min="1"
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="e.g. 2"
                 required
@@ -381,7 +387,7 @@ const SingleWribate = () => {
               </select>
             </div>
             
-            {userInfo?.userRole !== "user" && (
+            {user?.userRole !== "user" && (
               <div>
                 <label className="block text-gray-700 text-sm font-medium mb-2">
                   Institution

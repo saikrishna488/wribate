@@ -49,14 +49,16 @@ const Home = () => {
   // Reconnect only if the token changes
 
   return (
-    <div className="bg-gray-100">
+    <div className="bg-gray-100 p-2 ml-20 flex-col flex overflow-hidden">
       {/* <Header /> */}
-      <Categories
-        categories={data?.data}
-        isLoading={isLoading}
-        category={category}
-        onChange={handleCategoryChange}
-      />
+      <div className="">
+        <Categories
+          categories={data?.data}
+          isLoading={isLoading}
+          category={category}
+          onChange={handleCategoryChange}
+        />
+      </div>
       {wribatesLoading && <p>Wribates Loading</p>}
       {!wribatesError && !wribatesLoading && wribates && (
         <Articles
@@ -73,6 +75,7 @@ const Home = () => {
         />
       )}
       {wribatesError && <p>No Wribates Found</p>}
+
     </div>
   );
 };

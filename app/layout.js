@@ -37,7 +37,7 @@ export default function RootLayout({ children }) {
           <Sidebar />
 
           <ReduxProvider>
-            <div className="bg-white overflow-auto w-full h-[90%]">
+            <div className="bg-white w-full h-[90%]">
               <Render />
               {children}
             </div>

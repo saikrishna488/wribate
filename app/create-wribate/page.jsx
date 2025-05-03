@@ -13,19 +13,38 @@ const CreateWribateForm = () => {
   const [user] = useAtom(userAtom);
   const router = useRouter(userAtom);
 
+  const ads = [
+    {
+      src: "/Ads/01.png",
+      alt: "Ad 1",
+      link: "https://sponsor1.com"
+    },
+    {
+      src: "/Ads/02.png",
+      alt: "Ad 2",
+      link: "https://sponsor2.com"
+    },
+    {
+      src: "/Ads/03.png",
+      alt: "Ad 3",
+      link: "https://sponsor3.com"
+    }
+  ];
 
-  useEffect(()=>{
-    if(!user?._id){
+
+
+  useEffect(() => {
+    if (!user?._id) {
       router.push('/login')
     }
-  },[])
+  }, [])
 
-  if(!user?._id){
+  if (!user?._id) {
     return null
   }
 
   return (
-    <div className=" flex justify-center items-start flex-col md:flex-row">
+    <div className=" flex relative justify-center items-start flex-col md:flex-row">
       <div className="w-full md:w-[75%]">
         {/* <div className="w-full flex flex-row justify-center md:gap-20 gap-4 md:p-2">
           <button
@@ -51,7 +70,23 @@ const CreateWribateForm = () => {
         {type == "single" && <SingleWribate />}
         {type == "batched" && <BatchedWribate />}
       </div>
-      <div className="w-full md:w-[25%]">Hello</div>
+      <div className="sticky md:w-[25%] md:block hidden top-20 space-y-4">
+        {ads.map((ad, index) => (
+          <a
+            key={index}
+            href={ad.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block mb-4"
+          >
+            <img
+              src={ad.src}
+              alt={ad.alt}
+              className="w-full h-auto shadow-md hover:opacity-90 transition"
+            />
+          </a>
+        ))}
+      </div>
     </div>
   );
 };
