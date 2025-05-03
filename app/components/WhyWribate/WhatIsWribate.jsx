@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 
 
-export default function WhatIsWribateSection() {
+export default function WhatIsWribate() {
 
   const router = useRouter();
   return (
