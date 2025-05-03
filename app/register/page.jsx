@@ -11,6 +11,10 @@ import toast from "react-hot-toast";
 import { Router } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { auth, googleProvider, facebookProvider, githubProvider, appleProvider, twitterProvider } from "../firebase";
+import { signInWithPopup } from "firebase/auth";
+import { useAtom } from "jotai";
+import { userAtom } from "../states/GlobalStates";
 
 const SignupForm = () => {
   const [formData, setFormData] = useState({
@@ -34,6 +38,7 @@ const SignupForm = () => {
   const [userNameAvailable, setUserNameAvailable] = useState(null); // null, true, false
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [debouncedUserName, setDebouncedUserName] = useState("");
+  const [user,setUser] = useAtom(userAtom)
 
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
@@ -218,6 +223,37 @@ const SignupForm = () => {
     return () => clearTimeout(timer);
   }, [formData.userName, debouncedUserName]);
 
+
+  //providers
+  const handleProviderLogin = async (provider) => {
+    try {
+      // Sign in with the selected provider
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+  
+      // Get the Firebase ID token
+      const token = await user.getIdToken();  // This gives the Firebase ID token
+  
+      // Now, send the token to your backend using Axios
+      const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL+ '/firebase', {
+        token: token, // Send the Firebase token in the request body
+      },{
+        withCredentials:true
+      });
+  
+      if (response.data.res) {
+        toast.success("Login Success");
+        setUser(response.data.user)
+        router.push('/')
+      } else {
+        toast.error(response.data.msg); // Show error message if any
+      }
+    } catch (error) {
+      console.error("Error logging in with provider: ", error.message);
+      toast.error("Login failed");
+    }
+  };
+
   useEffect(() => {
     const checkUserNameAvailability = async () => {
       if (debouncedUserName && debouncedUserName.length >= 3) {
@@ -314,7 +350,7 @@ const SignupForm = () => {
             Create Your Account
           </h2>
 
-          <div className="flex gap-4 mb-6">
+          <div onClick={()=>handleProviderLogin(googleProvider)} className="flex gap-4 mb-6">
             <button className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-full py-3 hover:bg-gray-50 transition">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -342,7 +378,7 @@ const SignupForm = () => {
               <span>Google</span>
             </button>
 
-            <button className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-full py-3 hover:bg-gray-50 transition">
+            <button onClick={()=>toast.success("Coming soon")} className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-full py-3 hover:bg-gray-50 transition">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"

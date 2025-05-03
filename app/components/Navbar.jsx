@@ -20,13 +20,18 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const logout = async () => {
+
+    console.log(user)
+    
     try {
-      const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/user/logout", {
+      const url = user?.firebase_token?.length > 0 ? "/logout" : '/user/logout'
+      const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + url, {
         withCredentials: true
       });
       const data = res.data;
 
       if (data.res) {
+        setUser({})
         toast.success("Logged out");
         router.replace('/login');
       }
