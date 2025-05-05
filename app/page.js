@@ -49,7 +49,7 @@ const Home = () => {
   // Reconnect only if the token changes
 
   return (
-    <div className="bg-gray-100 p-2 ml-20 flex-col flex overflow-hidden">
+    <div className="bg-gray-100 p-2 sm:ml-20 flex-col flex overflow-hidden">
       {/* <Header /> */}
       <div className="">
         <Categories
