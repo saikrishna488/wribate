@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronUp, Globe, Shield, FileText } from 'lucide-react';
 
 export default function PrivacyPolicyRegional() {
-  const [expandedSection, setExpandedSection] = useState("international");
+  const [expandedSection, setExpandedSection] = useState("international"); 
   
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
