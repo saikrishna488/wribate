@@ -229,6 +229,16 @@ const ChatUI = () => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  if(!user?._id){
+    return null
+  }
+
+  useEffect(()=>{
+    if(!user?._id){
+      router.push('/login')
+    }
+  },[])
+
   return (
       <div>
       {usersLoading && <p>Loading users...</p>}
