@@ -44,7 +44,7 @@ const LegalPages = () => {
                 onClick={() => setSelectedSection("privacy")}
                 className={`px-4 py-2 rounded-md font-medium transition-colors ${
                   selectedSection === "privacy" 
-                    ? "bg-blue-600 text-white" 
+                    ? "bg-blue-900 text-white" 
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
@@ -54,7 +54,7 @@ const LegalPages = () => {
                 onClick={() => setSelectedSection("terms")}
                 className={`px-4 py-2 rounded-md font-medium transition-colors ${
                   selectedSection === "terms" 
-                    ? "bg-blue-600 text-white" 
+                    ? "bg-blue-900 text-white" 
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
