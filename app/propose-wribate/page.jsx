@@ -119,127 +119,13 @@ export default function DiscoverHotTopicsPage() {
     fetchWrites();
   }, [invoke])
 
-  const handleSubmit = async () => {
-
-    try {
-
-      if (!user?._id) {
-        toast.error("login to continue")
-        return;
-      }
-
-      if (formData.title.length > 100) {
-        toast("You have exceeded lenth of 100 chars");
-      }
-
-      const res = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose', formData, {
-        withCredentials: true
-      })
-
-      const data = res.data;
-
-      if (data.res) {
-        toast.success("Added!")
-        setDebates((prev) => ([data.propose, ...prev]))
-      }
-    }
-    catch (err) {
-      console.log(err);
-      toast.error("Failed to Add!")
-    }
-  };
-
   return (
-    <div className="container mx-auto p-2 bg-gray-200 min-h-screen sm:p-4">
+    <div className="container mx-auto p-2 bg-gray-200 h-[90vh] sm:p-4">
       <header className="mb-3 flex flex-col sm:flex-row sm:justify-between sm:items-center">
         <div className="mb-2 sm:mb-0">
           <h1 className="text-xl sm:text-2xl font-bold mb-1">Discover Hot Topics</h1>
           <p className="text-sm text-gray-500">Explore trending debates or propose your own</p>
         </div>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button onClick={() => !user?._id ? toast.error("Login to continue") : null} size="sm" className="self-start flex bg-blue-900 rounded-none items-center gap-1">
-              <Plus size={14} />
-              Propose Wribate
-            </Button>
-          </DialogTrigger>
-          {
-            user?._id && (
-              <DialogContent className="max-w-full sm:max-w-md p-3 sm:p-6">
-                <DialogHeader className="pb-2">
-                  <DialogTitle>Propose a New Wribate</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-3 py-2">
-                  <div className="grid gap-1">
-                    <Label htmlFor="title" className="text-sm">Title</Label>
-                    <Input
-                      id="title"
-                      placeholder="Enter your debate topic"
-                      value={formData.title}
-                      onChange={(e) => handleFormChange("title", e.target.value)}
-                      className="h-8"
-                    />
-                  </div>
-
-                  <div className="grid gap-1">
-                    <Label htmlFor="category" className="text-sm">Category</Label>
-                    <Select
-                      value={formData.category}
-                      onValueChange={(value) => handleFormChange("category", value)}
-                    >
-                      <SelectTrigger id="category" className="h-8">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categoryOptions.map(category => (
-                          <SelectItem key={category} value={category}>{category}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-1">
-                    <Label htmlFor="tag" className="text-sm">Tag</Label>
-                    <Input
-                      id="tag"
-                      placeholder="Enter a tag"
-                      value={formData.tag}
-                      onChange={(e) => handleFormChange("tag", e.target.value)}
-                      className="h-8"
-                    />
-                  </div>
-
-                  <div className="grid gap-1">
-                    <Label htmlFor="country" className="text-sm">Country</Label>
-                    <Select
-                      value={formData.country}
-                      onValueChange={(value) => handleFormChange("country", value)}
-                    >
-                      <SelectTrigger id="country" className="h-8">
-                        <SelectValue placeholder="Select a country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countryOptions.map(country => (
-                          <SelectItem key={country} value={country}>{country}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <DialogFooter className="gap-2">
-                  <DialogClose asChild>
-                    <Button variant="outline" className="rounded-none" size="sm">Cancel</Button>
-                  </DialogClose>
-                  <DialogClose asChild>
-                    <Button onClick={handleSubmit} className="bg-blue-800 rounded-none" size="sm">Submit</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            )
-          }
-
-        </Dialog>
       </header>
 
       {/* Navigation Menu */}
@@ -257,32 +143,6 @@ export default function DiscoverHotTopicsPage() {
               </button>
             ))
           }
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="focus:outline-none border-none shadow-none focus:ring-0 focus-visible:ring-0"
-              >
-                <BsThreeDots className="hover:text-gray-400" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end" className="md:w-[400px] w-[300px] rounded-none border">
-
-
-              <div className="flex flex-row flex-wrap">
-                {
-                  categories.map((cat, idx) => (
-                    <Button onClick={() => setSelectedCategory(cat)} variant={'outline'} className="bg-transparent text-xs text-black border-none shadow-none hover:text-red-600 rounded-none" key={idx}>
-                      {cat}
-                    </Button>
-                  ))
-                }
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </nav>
 
         {/* Content for each tab */}
@@ -311,87 +171,90 @@ export default function DiscoverHotTopicsPage() {
 function DebateCard({ debate, user, setInvoke, invoke }) {
   const [votes, setVotes] = useState(debate.votes);
   const [propDebate, setPropDebate] = useAtom(debateAtom);
-  const router = useRouter()
-
+  const router = useRouter();
 
   // handle votes
   const handleUpvote = async () => {
     try {
-
       if (!user?._id) {
         toast.error("Login to vote");
         return;
       }
 
-      const res = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose-vote', {
-        id: user?._id,
-        propose_id: debate._id
-      })
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose-vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: user?._id,
+          propose_id: debate._id
+        })
+      });
 
-      const data = res.data;
+      const data = await res.json();
 
       if (data.res) {
-        toast.success("voted")
-        setInvoke(!invoke)
+        toast.success("voted");
+        setInvoke(!invoke);
         setVotes((prev) => prev + 1);
       }
       else {
-        toast.success("Already voted!")
+        toast.success("Already voted!");
       }
     }
     catch (err) {
       console.log(err);
-      toast.error("CLient error")
+      toast.error("Client error");
     }
-
   };
 
-
   const handleLaunch = async () => {
-    setPropDebate(debate)
-    router.push('/create-wribate')
-  }
+    setPropDebate(debate);
+    router.push('/create-wribate');
+  };
 
   return (
     <div className="border rounded bg-white shadow-lg hover:shadow-sm transition-shadow">
       <div className="flex flex-col">
-        {/* Title Row */}
-        <div className="p-2 border-b">
-          <h3 className="font-medium text-sm">{debate.title}</h3>
+        {/* Row 1: User icon, Title, Launch button */}
+        <div className="flex justify-between items-center p-2 border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center text-gray-500 text-xs">
+              <User size={14} className="mr-1" />
+            </div>
+            <h3 className="font-medium text-sm">{debate.title}</h3>
+          </div>
+          
+          <button 
+            onClick={handleLaunch} 
+            className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 rounded px-2 py-1 border border-blue-200 ml-auto"
+          >
+            <PlayCircle size={14} />
+            <span>Launch</span>
+          </button>
         </div>
 
-        {/* Info Row */}
-        <div className="flex justify-between items-center p-2 text-xs">
-          <div className="flex items-center gap-1">
+        {/* Row 2: Country, Category, Tag, Upvote */}
+        <div className="flex justify-between items-center p-2 border-b">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-gray-500">{debate.country}</span>
             <Badge variant="secondary" className="text-xs py-0 px-1 h-5">{debate.category}</Badge>
             <Badge variant="outline" className="text-xs py-0 px-1 h-5">{debate.tag}</Badge>
           </div>
 
-          <div className="text-gray-500">
-            <span>{debate.country}</span>
-          </div>
+          <button
+            onClick={handleUpvote}
+            className="flex items-center gap-1 text-xs text-gray-700 hover:text-gray-900 bg-white rounded px-2 py-1 border"
+          >
+            <ArrowUpCircle size={14} />
+            <span>{votes}</span>
+          </button>
         </div>
 
-        {/* Action Row */}
-        <div className="flex justify-between items-center bg-gray-50 px-2 py-1">
-          <div className="flex items-center text-gray-500 text-xs">
-            <User size={12} className="mr-1" />
-            <span>{debate?.name?.slice(0,15)+'...'}</span>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handleUpvote}
-              className="flex items-center gap-1 text-xs text-gray-700 hover:text-gray-900 bg-white rounded px-2 py-1 border"
-            >
-              <ArrowUpCircle size={12} />
-              <span>{votes}</span>
-            </button>
-            <button onClick={handleLaunch} className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 rounded px-2 py-1 border border-blue-200">
-              <PlayCircle size={12} />
-              <span>Launch</span>
-            </button>
-          </div>
+        {/* Row 3: Context */}
+        <div className="p-2 text-xs text-gray-600 bg-gray-50">
+          {debate?.context || "Context..."}
         </div>
       </div>
     </div>

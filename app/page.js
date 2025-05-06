@@ -49,9 +49,9 @@ const Home = () => {
   // Reconnect only if the token changes
 
   return (
-    <div className="bg-gray-100 p-2 sm:ml-20 h-[90vh] flex-col flex overflow-hidden">
+    <div className="bg-gray-100 p-2 h-[90vh] flex-col flex">
       {/* <Header /> */}
-      <div className="">
+      <div className="w-[90vw] mx-auto overflow-hidden">
         <Categories
           categories={data?.data}
           isLoading={isLoading}

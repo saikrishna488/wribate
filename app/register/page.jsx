@@ -354,38 +354,38 @@ const SignupForm = () => {
               onClick={() => handleProviderLogin(googleProvider)} 
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
-              <FcGoogle className="text-xl text-red-500" />
+              <FcGoogle size={40}  className="text-xl text-red-500" />
             </button>
             <button 
               onClick={() => handleProviderLogin(facebookProvider)} 
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
-              <FaFacebook className="text-xl text-blue-600" />
+              <FaFacebook size={40} className="text-xl text-blue-600" />
             </button>
             <button 
               onClick={() => handleProviderLogin(twitterProvider)} 
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
-              <FaXTwitter className="text-xl text-blue-400" />
+              <FaXTwitter size={40} className="text-xl text-blue-400" />
             </button>
-            <button 
+            {/* <button 
               onClick={() => handleProviderLogin(githubProvider)} 
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
               <FaGithub className="text-xl" />
-            </button>
+            </button> */}
             <button
               onClick={() => handleProviderLogin(yahooProvider)}
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
-              <FaYahoo className="text-xl text-purple-600" />
+              <FaYahoo size={40} className="text-xl text-purple-600" />
             </button>
-            <button
+            {/* <button
               onClick={() => handleProviderLogin(appleProvider)}
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
               <FaApple className="text-xl" />
-            </button>
+            </button> */}
           </div>
 
           <div className="flex items-center gap-3 mb-6">

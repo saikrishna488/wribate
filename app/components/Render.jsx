@@ -22,7 +22,7 @@ const Render = () => {
         const data = res.data;
 
         if (data.res && data.user) {
-          toast.success("Welcome " + data.user.name + " (JWT)");
+          toast.success("Welcome " + data.user.name);
           setUser(data.user);
         }
       } catch (err) {

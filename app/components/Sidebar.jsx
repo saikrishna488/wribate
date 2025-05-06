@@ -4,7 +4,6 @@ import { useAtom } from 'jotai';
 import {
     Edit,
     FileText,
-    Plus,
     Home,
     MessageSquare,
     HelpCircle,
@@ -12,32 +11,46 @@ import {
     Info,
     Handshake,
     User,
-    LogOut
+    LogOut,
+    Plus,
+    CreditCard,
+    ChevronDown
 } from 'lucide-react';
 import Link from 'next/link';
 import { expandAtom, userAtom } from '../states/GlobalStates';
-import { usePathname } from 'next/navigation';
-import { useEffect, useRef } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { FaRegUser } from "react-icons/fa";
+import { toast } from 'react-hot-toast';
+import { TbViewfinder } from "react-icons/tb";
+import { MdOutlineMenu } from "react-icons/md";
 
 export default function Sidebar() {
     const [expand, setExpand] = useAtom(expandAtom);
     const pathname = usePathname();
     const ref = useRef(null);
     const [user, setUser] = useAtom(userAtom);
+    const router = useRouter();
+    // Create dropdown is now using the standard dropdown menu component
 
     const logout = async () => {
-
         try {
-            const url = user?.firebase_token?.length > 0 ? "/logout" : '/user/logout'
-            const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + url, {
-                withCredentials: true
+            const url = user?.firebase_token?.length > 0 ? "/logout" : '/user/logout';
+            const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + url, {
+                credentials: 'include'
             });
-            const data = res.data;
+            const data = await res.json();
 
             if (data.res) {
-                setUser({})
+                setUser({});
                 toast.success("Logged out");
                 router.replace('/login');
             }
@@ -50,15 +63,15 @@ export default function Sidebar() {
     useEffect(() => {
         function handleClickOutside(event) {
             if (ref.current && !ref.current.contains(event.target)) {
-                setExpand(false)
+                setExpand(false);
             }
         }
 
-        document.addEventListener("mousedown", handleClickOutside)
+        document.addEventListener("mousedown", handleClickOutside);
         return () => {
-            document.removeEventListener("mousedown", handleClickOutside)
-        }
-    }, [])
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     if (
         pathname.includes('/admin') ||
@@ -68,144 +81,205 @@ export default function Sidebar() {
         return null;
     }
 
-
+    const menuItems = [
+        {
+            icon: <Home className="w-5 h-5" />,
+            label: 'Home',
+            href: '/',
+        },
+        {
+            icon: <TbViewfinder className="w-5 h-5" />,
+            label: 'Discover Wribates',
+            href: '/propose-wribate',
+        },
+        {
+            icon: <MessageSquare className="w-5 h-5" />,
+            label: 'Messages',
+            href: '/messages',
+        },
+        {
+            icon: <CreditCard className="w-5 h-5" />,
+            label: 'Subscription',
+            href: '/subscription',
+        },
+        {
+            icon: <Trophy className="w-5 h-5" />,
+            label: 'Tips to Win',
+            href: '/tips-to-win',
+        },
+        {
+            icon: <FileText className="w-5 h-5" />,
+            label: 'Blogs',
+            href: '/blogs',
+        },
+        {
+            icon: <Info className="w-5 h-5" />,
+            label: 'Why Wribate',
+            href: '/why-wribate',
+        },
+        {
+            icon: <Handshake className="w-5 h-5" />,
+            label: 'Terms and Conditions',
+            href: '/terms',
+        }
+    ];
 
     return (
         <div className="sticky h-[90vh] top-0 sm:w-20 z-40">
             <div
                 ref={ref}
-                onMouseEnter={() => {
-                    if (window.innerWidth >= 640) setExpand(true);
-                }}
-                onMouseLeave={() => {
-                    if (window.innerWidth >= 640) setExpand(false);
-                }}
                 className={`z-10 fixed h-full ${expand ? 'w-64' : 'w-20 hidden sm:flex'
-                    } bg-gray-50 text-black border-r border-gray-200 flex flex-col justify-between items-center  py-4 px-2 transition-all duration-300 ease-in-out`}
+                    } bg-white text-black border-r border-gray-200 flex flex-col justify-between py-4 transition-all duration-300 ease-in-out `}
             >
-                {/* Sidebar Menu */}
-                <div className="flex flex-col gap-1">
-                    {[
-                        {
-                            icon: <Home className="w-6 h-6" />,
-                            label: 'Home',
-                            href: '/',
-                        },
-                        {
-                            icon: <Plus className="w-6 h-6" />,
-                            label: 'Wribate',
-                            href: '/create-wribate',
-                        },
-                        {
-                            icon: <Edit className="w-6 h-6" />,
-                            label: 'Launch Wribate',
-                            href: '/propose-wribate',
-                        },
-                        {
-                            icon: <MessageSquare className="w-6 h-6" />,
-                            label: 'Messages',
-                            href: '/messages',
-                        },
-                        {
-                            icon: <Trophy className="w-6 h-6" />,
-                            label: 'Tips to Win',
-                            href: '/tips-to-win',
-                        },
-                        {
-                            icon: <FileText className="w-6 h-6" />,
-                            label: 'Blogs',
-                            href: '/blogs',
-                        },
-                        {
-                            icon: <Handshake className="w-6 h-6" />,
-                            label: 'Terms and Conditions',
-                            href: '/terms',
-                        },
-                        {
-                            icon: <Info className="w-6 h-6" />,
-                            label: 'Why Wribate',
-                            href: '/why-wribate',
-                        },
-                    ].map(({ icon, label, href }) => (
-                        <Link key={label} onClick={() => setExpand(false)} href={href}>
-                            <div
-                                className={`flex relative items-center space-x-4 p-3 rounded-lg cursor-pointer hover:bg-indigo-100 text-gray-700 hover:text-indigo-600 transition duration-200 ${expand ? 'justify-start' : 'justify-center'
-                                    }`}
+
+                <div className={`w-full flex flex-row items-center mb-10 px-4 ${expand ? 'justify-start' : 'justify-center'}`}
+                    onClick={() => setExpand(!expand)}
+                >
+                    <MdOutlineMenu size={30} /> {expand && <span className='font-bold px-2 text-lg'>Wribate</span>}
+
+                </div>
+
+                {/* Create Button with Dropdown */}
+                <div className="px-4 mb-6 w-full text-center">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className={`rounded-full w-fit flex items-center mx-auto gap-1`}
                             >
-                                {icon}
-                                {expand && (
-                                    <span
-                                        className={`text-md font-medium overflow-hidden transition-all duration-300 ${expand
-                                            ? 'max-w-[200px] opacity-100'
-                                            : 'max-w-0 opacity-0'
+                                <Plus size={24} strokeWidth={3} />
+                                <span className={`${expand ? 'block text-xl' : 'hidden'}`}>Create</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align={expand ? 'start' : 'center'} className="w-56">
+                            <DropdownMenuItem
+                                onClick={() => router.push('/create-wribate')}
+                                className="cursor-pointer py-2"
+                            >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Create Wribate
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={() => router.push('/propose-wribate/propose')}
+                                className="cursor-pointer py-2"
+                            >
+                                <FileText className="w-4 h-4 mr-2" />
+                                Propose Wribate
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+                {/* Sidebar Menu */}
+                <div className="flex-1 overflow-y-auto px-2"
+                    onMouseEnter={() => {
+                        if (window.innerWidth >= 640) setExpand(true);
+                    }}
+                    onMouseLeave={() => {
+                        if (window.innerWidth >= 640) {
+                            setExpand(false);
+                            // setCreateDropdownOpen(false);
+                        }
+                    }}
+                >
+                    <div className="flex flex-col">
+                        {menuItems.map((item) => {
+                            const isActive = pathname === item.href;
+                            return (
+                                <Link key={item.label} href={item.href} onClick={() => setExpand(false)}>
+                                    <div
+                                        className={`flex items-center px-3 py-3 rounded-lg cursor-pointer transition-all duration-200 ${isActive
+                                                ? 'bg-indigo-50 text-indigo-600'
+                                                : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600'
+                                            } ${expand ? 'justify-start' : 'justify-center'
                                             }`}
                                     >
-                                        {label}
-                                    </span>
-                                )}
-                            </div>
-                        </Link>
-                    ))}
+                                        <div className={isActive ? 'text-indigo-600' : 'text-gray-500'}>
+                                            {item.icon}
+                                        </div>
+                                        {expand && (
+                                            <span className="ml-3 font-medium">
+                                                {item.label}
+                                            </span>
+                                        )}
+                                        {!expand && isActive && (
+                                            <div className="absolute left-0 w-1 h-8 bg-indigo-600 rounded-r-md"></div>
+                                        )}
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                    </div>
                 </div>
-                <div className='sticky'>
-                <DropdownMenu >
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="rounded-full border-gray-300 hover:border-gray-400"
-                        >
-                            <User className="w-5 h-5 text-gray-700" />
-                        </Button>
-                    </DropdownMenuTrigger>
 
-                    <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-xl">
-                        <DropdownMenuItem className="cursor-pointer flex gap-2 items-center flex-col p-4">
-                            <div className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300 bg-gray-50">
-                                <User className="w-6 h-6 text-gray-700" />
-                            </div>
-                            <div className='flex flex-col items-center mt-2'>
-                                <span className='font-bold text-gray-800'>{user?.name}</span>
-                                <small className='text-gray-500 text-xs mt-1'>{user?.email}</small>
-                            </div>
+                {/* User Profile - Made sticky with original commented code preserved */}
+                <div onClick={() => router.push('/profile')} className={`w-full sticky bottom-0 py-4 border-t border-gray-200 flex items-center ${expand ? 'justify-center' : 'justify-center'}`}>
+                    {/* <DropdownMenu >
+                        <DropdownMenuTrigger asChild>
                             <Button
-                                onClick={() => router.push('/profile')}
-                                variant='outline'
-                                className='py-1 w-full mt-3 rounded-md'
+                            variant='outline'
+                            size='icon'
+                                className="rounded-full border  border-gray-300 hover:border-gray-400"
                             >
-                                <User className="w-4 h-4 mr-2" />
-                                View Profile
+                                <FaRegUser size={30} className="w-12 h-12 text-gray-700" />
                             </Button>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={() => router.push('/messages')}
-                            className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
-                        >
-                            <MessageSquare className="w-4 h-4 mr-2 text-indigo-600" />
-                            Messages
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={() => router.push('/my-wribates')}
-                            className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
-                        >
-                            <FileText className="w-4 h-4 mr-2 text-indigo-600" />
-                            My Wribates
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={logout}
-                            className="cursor-pointer text-red-600 font-medium py-2 flex items-center"
-                        >
-                            <LogOut className="w-4 h-4 mr-2" />
-                            Logout
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align='start' className="w-56 rounded-xl shadow-xl">
+                            <DropdownMenuItem className="cursor-pointer flex gap-2 items-center flex-col p-4">
+                                <div className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300 bg-gray-50">
+                                    <User className="w-6 h-6 text-gray-700" />
+                                </div>
+                                <div className='flex flex-col items-center mt-2'>
+                                    <span className='font-bold text-gray-800'>{user?.name}</span>
+                                    <small className='text-gray-500 text-xs mt-1'>{user?.email}</small>
+                                </div>
+                                <Button
+                                    onClick={() => router.push('/profile')}
+                                    variant='outline'
+                                    className='py-1 w-full mt-3 rounded-md'
+                                >
+                                    <User className="w-4 h-4 mr-2" />
+                                    View Profile
+                                </Button>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={() => router.push('/messages')}
+                                className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
+                            >
+                                <MessageSquare className="w-4 h-4 mr-2 text-indigo-600" />
+                                Messages
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={() => router.push('/my-wribates')}
+                                className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
+                            >
+                                <FileText className="w-4 h-4 mr-2 text-indigo-600" />
+                                My Wribates
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={logout}
+                                className="cursor-pointer text-red-600 font-medium py-2 flex items-center"
+                            >
+                                <LogOut className="w-4 h-4 mr-2" />
+                                Logout
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu> */}
+                    <Button
+                        variant='outline'
+                        size='icon'
+                        className="rounded-full border border-gray-300 hover:border-gray-400"
+                    >
+                        <FaRegUser size={30} className="w-12 h-12 text-gray-700" />
+                    </Button>
+                    <span className={`${expand ? 'block' : 'hidden'} cursor-pointer text-blue-900 px-2`}>{user?.name}</span>
                 </div>
             </div>
         </div>
-
     );
 }

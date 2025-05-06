@@ -43,7 +43,7 @@ export default function InformationSharingSection() {
   ];
 
   return (
-    <section className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 bg-white rounded-lg shadow-md">
+    <section className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 bg-white shadow-md">
       <div className="space-y-8">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">

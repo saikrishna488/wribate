@@ -31,13 +31,13 @@ export default function RootLayout({ children }) {
       >
         <Toaster />
 
-        <Navbar />
         <div className="h-full w-full flex flex-row">
           <Sidebar />
-
+          
           <ReduxProvider>
             <div className="bg-white w-full h-[90%]">
               <Render />
+              <Navbar />
               {children}
             </div>
           </ReduxProvider>

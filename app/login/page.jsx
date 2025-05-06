@@ -171,24 +171,24 @@ const LoginPage = () => {
             >
               <FaXTwitter size={40} className="text-xl text-blue-400" />
             </button>
-            <button
+            {/* <button
               onClick={() => handleProviderLogin(githubProvider)}
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
               <FaGithub size={40} className="text-xl" />
-            </button>
+            </button> */}
             <button
               onClick={() => handleProviderLogin(yahooProvider)}
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
               <FaYahoo size={40} className="text-xl text-purple-600" />
             </button>
-            <button
+            {/* <button
               onClick={() => handleProviderLogin(appleProvider)}
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
               <FaApple size={40} className="text-xl" />
-            </button>
+            </button> */}
           </div>
 
           <div className="flex items-center my-6">

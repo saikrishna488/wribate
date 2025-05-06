@@ -2,42 +2,54 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
-import { Menu, Edit, PlusCircle, User, Search, X, LogOut, FileText, MessageSquare, Bell } from 'lucide-react';
+import { Menu, Search, X, LogOut, FileText, MessageSquare, Bell, User, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { expandAtom, userAtom } from '../states/GlobalStates';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Navbar() {
   const [expand, setExpand] = useAtom(expandAtom);
   const [user, setUser] = useAtom(userAtom);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
+  // Handle scroll effect for navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const logout = async () => {
-
-    console.log(user)
-
     try {
-      const url = user?.firebase_token?.length > 0 ? "/logout" : '/user/logout'
+      const url = user?.firebase_token?.length > 0 ? "/logout" : '/user/logout';
       const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + url, {
         withCredentials: true
       });
       const data = res.data;
 
       if (data.res) {
-        setUser({})
-        toast.success("Logged out");
+        setUser({});
+        toast.success("Logged out successfully");
         router.replace('/login');
       }
     } catch (err) {
-      console.log(err);
-      toast.error("Client error");
+      console.error("Logout error:", err);
+      toast.error("Something went wrong during logout");
     }
   };
 
@@ -45,6 +57,7 @@ export default function Navbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setIsSearchVisible(false);
     }
   };
 
@@ -52,176 +65,230 @@ export default function Navbar() {
     setIsSearchVisible(!isSearchVisible);
   };
 
+  const toggleSidebar = () => {
+    setExpand(!expand);
+  };
+
+  // Don't render navbar on admin, login, or register pages
   if (pathname.includes('/admin') || pathname.includes('/login') || pathname.includes('/register')) {
     return null;
   }
 
   return (
-    <nav className="w-full h-16 flex justify-center items-center z-30 border-b bg-gray-50 border-gray-200 sticky top-0 left-0 right-0 py-2">
-      <div className="w-full mx-auto px-4 sm:px-6 flex items-center justify-between">
-        {/* Left Side: Menu + Logo */}
-        <div className="flex items-center space-x-3">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setExpand(!expand)}
-            className="border-gray-300 hover:border-gray-400"
-          >
-            <Menu className="w-5 h-5 text-gray-700" />
-          </Button>
+    <>
+      <nav className={`w-full h-16 flex justify-center items-center z-20 border-b sticky top-0 left-0 right-0 transition-all duration-200 ${
+        scrolled ? 'bg-white' : 'bg-white'
+      }`}>
+        <div className="w-full mx-auto px-4 sm:px-6 flex items-center justify-between">
+          {/* Left Side: Menu + Logo */}
+          <div className="flex items-center space-x-3">
 
-          <div
-            onClick={() => router.push('/')}
-            className="cursor-pointer flex items-center space-x-2 text-lg sm:text-xl font-semibold text-gray-800"
-          >
-            <Image
-              src="/logo/logo.png"
-              alt="Logo"
-              width={40}
-              height={40}
-              className="object-contain"
-            />
-            <span className="hidden sm:inline">Wribate</span>
-          </div>
-        </div>
-
-        {/* Center: Search Bar (Desktop) */}
-        <div className="hidden md:flex flex-1 justify-center mx-4">
-          <form onSubmit={handleSearch} className="w-full max-w-md relative">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search wribates..."
-                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-2.5"
-                >
-                  <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                </button>
-              )}
+            <div
+              onClick={() => router.push('/')}
+              className="cursor-pointer flex items-center space-x-2 text-lg sm:text-xl font-semibold text-gray-800"
+            >
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10">
+                <Image
+                  src="/logo/logo.png"
+                  alt="Wribate Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <span className="hidden sm:inline bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-bold">
+                Wribate
+              </span>
             </div>
-          </form>
-        </div>
+          </div>
 
-        {/* Mobile Search Bar (When Active) */}
-        {isSearchVisible && (
-          <div className="absolute top-16 left-0 right-0 bg-gray-50 p-3 shadow-md md:hidden z-40 border-b border-gray-200">
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search wribates..."
-                className="w-full pl-10 pr-10 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                autoFocus
-              />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <button
-                type="button"
-                onClick={toggleSearchBar}
-                className="absolute right-3 top-2.5"
-              >
-                <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-              </button>
+          {/* Center: Search Bar (Desktop) */}
+          <div className="hidden md:flex flex-1 justify-center mx-4 max-w-xl">
+            <form onSubmit={handleSearch} className="w-full">
+              <div className="relative group">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search wribates..."
+                  className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                />
+                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400 group-focus-within:text-blue-500" />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-2.5"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  </button>
+                )}
+              </div>
             </form>
           </div>
-        )}
 
-        {/* Right Side Controls */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* Mobile Search Button */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleSearchBar}
-            className="md:hidden border-gray-300 hover:border-gray-400 rounded-full"
-          >
-            <Search className="w-5 h-5 text-gray-700" />
-          </Button>
-          <Button variant='outline'
-            size='icon'
-            className='rounded-full'>
-            <Bell />
-          </Button>
-
-          {!user?._id ? (
+          {/* Right Side Controls */}
+          <div className="flex items-center space-x-1 sm:space-x-3">
+            {/* Mobile Search Button */}
             <Button
-              onClick={() => router.push('/login')}
-              variant="outline"
-              className="text-sm rounded-full border-gray-300 hover:bg-gray-100"
+              variant="ghost"
+              size="icon"
+              onClick={toggleSearchBar}
+              className="md:hidden hover:bg-gray-100 text-gray-700"
+              aria-label="Search"
             >
-              Get Started
+              <Search className="w-5 h-5" />
             </Button>
-          ) : (
+            
+            {/* Notifications */}
+            <Button 
+              variant="ghost"
+              size="icon"
+              className="hover:bg-gray-100 text-gray-700 relative"
+              aria-label="Notifications"
+            >
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+            </Button>
 
-            <div className='block sm:hidden'>
-              <DropdownMenu >
+            {/* Messages Button */}
+            <Button 
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push('/messages')}
+              className="hover:bg-gray-100 text-gray-700 hidden sm:flex"
+              aria-label="Messages"
+            >
+              <MessageSquare className="w-5 h-5" />
+            </Button>
+
+            {/* User Menu */}
+            {!user?._id ? (
+              <Button
+                onClick={() => router.push('/login')}
+                variant="primary"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm px-4 py-2 transition-colors"
+              >
+                Get Started
+              </Button>
+            ) : (
+              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="icon"
-                    className="rounded-full border-gray-300 hover:border-gray-400"
+                    className="rounded-full hover:bg-gray-100 overflow-hidden border-2 border-gray-200"
                   >
-                    <User className="w-5 h-5 text-gray-700" />
+                    {user?.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        alt="Profile"
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <User className="w-5 h-5 text-gray-700" />
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-xl">
-                  <DropdownMenuItem className="cursor-pointer flex gap-2 items-center flex-col p-4">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300 bg-gray-50">
-                      <User className="w-6 h-6 text-gray-700" />
+                <DropdownMenuContent align="end" className="w-64 rounded-xl shadow-xl p-2">
+                  <div className="px-4 py-3 flex items-center space-x-3">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
+                      {user?.avatar ? (
+                        <Image
+                          src={user.avatar}
+                          alt="Profile"
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <User className="w-6 h-6 text-gray-700" />
+                      )}
                     </div>
-                    <div className='flex flex-col items-center mt-2'>
-                      <span className='font-bold text-gray-800'>{user?.name}</span>
-                      <small className='text-gray-500 text-xs mt-1'>{user?.email}</small>
+                    <div>
+                      <p className="font-semibold text-gray-800">{user?.name || 'User'}</p>
+                      <p className="text-sm text-gray-500 truncate">{user?.email || ''}</p>
                     </div>
-                    <Button
-                      onClick={() => router.push('/profile')}
-                      variant='outline'
-                      className='py-1 w-full mt-3 rounded-md'
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      View Profile
-                    </Button>
-                  </DropdownMenuItem>
+                  </div>
+                  
                   <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem
+                    onClick={() => router.push('/profile')}
+                    className="cursor-pointer text-gray-700 font-medium py-2 rounded-md hover:bg-gray-50"
+                  >
+                    <User className="w-4 h-4 mr-2 text-blue-600" />
+                    My Profile
+                  </DropdownMenuItem>
+                  
                   <DropdownMenuItem
                     onClick={() => router.push('/messages')}
-                    className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
+                    className="cursor-pointer text-gray-700 font-medium py-2 rounded-md hover:bg-gray-50"
                   >
-                    <MessageSquare className="w-4 h-4 mr-2 text-indigo-600" />
+                    <MessageSquare className="w-4 h-4 mr-2 text-blue-600" />
                     Messages
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  
                   <DropdownMenuItem
                     onClick={() => router.push('/my-wribates')}
-                    className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
+                    className="cursor-pointer text-gray-700 font-medium py-2 rounded-md hover:bg-gray-50"
                   >
-                    <FileText className="w-4 h-4 mr-2 text-indigo-600" />
+                    <FileText className="w-4 h-4 mr-2 text-blue-600" />
                     My Wribates
                   </DropdownMenuItem>
+                  
+                  <DropdownMenuItem
+                    onClick={() => router.push('/settings')}
+                    className="cursor-pointer text-gray-700 font-medium py-2 rounded-md hover:bg-gray-50"
+                  >
+                    <Settings className="w-4 h-4 mr-2 text-blue-600" />
+                    Settings
+                  </DropdownMenuItem>
+                  
                   <DropdownMenuSeparator />
+                  
                   <DropdownMenuItem
                     onClick={logout}
-                    className="cursor-pointer text-red-600 font-medium py-2 flex items-center"
+                    className="cursor-pointer text-red-600 font-medium py-2 rounded-md hover:bg-red-50"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Mobile Search Bar (When Active) */}
+      {isSearchVisible && (
+        <div className="fixed top-16 left-0 right-0 bg-white p-3 shadow-md md:hidden z-30 border-b border-gray-200">
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search wribates..."
+              className="w-full pl-10 pr-10 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              autoFocus
+            />
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            <button
+              type="button"
+              onClick={toggleSearchBar}
+              className="absolute right-3 top-2.5"
+              aria-label="Close search"
+            >
+              <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+            </button>
+          </form>
+        </div>
+      )}
+    </>
   );
 }

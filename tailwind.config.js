@@ -9,6 +9,7 @@ const config  = {
     },
     plugins: [
       require('tailwind-scrollbar'),
+      require('tailwind-scrollbar-hide'),
     ],
   }
 

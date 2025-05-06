@@ -40,9 +40,9 @@ const NewsSections = ({
 
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between overflow-hidden md:p-2 p-1">
+    <div className="flex flex-col h-full lg:flex-row justify-between overflow-y-auto md:p-2 p-1">
       {/* Main News Column - 60% width on large screens, full width on small */}
-      <div className="lg:w-[60%] overflow-y-auto md:h-[calc(100vh-130px)] scrollbar-thin pr-2 pb-2 border-r-2 border-gray-400">
+      <div className="lg:w-[60%] sm:overflow-y-auto scrollbar-thin pr-2 pb-2 border-r-2 border-gray-400">
         <div className="pb-2 border-b-2 border-gray-400">
           <ArticleCard
             id={mainWribate._id}
