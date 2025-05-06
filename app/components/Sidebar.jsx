@@ -190,8 +190,8 @@ export default function Sidebar() {
                                 <Link key={item.label} href={item.href} onClick={() => setExpand(false)}>
                                     <div
                                         className={`flex items-center px-3 py-3 rounded-lg cursor-pointer transition-all duration-200 ${isActive
-                                                ? 'bg-indigo-50 text-indigo-600'
-                                                : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600'
+                                            ? 'bg-indigo-50 text-indigo-600'
+                                            : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600'
                                             } ${expand ? 'justify-start' : 'justify-center'
                                             }`}
                                     >
@@ -214,8 +214,10 @@ export default function Sidebar() {
                 </div>
 
                 {/* User Profile - Made sticky with original commented code preserved */}
-                <div onClick={() => router.push('/profile')} className={`w-full sticky bottom-0 py-4 border-t border-gray-200 flex items-center ${expand ? 'justify-center' : 'justify-center'}`}>
-                    {/* <DropdownMenu >
+                {
+                    user?._id && (
+                        <div onClick={() => router.push('/profile')} className={`w-full sticky bottom-0 py-4 border-t border-gray-200 flex items-center ${expand ? 'justify-center' : 'justify-center'}`}>
+                            {/* <DropdownMenu >
                         <DropdownMenuTrigger asChild>
                             <Button
                             variant='outline'
@@ -270,15 +272,17 @@ export default function Sidebar() {
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu> */}
-                    <Button
-                        variant='outline'
-                        size='icon'
-                        className="rounded-full border border-gray-300 hover:border-gray-400"
-                    >
-                        <FaRegUser size={30} className="w-12 h-12 text-gray-700" />
-                    </Button>
-                    <span className={`${expand ? 'block' : 'hidden'} cursor-pointer text-blue-900 px-2`}>{user?.name}</span>
-                </div>
+                            <Button
+                                variant='outline'
+                                size='icon'
+                                className="rounded-full border border-gray-300 hover:border-gray-400"
+                            >
+                                <FaRegUser size={30} className="w-12 h-12 text-gray-700" />
+                            </Button>
+                            <span className={`${expand ? 'block' : 'hidden'} cursor-pointer text-blue-900 px-2`}>{user?.name}</span>
+                        </div>
+                    )
+                }
             </div>
         </div>
     );
