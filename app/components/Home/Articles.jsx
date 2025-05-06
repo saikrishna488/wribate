@@ -40,10 +40,10 @@ const NewsSections = ({
 
 
   return (
-    <div className="flex flex-col lg:flex-row overflow-hidden md:p-2 p-1">
+    <div className="flex flex-col lg:flex-row justify-between overflow-hidden md:p-2 p-1">
       {/* Main News Column - 60% width on large screens, full width on small */}
-      <div className="lg:w-[60%] overflow-y-auto md:h-[calc(100vh-130px)] scrollbar-thin pr-2 pb-2 border-r-2 border-gray-200">
-        <div className="pb-2 border-b-2 border-gray-200">
+      <div className="lg:w-[60%] overflow-y-auto md:h-[calc(100vh-130px)] scrollbar-thin pr-2 pb-2 border-r-2 border-gray-400">
+        <div className="pb-2 border-b-2 border-gray-400">
           <ArticleCard
             id={mainWribate._id}
             image={mainWribate.coverImage}
@@ -54,10 +54,10 @@ const NewsSections = ({
             createdAt={mainWribate.createdAt}
           />
         </div>
-        <div className="mt-1">
+        <div className="mt-6">
           {free && free.length > 0 && (
             <>
-              <p className="text-primary text-lg md:mt-1">Free</p>
+              <p className="text-primary text-xl md:mt-1 font-bold ">Free</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 scrollbar-thin pt-1 mt-2">
                 {free.map((article, index) => (
                   <ArticleCard
@@ -78,10 +78,10 @@ const NewsSections = ({
           )}
         </div>
 
-        <div className="mt-1">
+        <div className="mt-6">
           {sponsoredWribates && sponsoredWribates.length > 0 && (
             <>
-              <p className="text-primary text-base">Featured</p>
+              <p className="text-primary text-xl md:mt-1 font-bold">Featured</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 scrollbar-thin pt-1 mt-2">
                 {sponsoredWribates.map((article, index) => (
                   <ArticleCard
@@ -101,10 +101,10 @@ const NewsSections = ({
             </>
           )}
         </div>
-        <div className="mt-1">
+        <div className="mt-6">
           {completed && completed.length > 0 && (
             <>
-              <p className="text-primary text-base">Completed</p>
+              <p className="text-primary text-xl md:mt-1 font-bold">Completed</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 scrollbar-thin pt-1 mt-2">
                 {completed.map((article, index) => (
                   <ArticleCard
@@ -127,8 +127,9 @@ const NewsSections = ({
       </div>
 
       {/* Middle News Column - individually scrollable */}
-      {onGoing && onGoing?.length > 0 && (
+      {onGoing && onGoing?.length > 0 ? (
         <div className="lg:w-[20%]">
+          <p className="text-primary text-xl font-bold pb-2 w-full px-2 my-0">On Going</p>
           <div className="overflow-y-auto md:h-[calc(100vh-130px)] mt-4 lg:mt-0 scrollbar-thin pr-2 pl-2 border-r-2 border-gray-200">
             {/* <p className="text-primary m-2">ongoing</p> */}
             {onGoing.map((article, index) => (
@@ -148,10 +149,15 @@ const NewsSections = ({
             ))}
           </div>
         </div>
+      ) : (
+        <div className="">
+
+        </div>
+
       )}
 
       {/* Featured News Column - individually scrollable */}
-      <div className="sticky md:w-[20%] md:block hidden top-20 space-y-4">
+      <div className="md:w-[20%] border-l border-gray-400 p-2 space-y-4">
         {ads.map((ad, index) => (
           <a
             key={index}

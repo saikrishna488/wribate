@@ -25,7 +25,7 @@ const menuItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="min-w-64 bg-gray-50 border-r h-full hidden sm:block sticky top-0 p-4">
+    <aside className="min-w-64 bg-white border-r h-full hidden sm:block sticky top-0 p-4">
       <nav className="flex flex-col gap-3">
         {menuItems.map(({ label, href, icon: Icon }) => (
           <Link

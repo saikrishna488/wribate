@@ -245,14 +245,14 @@ const VotingPlatformUI = () => {
         <div className="flex flex-col md:flex-row gap-2 md:px-4">
           <div className="flex flex-col min-h-screen bg-gray-200 w-full md:w-[75%]">
             {/* Header */}
-            <div className="flex flex-col md:flex-row">
-              <div className="w-full md:w-3/4">
+            <div className="flex flex-col p-4 md:flex-row">
+              <div className="w-full ">
                 <div>
-                  <h1 className="text-xl font-bold px-2 py-2 bg-white mb-2">
+                  <h1 className="text-xl sm:text-4xl font-bold px-2 py-2 bg-white mb-2">
                     {data?.data?.title}
                   </h1>
                 </div>
-                <div className="grid mb-3 md:grid-cols-3 px-1 grid-cols-1 items-center text-white text-center bg-gradient-to-r from-red-500 to-blue-500">
+                <div className="grid my-4 md:grid-cols-3 px-1 text-xl grid-cols-1 items-center text-white text-center bg-gradient-to-r from-red-500 to-blue-500">
                   <div className="py-2">
                     {data?.data?.leadFor || "@Test 1"}
                   </div>
@@ -359,11 +359,12 @@ const VotingPlatformUI = () => {
             <ProgressBar rounds={data?.data?.rounds} />
 
             {/* Voting Section */}
-            <div className="border rounded-lg my-4 px-4 bg-white">
-              <h2 className="font-bold text-lg mb-4">Voting</h2>
+            <h2 className="font-bold text-2xl mt-8">Voting</h2>
+            <div className="border rounded-lg shadow-lg my-4 py-2 px-4 bg-white">
+              
               <div className="mb-4">
                 <label className="block mb-2">
-                  Which Side Do You Support?
+                {data?.data?.title}
                 </label>
                 <button
                   className={`w-full p-2 mb-2 border rounded-lg text-left 
@@ -392,9 +393,9 @@ const VotingPlatformUI = () => {
             )}
 
             {/* Dynamic Arguments Section */}
-            <Card className="w-full shadow-none bg-transparent rounded-none">
+            <Card className="w-full mt-6  shadow-none bg-transparent rounded-none">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Rounds</CardTitle>
+                <CardTitle className="text-2xl font-bold">Arguments</CardTitle>
               </CardHeader>
 
               <CardContent className="space-y-6 p-0 w-full">
@@ -483,8 +484,9 @@ const VotingPlatformUI = () => {
             </Card>
 
             {/* Comments Section */}
-            <div className="flex flex-col max-h-screen bg-white mt-4 mb-2 rounded-lg border border-gray-200">
-              <h4 className="p-4 text-2xl font-bold">Comments</h4>
+            <h4 className="p-4 text-2xl mt-8 font-bold">Comments</h4>
+            <div className="flex flex-col max-h-screen bg-white mt-2 mb-2 rounded-lg shadow-lg border border-gray-200">
+              
               {/* Chat Messages */}
               {data?.data?.comments && data?.data?.comments.length > 0 ? (
                 <div

@@ -150,7 +150,7 @@ export default function DiscoverHotTopicsPage() {
   };
 
   return (
-    <div className="container mx-auto p-2 sm:p-4">
+    <div className="container mx-auto p-2 bg-gray-200 min-h-screen sm:p-4">
       <header className="mb-3 flex flex-col sm:flex-row sm:justify-between sm:items-center">
         <div className="mb-2 sm:mb-0">
           <h1 className="text-xl sm:text-2xl font-bold mb-1">Discover Hot Topics</h1>
@@ -288,7 +288,7 @@ export default function DiscoverHotTopicsPage() {
         {/* Content for each tab */}
         <TabsContent value={selectedCategory} className="mt-2">
           {filteredDebates.length > 0 ? (
-            <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {filteredDebates.map((debate) => (
                 <DebateCard key={debate._id} user={user} invoke={invoke} setInvoke={setInvoke} debate={debate} />
               ))}
@@ -353,7 +353,7 @@ function DebateCard({ debate, user, setInvoke, invoke }) {
   }
 
   return (
-    <div className="border rounded bg-white hover:shadow-sm transition-shadow">
+    <div className="border rounded bg-white shadow-lg hover:shadow-sm transition-shadow">
       <div className="flex flex-col">
         {/* Title Row */}
         <div className="p-2 border-b">
@@ -376,7 +376,7 @@ function DebateCard({ debate, user, setInvoke, invoke }) {
         <div className="flex justify-between items-center bg-gray-50 px-2 py-1">
           <div className="flex items-center text-gray-500 text-xs">
             <User size={12} className="mr-1" />
-            <span>{debate.username}</span>
+            <span>{debate?.name?.slice(0,15)+'...'}</span>
           </div>
 
           <div className="flex items-center gap-1">

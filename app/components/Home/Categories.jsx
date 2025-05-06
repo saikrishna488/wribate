@@ -20,7 +20,7 @@ const Navigation = ({ categories, isLoading, category, onChange }) => {
   };
 
   return (
-    <div className="relative flex items-center border-b border-gray-200">
+    <div className="relative flex items-center mb-4 border-gray-200">
       {isLoading && <p>Loading Categories</p>}
 
       {categories && (
@@ -31,7 +31,7 @@ const Navigation = ({ categories, isLoading, category, onChange }) => {
         >
           <span
             key={120}
-            className={`inline-block md:px-4 px-2 py-4 font-medium text-sm cursor-pointer ${
+            className={`inline-block md:px-4 px-2 py-2 font-medium text-md cursor-pointer ${
               category === "All"
                 ? "text-primary border-b-2 border-purple-900"
                 : "text-gray-600 hover:text-purple-900 border-b-2 border-gray-200"
@@ -43,7 +43,7 @@ const Navigation = ({ categories, isLoading, category, onChange }) => {
           {categories.map((item) => (
             <span
               key={item._id}
-              className={`inline-block md:px-4 px-2 py-4 font-medium text-sm cursor-pointer ${
+              className={`inline-block md:px-4 px-2 py-2 font-medium text-md cursor-pointer ${
                 category === item.categoryName
                   ? "text-primary border-b-2 border-purple-900"
                   : "text-gray-600 hover:text-purple-900 border-b-2 border-gray-200"

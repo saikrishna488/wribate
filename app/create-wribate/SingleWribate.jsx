@@ -405,53 +405,8 @@ const SingleWribate = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                Prize Amount
-              </label>
-              <input
-                type="text"
-                name="prizeAmount"
-                value={formData.prizeAmount}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="e.g. $500"
-              />
-            </div>
             
-            <div className="flex flex-col">
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                Scope
-              </label>
-              <div className="flex items-center h-12">
-                <span className={`mr-3 text-sm ${formData.scope === "Private" ? "font-medium text-gray-800" : "text-gray-500"}`}>
-                  Private
-                </span>
-                <div
-                  className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
-                    formData.scope === "Open" ? "bg-blue-600" : "bg-gray-300"
-                  }`}
-                  onClick={() =>
-                    handleToggleChange(
-                      "scope",
-                      formData.scope === "Private" ? "Open" : "Private"
-                    )
-                  }
-                >
-                  <div 
-                    className={`bg-white h-5 w-5 rounded-full shadow-md transform transition-transform ${
-                      formData.scope === "Open" ? "translate-x-6" : ""
-                    }`}>
-                  </div>
-                </div>
-                <span className={`ml-3 text-sm ${formData.scope === "Open" ? "font-medium text-gray-800" : "text-gray-500"}`}>
-                  Open to All
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          <div>
+            <div>
             <label className="block text-gray-700 text-sm font-medium mb-2">
               Type
             </label>
@@ -481,6 +436,54 @@ const SingleWribate = () => {
               </span>
             </div>
           </div>
+
+          <div>
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Prize Amount
+              </label>
+              <input
+                type="text"
+                name="prizeAmount"
+                value={formData.prizeAmount}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="e.g. $500"
+              />
+            </div>
+            
+            
+          </div>
+
+          <div className="flex flex-col">
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Scope
+              </label>
+              <div className="flex items-center h-12">
+                <span className={`mr-3 text-sm ${formData.scope === "Private" ? "font-medium text-gray-800" : "text-gray-500"}`}>
+                  Private
+                </span>
+                <div
+                  className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
+                    formData.scope === "Open" ? "bg-blue-600" : "bg-gray-300"
+                  }`}
+                  onClick={() =>
+                    handleToggleChange(
+                      "scope",
+                      formData.scope === "Private" ? "Open" : "Private"
+                    )
+                  }
+                >
+                  <div 
+                    className={`bg-white h-5 w-5 rounded-full shadow-md transform transition-transform ${
+                      formData.scope === "Open" ? "translate-x-6" : ""
+                    }`}>
+                  </div>
+                </div>
+                <span className={`ml-3 text-sm ${formData.scope === "Open" ? "font-medium text-gray-800" : "text-gray-500"}`}>
+                  Open to All
+                </span>
+              </div>
+            </div>
         </div>
 
         {/* Submit Button */}

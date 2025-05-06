@@ -24,9 +24,17 @@ const facebookProvider = new FacebookAuthProvider();
 const githubProvider = new GithubAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
 const twitterProvider = new OAuthProvider('twitter.com');
+const yahooProvider = new OAuthProvider('yahoo.com'); // ✅ Yahoo added
 
-// Optionally, you can set the scopes for each provider, if needed
-// googleProvider.addScope('email');
-// facebookProvider.addScope('email');
+// Optional: add scopes
+// yahooProvider.addScope('email');
 
-export { auth, googleProvider, facebookProvider, githubProvider, appleProvider, twitterProvider };
+export {
+  auth,
+  googleProvider,
+  facebookProvider,
+  githubProvider,
+  appleProvider,
+  twitterProvider,
+  yahooProvider, // ✅ Export Yahoo provider
+};

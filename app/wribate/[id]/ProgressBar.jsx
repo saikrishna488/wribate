@@ -51,10 +51,12 @@ const ProgressBar = ({ rounds }) => {
   });
 
   return (
-    <div className="w-full px-4 md:mt-4 mt-2 py-4 rounded-lg border border-gray-200 mx-auto bg-white">
-      <p className="mb-2 text-gray-700 text-lg md:text-xl  font-bold">
+   <>
+    <p className="mt-8  text-gray-700 text-2xl md:text-2xl  font-bold">
         Progress
       </p>
+    <div className="w-full px-4 md:mt-2 py-4 rounded-lg shadow-lg border border-gray-200 mx-auto bg-white">
+      
       <p>{getEventStatus(rounds[0]?.startDate, rounds[2]?.endDate)}</p>
       <div className="relative w-full bg-gray-300 h-4 rounded-full">
         {/* Progress Bar */}
@@ -81,6 +83,7 @@ const ProgressBar = ({ rounds }) => {
         <span>{formatUTCDate(rounds[2].endDate)}</span>
       </div>
     </div>
+   </>
   );
 };
 

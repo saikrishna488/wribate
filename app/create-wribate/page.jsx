@@ -44,7 +44,7 @@ const CreateWribateForm = () => {
   }
 
   return (
-    <div className=" flex relative justify-center items-start flex-col md:flex-row">
+    <div className=" flex relative justify-center gap-4 items-start flex-col md:flex-row">
       <div className="w-full md:w-[75%]">
         {/* <div className="w-full flex flex-row justify-center md:gap-20 gap-4 md:p-2">
           <button
@@ -70,7 +70,7 @@ const CreateWribateForm = () => {
         {type == "single" && <SingleWribate />}
         {type == "batched" && <BatchedWribate />}
       </div>
-      <div className="sticky md:w-[25%] md:block hidden top-20 space-y-4">
+      <div className="md:w-[25%] p-4 space-y-4">
         {ads.map((ad, index) => (
           <a
             key={index}

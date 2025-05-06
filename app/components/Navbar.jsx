@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
-import { Menu, Edit, PlusCircle, User, Search, X,LogOut,FileText,MessageSquare } from 'lucide-react';
+import { Menu, Edit, PlusCircle, User, Search, X, LogOut, FileText, MessageSquare, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { expandAtom, userAtom } from '../states/GlobalStates';
@@ -22,7 +22,7 @@ export default function Navbar() {
   const logout = async () => {
 
     console.log(user)
-    
+
     try {
       const url = user?.firebase_token?.length > 0 ? "/logout" : '/user/logout'
       const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + url, {
@@ -145,16 +145,11 @@ export default function Navbar() {
           >
             <Search className="w-5 h-5 text-gray-700" />
           </Button>
-
-          {user?._id && (
-            <Button
-              onClick={() => router.push('/create-wribate')}
-              className="bg-indigo-900 text-white hover:bg-indigo-700 rounded-full shadow p-0 w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-2"
-            >
-              <PlusCircle className="w-5 h-5" />
-              <span className="hidden sm:inline ml-1">Wribate</span>
-            </Button>
-          )}
+          <Button variant='outline'
+            size='icon'
+            className='rounded-full'>
+            <Bell />
+          </Button>
 
           {!user?._id ? (
             <Button
@@ -165,61 +160,65 @@ export default function Navbar() {
               Get Started
             </Button>
           ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full border-gray-300 hover:border-gray-400"
-                >
-                  <User className="w-5 h-5 text-gray-700" />
-                </Button>
-              </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-xl">
-                <DropdownMenuItem className="cursor-pointer flex gap-2 items-center flex-col p-4">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300 bg-gray-50">
-                    <User className="w-6 h-6 text-gray-700" />
-                  </div>
-                  <div className='flex flex-col items-center mt-2'>
-                    <span className='font-bold text-gray-800'>{user?.name}</span>
-                    <small className='text-gray-500 text-xs mt-1'>{user?.email}</small>
-                  </div>
+            <div className='block sm:hidden'>
+              <DropdownMenu >
+                <DropdownMenuTrigger asChild>
                   <Button
-                    onClick={() => router.push('/profile')}
-                    variant='outline'
-                    className='py-1 w-full mt-3 rounded-md'
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full border-gray-300 hover:border-gray-400"
                   >
-                    <User className="w-4 h-4 mr-2" />
-                    View Profile
+                    <User className="w-5 h-5 text-gray-700" />
                   </Button>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => router.push('/messages')}
-                  className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
-                >
-                  <MessageSquare className="w-4 h-4 mr-2 text-indigo-600" />
-                  Messages
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => router.push('/my-wribates')}
-                  className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
-                >
-                  <FileText className="w-4 h-4 mr-2 text-indigo-600" />
-                  My Wribates
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={logout}
-                  className="cursor-pointer text-red-600 font-medium py-2 flex items-center"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-xl">
+                  <DropdownMenuItem className="cursor-pointer flex gap-2 items-center flex-col p-4">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300 bg-gray-50">
+                      <User className="w-6 h-6 text-gray-700" />
+                    </div>
+                    <div className='flex flex-col items-center mt-2'>
+                      <span className='font-bold text-gray-800'>{user?.name}</span>
+                      <small className='text-gray-500 text-xs mt-1'>{user?.email}</small>
+                    </div>
+                    <Button
+                      onClick={() => router.push('/profile')}
+                      variant='outline'
+                      className='py-1 w-full mt-3 rounded-md'
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      View Profile
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => router.push('/messages')}
+                    className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2 text-indigo-600" />
+                    Messages
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => router.push('/my-wribates')}
+                    className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
+                  >
+                    <FileText className="w-4 h-4 mr-2 text-indigo-600" />
+                    My Wribates
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="cursor-pointer text-red-600 font-medium py-2 flex items-center"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+            </div>
           )}
         </div>
       </div>
