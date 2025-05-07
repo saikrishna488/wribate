@@ -194,6 +194,8 @@ const VotingPlatformUI = () => {
     if (id) {
       refetch(); // Fetch data when component mounts and id is available
     }
+
+    
   }, [id, refetch]);
 
   useEffect(() => {
@@ -211,6 +213,8 @@ const VotingPlatformUI = () => {
       query: { wribateId: id, title: data?.data?.title },
     });
   };
+
+  console.log(data?.data)
 
   // Get round title based on round number
   const getRoundTitle = (roundNumber) => {
