@@ -37,7 +37,7 @@ export default function Navbar() {
 
   const logout = async () => {
     try {
-      const res2 = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL +'/user/logout', {
+      const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL +'/user/logout', {
         withCredentials: true
       });
       const data = res.data;
