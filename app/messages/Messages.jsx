@@ -50,7 +50,7 @@ const ChatUI = () => {
       const token = localStorage.getItem("token");
       console.log("Initializing socket connection");
 
-      socket = io("http://194.164.149.238:8000/", {
+      socket = io("https://admin.wribate.com/", {
         query: { token },
         autoConnect: false,
       });
