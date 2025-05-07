@@ -37,8 +37,7 @@ export default function Navbar() {
 
   const logout = async () => {
     try {
-      const url = user?.firebase_token?.length > 0 ? "/logout" : '/user/logout';
-      const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + url, {
+      const res2 = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL +'/user/logout', {
         withCredentials: true
       });
       const data = res.data;

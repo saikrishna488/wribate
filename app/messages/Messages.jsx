@@ -43,6 +43,14 @@ const ChatUI = () => {
     error: userError,
   } = useGetUsersQuery();
 
+
+  //check user
+  useEffect(()=>{
+    if(!user?._id){
+      router.push('/login')
+    }
+  },[])
+
   // Initialize socket connection only once when component mounts
   useEffect(() => {
     // Only initialize socket once
@@ -232,12 +240,6 @@ const ChatUI = () => {
   if(!user?._id){
     return null
   }
-
-  useEffect(()=>{
-    if(!user?._id){
-      router.push('/login')
-    }
-  },[])
 
   return (
       <div>

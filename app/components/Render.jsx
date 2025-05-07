@@ -48,7 +48,7 @@ const Render = () => {
 
     if (!user._id) {
       fetchJWTUser();      // attempt to get manual login
-      fetchFirebaseUser(); // attempt to get provider login
+      //fetchFirebaseUser(); // attempt to get provider login
     }
   }, []);
 

@@ -13,16 +13,18 @@ import { useAtom } from "jotai";
 import { debateAtom, userAtom } from "../states/GlobalStates";
 
 const SingleWribate = () => {
-  
+
 
   const [uploadImage, { isLoading }] = useUploadImageMutation();
   // const { userInfo } = useSelector((state) => state.auth);
-  const [user,setUser] = useAtom(userAtom);
+  const [user, setUser] = useAtom(userAtom);
   const [createWribate, { isLoading: wribateCreating }] = useCreateWribateMutation();
   const { data, isLoading: categoriesLoading } = useGetCategoriesQuery();
   const [debate, setDebate] = useAtom(debateAtom);
   const dateInputRef = useRef(null);
   const router = useRouter();
+  const inputClass = "w-full p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm";
+
 
   const [formData, setFormData] = useState({
     title: debate?.title || "",
@@ -68,16 +70,16 @@ const SingleWribate = () => {
     e.preventDefault();
     try {
       let wribateData = { ...formData };
-      
+
       if (formData.coverImage) {
         const imageData = new FormData();
         imageData.append("image", formData.coverImage);
-        
+
         const imageResponse = await uploadImage({
           type: "wribte",
           data: imageData,
         }).unwrap();
-        
+
         if (imageResponse.status === 1) {
           wribateData.coverImage = imageResponse.cloudinaryUrl;
         } else {
@@ -88,9 +90,9 @@ const SingleWribate = () => {
       }
 
       wribateData.judges = [formData.judge1, formData.judge2, formData.judge3];
-      
+
       const response = await createWribate(wribateData).unwrap();
-      
+
       if (response?.status === 1) {
         toast.success("Wribate created successfully");
         router.push("/");
@@ -122,7 +124,7 @@ const SingleWribate = () => {
         {/* Basic Information */}
         <div className="mb-8 border-b pb-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Basic Information</h2>
-          
+
           <div className="mb-6">
             <label className="block text-gray-700 font-medium mb-2" htmlFor="title">
               Wribate Title
@@ -140,51 +142,27 @@ const SingleWribate = () => {
           </div>
 
           {/* Cover Image Upload */}
+          {/* Optimized Cover Image Upload */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Cover Image
-            </label>
-            <div className="border border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
-              <div className="text-center">
-                <div className="mb-4 flex justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                </div>
-                <p className="text-gray-700 font-medium mb-2">Upload Cover Image</p>
-                <p className="text-sm text-gray-500 mb-4">
-                  Drag and drop your image here or click to browse
-                </p>
-                <label className="inline-block cursor-pointer">
-                  <span className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-                    Browse Files
-                  </span>
+            <label className="block text-gray-700 font-medium mb-1">Cover Image</label>
+            <div className="border border-dashed border-gray-300 rounded-md px-4 py-3 bg-gray-50">
+              <div className="text-center text-sm">
+                <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                  Upload
                   <input
                     type="file"
                     className="hidden"
-                    id="imageUpload"
                     onChange={handleFileUpload}
                     accept="image/*"
                   />
                 </label>
                 {formData?.coverImage && (
-                  <p className="mt-2 text-sm text-gray-600">
+                  <p className="mt-2 text-xs text-gray-600 truncate">
                     Selected: {formData.coverImage.name}
                   </p>
                 )}
-                <p className="text-xs text-gray-500 mt-3">
-                  Recommended: 1200x630px, Max 5MB
+                <p className="text-xs text-gray-500 mt-1">
+                  Max 5MB, ideal 1200×630px
                 </p>
               </div>
             </div>
@@ -194,7 +172,7 @@ const SingleWribate = () => {
         {/* Panel Setup */}
         <div className="mb-8 border-b pb-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Panel Setup</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
             <div>
               <h3 className="font-medium text-gray-700 mb-4">For</h3>
@@ -208,7 +186,7 @@ const SingleWribate = () => {
                     name="leadFor"
                     value={formData.leadFor}
                     onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className={inputClass}
                     placeholder="Email address"
                     required
                   />
@@ -222,7 +200,7 @@ const SingleWribate = () => {
                     name="supportingFor"
                     value={formData.supportingFor}
                     onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className={inputClass}
                     placeholder="Email address"
                     required
                   />
@@ -242,7 +220,7 @@ const SingleWribate = () => {
                     name="leadAgainst"
                     value={formData.leadAgainst}
                     onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className={inputClass}
                     placeholder="Email address"
                     required
                   />
@@ -256,7 +234,7 @@ const SingleWribate = () => {
                     name="supportingAgainst"
                     value={formData.supportingAgainst}
                     onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className={inputClass}
                     placeholder="Email address"
                     required
                   />
@@ -269,7 +247,7 @@ const SingleWribate = () => {
         {/* Judges */}
         <div className="mb-8 border-b pb-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Judges</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-2">
@@ -280,7 +258,7 @@ const SingleWribate = () => {
                 name="judge1"
                 value={formData.judge1}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={inputClass}
                 placeholder="Email address"
                 required
               />
@@ -294,7 +272,7 @@ const SingleWribate = () => {
                 name="judge2"
                 value={formData.judge2}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={inputClass}
                 placeholder="Email address"
                 required
               />
@@ -308,7 +286,7 @@ const SingleWribate = () => {
                 name="judge3"
                 value={formData.judge3}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={inputClass}
                 placeholder="Email address"
                 required
               />
@@ -319,7 +297,7 @@ const SingleWribate = () => {
         {/* Schedule */}
         <div className="mb-8 border-b pb-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Schedule</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-2">
@@ -332,14 +310,14 @@ const SingleWribate = () => {
                   value={formData.startDate}
                   onChange={handleInputChange}
                   ref={dateInputRef}
-                  className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className={inputClass}
                   required
                 />
-                <div 
+                <div
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
                   onClick={handleDateIconClick}
                 >
-                  <Calendar className="h-5 w-5 text-gray-500" />
+                  {/* <Calendar className="h-5 w-5 text-gray-500" /> */}
                 </div>
               </div>
             </div>
@@ -353,7 +331,7 @@ const SingleWribate = () => {
                 name="durationDays"
                 value={formData.durationDays}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={inputClass}
                 placeholder="e.g. 2"
                 required
               />
@@ -364,7 +342,7 @@ const SingleWribate = () => {
         {/* Additional Details */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Additional Details</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-2">
@@ -386,7 +364,7 @@ const SingleWribate = () => {
                   ))}
               </select>
             </div>
-            
+
             {user?.userRole !== "user" && (
               <div>
                 <label className="block text-gray-700 text-sm font-medium mb-2">
@@ -397,7 +375,7 @@ const SingleWribate = () => {
                   name="institution"
                   value={formData.institution}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className={inputClass}
                   placeholder="Institution name"
                 />
               </div>
@@ -405,39 +383,37 @@ const SingleWribate = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            
-            <div>
-            <label className="block text-gray-700 text-sm font-medium mb-2">
-              Type
-            </label>
-            <div className="flex items-center h-12">
-              <span className={`mr-3 text-sm ${formData.type === "Sponsored" ? "font-medium text-gray-800" : "text-gray-500"}`}>
-                Sponsored
-              </span>
-              <div
-                className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
-                  formData.type === "Free" ? "bg-blue-600" : "bg-gray-300"
-                }`}
-                onClick={() =>
-                  handleToggleChange(
-                    "type",
-                    formData.type === "Sponsored" ? "Free" : "Sponsored"
-                  )
-                }
-              >
-                <div 
-                  className={`bg-white h-5 w-5 rounded-full shadow-md transform transition-transform ${
-                    formData.type === "Free" ? "translate-x-6" : ""
-                  }`}>
-                </div>
-              </div>
-              <span className={`ml-3 text-sm ${formData.type === "Free" ? "font-medium text-gray-800" : "text-gray-500"}`}>
-                Free
-              </span>
-            </div>
-          </div>
 
-          <div>
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Type
+              </label>
+              <div className="flex items-center h-12">
+                <span className={`mr-3 text-sm ${formData.type === "Sponsored" ? "font-medium text-gray-800" : "text-gray-500"}`}>
+                  Sponsored
+                </span>
+                <div
+                  className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${formData.type === "Free" ? "bg-blue-600" : "bg-gray-300"
+                    }`}
+                  onClick={() =>
+                    handleToggleChange(
+                      "type",
+                      formData.type === "Sponsored" ? "Free" : "Sponsored"
+                    )
+                  }
+                >
+                  <div
+                    className={`bg-white h-5 w-5 rounded-full shadow-md transform transition-transform ${formData.type === "Free" ? "translate-x-6" : ""
+                      }`}>
+                  </div>
+                </div>
+                <span className={`ml-3 text-sm ${formData.type === "Free" ? "font-medium text-gray-800" : "text-gray-500"}`}>
+                  Free
+                </span>
+              </div>
+            </div>
+
+            <div>
               <label className="block text-gray-700 text-sm font-medium mb-2">
                 Prize Amount
               </label>
@@ -446,44 +422,42 @@ const SingleWribate = () => {
                 name="prizeAmount"
                 value={formData.prizeAmount}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={inputClass}
                 placeholder="e.g. $500"
               />
             </div>
-            
-            
+
+
           </div>
 
           <div className="flex flex-col">
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                Scope
-              </label>
-              <div className="flex items-center h-12">
-                <span className={`mr-3 text-sm ${formData.scope === "Private" ? "font-medium text-gray-800" : "text-gray-500"}`}>
-                  Private
-                </span>
-                <div
-                  className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
-                    formData.scope === "Open" ? "bg-blue-600" : "bg-gray-300"
+            <label className="block text-gray-700 text-sm font-medium mb-2">
+              Scope
+            </label>
+            <div className="flex items-center h-12">
+              <span className={`mr-3 text-sm ${formData.scope === "Private" ? "font-medium text-gray-800" : "text-gray-500"}`}>
+                Private
+              </span>
+              <div
+                className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${formData.scope === "Open" ? "bg-blue-600" : "bg-gray-300"
                   }`}
-                  onClick={() =>
-                    handleToggleChange(
-                      "scope",
-                      formData.scope === "Private" ? "Open" : "Private"
-                    )
-                  }
-                >
-                  <div 
-                    className={`bg-white h-5 w-5 rounded-full shadow-md transform transition-transform ${
-                      formData.scope === "Open" ? "translate-x-6" : ""
+                onClick={() =>
+                  handleToggleChange(
+                    "scope",
+                    formData.scope === "Private" ? "Open" : "Private"
+                  )
+                }
+              >
+                <div
+                  className={`bg-white h-5 w-5 rounded-full shadow-md transform transition-transform ${formData.scope === "Open" ? "translate-x-6" : ""
                     }`}>
-                  </div>
                 </div>
-                <span className={`ml-3 text-sm ${formData.scope === "Open" ? "font-medium text-gray-800" : "text-gray-500"}`}>
-                  Open to All
-                </span>
               </div>
+              <span className={`ml-3 text-sm ${formData.scope === "Open" ? "font-medium text-gray-800" : "text-gray-500"}`}>
+                Open to All
+              </span>
             </div>
+          </div>
         </div>
 
         {/* Submit Button */}
