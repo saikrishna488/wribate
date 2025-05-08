@@ -7,6 +7,7 @@ import axios from "axios";
 import { useAtom } from "jotai";
 import { userAtom } from "../states/GlobalStates";
 import { linkWithCredential } from "firebase/auth";
+import getAuthHeader from "../utils/authHeader";
 
 const Home = () => {
   // const {
@@ -29,7 +30,8 @@ const Home = () => {
         email: user._id
       },
         {
-          withCredentials: true
+          withCredentials: true,
+          headers : getAuthHeader()
         }
       )
 

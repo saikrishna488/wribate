@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 import { debateAtom, userAtom } from "../states/GlobalStates";
 import axios from "axios";
+import getAuthHeader from "../utils/authHeader";
 
 const SingleWribate = () => {
   const [uploadImage] = useUploadImageMutation();
@@ -113,7 +114,9 @@ const SingleWribate = () => {
       const response = await axios.post(
         process.env.NEXT_PUBLIC_BACKEND_URL + '/user/createWribate',
         wribateData,
-        { withCredentials: true }
+        { withCredentials: true,
+          headers: getAuthHeader()
+         }
       );
 
       if (response.data.res) {

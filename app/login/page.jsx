@@ -55,6 +55,9 @@ const LoginPage = () => {
     return () => clearInterval(interval);
   }, []);
 
+
+
+  //handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -81,6 +84,10 @@ const LoginPage = () => {
     }
   };
 
+
+
+
+  // third party login
   const handleProviderLogin = async (provider) => {
     try {
       // Sign in with the selected provider
