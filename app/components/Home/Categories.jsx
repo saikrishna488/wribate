@@ -56,7 +56,7 @@ const Navigation = ({ categories, isLoading, category, onChange }) => {
   };
 
   return (
-    <div className="w-full relative mb-4 border-b border-gray-200">
+    <div className="w-full relative border-b border-gray-200">
       {isLoading && <p>Loading Categories</p>}
 
       {categories && (

@@ -39,6 +39,7 @@ export default function Sidebar() {
     const ref = useRef(null);
     const [user, setUser] = useAtom(userAtom);
     const router = useRouter();
+    const [popup,setPopup] = useState(false)
     // Create dropdown is now using the standard dropdown menu component
 
     const logout = async () => {
@@ -62,7 +63,7 @@ export default function Sidebar() {
 
     useEffect(() => {
         function handleClickOutside(event) {
-            if (ref.current && !ref.current.contains(event.target)) {
+            if (ref.current && !ref.current.contains(event.target) && window.innerWidth >= 640) {
                 setExpand(false);
             }
         }
@@ -145,13 +146,14 @@ export default function Sidebar() {
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="outline"
+                                onClick={()=>setPopup(true)}
                                 className={`rounded-full w-fit flex items-center mx-auto gap-1`}
                             >
                                 <Plus size={24} strokeWidth={3} />
                                 <span className={`${expand ? 'block text-xl' : 'hidden'}`}>Create</span>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align={expand ? 'start' : 'center'} className="w-56">
+                        <DropdownMenuContent onCloseAutoFocus={()=>setExpand(!expand)} align={expand ? 'start' : 'center'} className="w-56">
                             <DropdownMenuItem
                                 onClick={() => router.push('/create-wribate')}
                                 className="cursor-pointer py-2"
