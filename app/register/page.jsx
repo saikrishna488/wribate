@@ -333,7 +333,7 @@ const SignupForm = () => {
       </div>
 
       {/* Right Side - Sign-up Form */}
-      <div className="w-full md:w-1/2 min-h-screen py-4 px-8 bg-gray-100 overflow-y-auto">
+      <div className="w-full md:w-1/2 min-h-screen py-4 sm:px-8 bg-gray-100 overflow-y-auto">
         <div className="flex justify-between flex-col items-center p-4">
           <div className="mb-6 flex flex-row justify-center items-center md:mb-8">
             <div className=" h-20">

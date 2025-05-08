@@ -264,8 +264,8 @@ const SingleWribate = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
               {/* For Panel */}
-              <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
-                <h3 className="font-semibold text-blue-800 mb-4 text-lg border-b border-blue-100 pb-2">Affirmative Side</h3>
+              <div className="bg-red-50 p-6 rounded-lg border border-red-100">
+                <h3 className="font-semibold text-blue-800 mb-4 text-lg border-b border-blue-100 pb-2">For Side</h3>
                 <div className="space-y-5">
                   <div>
                     <FieldLabel htmlFor="leadFor" tooltip={tooltips.leadFor}>
@@ -301,8 +301,8 @@ const SingleWribate = () => {
               </div>
 
               {/* Against Panel */}
-              <div className="bg-red-50 p-6 rounded-lg border border-red-100">
-                <h3 className="font-semibold text-red-800 mb-4 text-lg border-b border-red-100 pb-2">Opposition Side</h3>
+              <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
+                <h3 className="font-semibold text-red-800 mb-4 text-lg border-b border-red-100 pb-2">Against Side</h3>
                 <div className="space-y-5">
                   <div>
                     <FieldLabel htmlFor="leadAgainst" tooltip={tooltips.leadAgainst}>

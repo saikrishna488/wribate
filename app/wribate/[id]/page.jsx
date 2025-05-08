@@ -28,8 +28,11 @@ import "react-quill-new/dist/quill.snow.css";
 import processArguments from "../../utils/processedArguments";
 import Swal from "sweetalert2";
 import { useParams } from "next/navigation";
+import { useAtom } from "jotai";
+import { userAtom } from "@/app/states/GlobalStates";
 
 const VotingPlatformUI = () => {
+  const [user] = useAtom(userAtom);
   const [selectedVote, setSelectedVote] = useState(null);
   const [message, setMessage] = useState("");
   const [showSharePopup, setShowSharePopup] = useState(false);
@@ -48,12 +51,6 @@ const VotingPlatformUI = () => {
     useAddCommentMutation();
   const [addVote, { isLoading: addingVote, error: addVoteError }] =
     useAddVoteMutation();
-
-  const {
-    data: user,
-    isLoading: userLoading,
-    error: userError,
-  } = useGetProfileQuery();
 
   const { data, isLoading, error, refetch } = useGetMyWribateByIdQuery(id);
 
@@ -107,7 +104,7 @@ const VotingPlatformUI = () => {
 
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!user) {
+    if (!user?._id) {
       showLoginAlert();
       return;
     }
@@ -125,7 +122,7 @@ const VotingPlatformUI = () => {
   };
 
   const handleSubmitVote = async (string) => {
-    if (!user) {
+    if (!user?._id) {
       showLoginAlert();
       return;
     }
