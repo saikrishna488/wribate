@@ -36,21 +36,9 @@ export default function Navbar() {
   }, []);
 
   const logout = async () => {
-    try {
-      const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL +'/user/logout', {
-        withCredentials: true
-      });
-      const data = res.data;
-
-      if (data.res) {
-        setUser({});
-        toast.success("Logged out successfully");
-        router.replace('/login');
-      }
-    } catch (err) {
-      console.error("Logout error:", err);
-      toast.error("Something went wrong during logout");
-    }
+    setUser({});
+    localStorage.removeItem('token')
+    toast.success("Logout successfull")
   };
 
   const handleSearch = (e) => {
@@ -80,9 +68,9 @@ export default function Navbar() {
         }`}>
         <div className="w-full mx-auto px-4 sm:px-6 flex items-center justify-between">
           {/* Left Side: Menu + Logo */}
-          <div onClick={()=>setExpand(!expand)} className="flex items-center space-x-3">
+          <div onClick={() => setExpand(!expand)} className="flex items-center space-x-3">
             <div className='lg:hidden block'>
-              <MdOutlineMenu size={30}/>
+              <MdOutlineMenu size={30} />
             </div>
 
             <div

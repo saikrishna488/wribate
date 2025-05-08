@@ -32,25 +32,8 @@ const Render = () => {
       }
     };
 
-    const fetchFirebaseUser = async () => {
-      try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/decode-jwt`, {
-          withCredentials: true,
-        });
-        const data = res.data;
-
-        if (data.res && data.user) {
-          toast.success("Welcome " + data.user.name);
-          setUser(data.user);
-        }
-      } catch (err) {
-        console.log("Firebase login not active:", err.response?.data || err.message);
-      }
-    };
-
     if (!user._id) {
-      fetchJWTUser();      // attempt to get manual login
-      //fetchFirebaseUser(); // attempt to get provider login
+      fetchJWTUser();      
     }
   }, []);
 

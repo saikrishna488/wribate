@@ -153,7 +153,7 @@ export default function Sidebar() {
                                 <span className={`${expand ? 'block text-xl' : 'hidden'}`}>Create</span>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent onCloseAutoFocus={()=>setExpand(false)} align={expand ? 'start' : 'center'} className="w-56">
+                        <DropdownMenuContent onCloseAutoFocus={()=>setExpand(false)} align="start" className="w-56">
                             <DropdownMenuItem
                                 onClick={() => router.push('/create-wribate')}
                                 className="cursor-pointer py-2"
