@@ -105,6 +105,7 @@ const LoginPage = () => {
       });
 
       if (response.data.res) {
+        localStorage.setItem("token", response?.data?.token);
         toast.success("Login Success");
         setUser(response.data.user)
         router.push('/')
