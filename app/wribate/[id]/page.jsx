@@ -29,7 +29,7 @@ import processArguments from "../../utils/processedArguments";
 import Swal from "sweetalert2";
 import { useParams } from "next/navigation";
 import { useAtom } from "jotai";
-import { userAtom } from "@/app/states/GlobalStates";
+import { chatAtom, userAtom } from "@/app/states/GlobalStates";
 
 const VotingPlatformUI = () => {
   const [user] = useAtom(userAtom);
@@ -41,6 +41,7 @@ const VotingPlatformUI = () => {
   const [voteSelection, setVoteSelection] = useState(null);
   const [value, setValue] = useState("");
   const scrollContainerRef = useRef(null);
+  const [chatUser, setChatUser] = useAtom(chatAtom)
   
   const router = useRouter();
   const { id } = useParams();
@@ -206,12 +207,13 @@ const VotingPlatformUI = () => {
   }, [data?.data?.comments]);
 
   const handleChat = (userId) => {
-    router.push(`/messages?contact=${userId}`, {
-      query: { wribateId: id, title: data?.data?.title },
-    });
-  };
 
-  console.log(data?.data)
+    setChatUser({
+      _id:userId,
+      title: data?.data?.title
+    })
+    router.push(`/messages`);
+  };
 
   // Get round title based on round number
   const getRoundTitle = (roundNumber) => {
