@@ -47,7 +47,7 @@ const ChatUI = () => {
   // Message state
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [wribate, setWribate] = useState({title:chatUser.title || null});
+  const [wribate, setWribate] = useState(chatUser.title && {title:chatUser.title});
   
   // Socket state
   const [socketConnected, setSocketConnected] = useState(false);

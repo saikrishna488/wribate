@@ -39,27 +39,8 @@ export default function Sidebar() {
     const ref = useRef(null);
     const [user, setUser] = useAtom(userAtom);
     const router = useRouter();
-    const [popup,setPopup] = useState(false)
-    // Create dropdown is now using the standard dropdown menu component
+    const [popup, setPopup] = useState(false)
 
-    const logout = async () => {
-        try {
-            const url = user?.firebase_token?.length > 0 ? "/logout" : '/user/logout';
-            const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + url, {
-                credentials: 'include'
-            });
-            const data = await res.json();
-
-            if (data.res) {
-                setUser({});
-                toast.success("Logged out");
-                router.replace('/login');
-            }
-        } catch (err) {
-            console.log(err);
-            toast.error("Client error");
-        }
-    };
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -146,14 +127,14 @@ export default function Sidebar() {
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="outline"
-                                onClick={()=>setPopup(true)}
+                                onClick={() => setPopup(true)}
                                 className={`rounded-full w-fit flex items-center mx-auto gap-1`}
                             >
                                 <Plus size={24} strokeWidth={3} />
                                 <span className={`${expand ? 'block text-xl' : 'hidden'}`}>Create</span>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent onCloseAutoFocus={()=>setExpand(false)} align="start" className="w-56">
+                        <DropdownMenuContent onCloseAutoFocus={() => setExpand(false)} align="start" className="w-56">
                             <DropdownMenuItem
                                 onClick={() => router.push('/create-wribate')}
                                 className="cursor-pointer py-2"
@@ -218,71 +199,31 @@ export default function Sidebar() {
                 {/* User Profile - Made sticky with original commented code preserved */}
                 {
                     user?._id && (
-                        <div onClick={() => router.push('/profile')} className={`w-full sticky bottom-0 py-4 border-t border-gray-200 flex items-center ${expand ? 'justify-center' : 'justify-center'}`}>
-                            {/* <DropdownMenu >
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                            variant='outline'
-                            size='icon'
-                                className="rounded-full border  border-gray-300 hover:border-gray-400"
-                            >
-                                <FaRegUser size={30} className="w-12 h-12 text-gray-700" />
-                            </Button>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent align='start' className="w-56 rounded-xl shadow-xl">
-                            <DropdownMenuItem className="cursor-pointer flex gap-2 items-center flex-col p-4">
-                                <div className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300 bg-gray-50">
-                                    <User className="w-6 h-6 text-gray-700" />
-                                </div>
-                                <div className='flex flex-col items-center mt-2'>
-                                    <span className='font-bold text-gray-800'>{user?.name}</span>
-                                    <small className='text-gray-500 text-xs mt-1'>{user?.email}</small>
-                                </div>
-                                <Button
-                                    onClick={() => router.push('/profile')}
-                                    variant='outline'
-                                    className='py-1 w-full mt-3 rounded-md'
-                                >
-                                    <User className="w-4 h-4 mr-2" />
-                                    View Profile
-                                </Button>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={() => router.push('/messages')}
-                                className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
-                            >
-                                <MessageSquare className="w-4 h-4 mr-2 text-indigo-600" />
-                                Messages
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={() => router.push('/my-wribates')}
-                                className="cursor-pointer text-gray-700 font-medium py-2 flex items-center"
-                            >
-                                <FileText className="w-4 h-4 mr-2 text-indigo-600" />
-                                My Wribates
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={logout}
-                                className="cursor-pointer text-red-600 font-medium py-2 flex items-center"
-                            >
-                                <LogOut className="w-4 h-4 mr-2" />
-                                Logout
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu> */}
+                        <div
+                            onClick={() => router.push('/profile')}
+                            className={`w-full sticky bottom-0 py-4 border-t border-gray-200 flex items-center ${expand ? 'justify-center' : 'justify-center'}`}
+                        >
                             <Button
                                 variant='outline'
                                 size='icon'
-                                className="rounded-full border border-gray-300 hover:border-gray-400"
+                                className="rounded-full border border-gray-300 hover:border-gray-400 overflow-hidden"
                             >
-                                <FaRegUser size={30} className="w-12 h-12 text-gray-700" />
+                                {user?.profilePhoto ? (
+                                    <img
+                                        src={user.profilePhoto}
+                                        alt="Profile"
+                                        className="w-12 h-12 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <FaRegUser size={30} className="w-12 h-12 text-gray-700" />
+                                )}
                             </Button>
-                            <span className={`${expand ? 'block' : 'hidden'} cursor-pointer text-blue-900 px-2`}>{user?.name}</span>
+
+                            <span className={`${expand ? 'block' : 'hidden'} cursor-pointer text-blue-900 px-2`}>
+                                {user?.name}
+                            </span>
                         </div>
+
                     )
                 }
             </div>

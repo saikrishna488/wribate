@@ -1,47 +1,63 @@
 import React, { useState, useEffect } from "react";
-import {
-  useUpdateProfileMutation,
-  useUploadImageMutation,
-} from "../services/authApi";
+import axios from "axios";
 import formatToYMD from "../utils/dateFormat";
-import { setCredentials } from "../features/authSlice";
-import { useDispatch } from "react-redux";
+import { useAtom } from "jotai";
+import { userAtom } from "../states/GlobalStates";
+import toast from "react-hot-toast";
+import authHeader from "../utils/authHeader";
+import Compressor from 'compressorjs';
 
-const EditProfileModal = ({ isOpen, onClose, userInfo }) => {
-  const [updateProfile, { isLoading: isUpdatingProfile }] =
-    useUpdateProfileMutation();
+const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
+  const [user, setUser] = useAtom(userAtom);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isRequestingOtp, setIsRequestingOtp] = useState(false);
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [profileForm, setProfileForm] = useState({
+    image: "",
     name: "",
+    username: "",
     email: "",
     country: "",
     dob: "",
   });
-
-  const [uploadImage, { isLoading }] = useUploadImageMutation();
 
   const [profileImage, setProfileImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const dispatch = useDispatch();
+  // Email verification states
+  const [emailChanged, setEmailChanged] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [emailVerified, setEmailVerified] = useState(false);
 
   // Initialize profile form with user data
   useEffect(() => {
-    if (userInfo) {
+    if (user) {
       setProfileForm({
-        name: userInfo.name || "",
-        email: userInfo.email || "",
-        country: userInfo.country || "",
-        dob: userInfo.dob ? formatToYMD(userInfo.dob) : "",
+        id: user?._id,
+        image: user.profilePhoto || "",
+        name: user.name || "",
+        username: user.userName || "",
+        email: user.email || "",
+        country: user.country || "",
+        dob: user.dob || "",
       });
 
       // Reset image preview when modal is opened
-      setProfileImagePreview(userInfo?.profilePhoto || "/user.png");
+      setProfileImagePreview(user?.profilePhoto || "/user.png");
       setProfileImage(null);
+
+      // Reset email verification states
+      setEmailChanged(false);
+      setOtpSent(false);
+      setOtp("");
+      setEmailVerified(user?.emailVerified || false);
     }
-  }, [userInfo, isOpen]);
+  }, [user, isOpen]);
 
   // Fetch countries data
   useEffect(() => {
@@ -71,6 +87,16 @@ const EditProfileModal = ({ isOpen, onClose, userInfo }) => {
   // Handle profile form input changes
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
+
+    // Check if email was changed
+    if (name === "email" && value !== user.email) {
+      setEmailChanged(true);
+      setEmailVerified(false);
+    } else if (name === "email" && value === user.email) {
+      setEmailChanged(false);
+      setEmailVerified(user?.emailVerified || false);
+    }
+
     setProfileForm({
       ...profileForm,
       [name]: value,
@@ -81,12 +107,100 @@ const EditProfileModal = ({ isOpen, onClose, userInfo }) => {
   const handleProfileImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      new Compressor(file, {
+        quality: 0.6, // Adjust quality (0 to 1)
+        maxWidth: 800, // Optional: limit width
+        maxHeight: 800, // Optional: limit height
+        success(compressedFile) {
+          setProfileImage(compressedFile);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setProfileForm({ ...profileForm, image: reader.result });
+            setProfileImagePreview(reader.result);
+          };
+          reader.readAsDataURL(compressedFile);
+        },
+        error(err) {
+          console.error('Image compression error:', err);
+          toast.error('Failed to compress image');
+        },
+      });
+    }
+  };
+
+  // Handle OTP request
+  const handleRequestOtp = async () => {
+    setIsRequestingOtp(true);
+    try {
+      const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + "/user/sendOTP", {
+        email: profileForm.email
+      });
+
+      const data = response.data;
+
+      if (data.res) {
+        setOtpSent(true);
+        toast.success("OTP sent!")
+      }
+      else {
+        toast.error(data.msg)
+      }
+    } catch (error) {
+      toast.error("error occured")
+    } finally {
+      setIsRequestingOtp(false);
+    }
+  };
+
+  // Handle OTP verification
+  const handleVerifyOtp = async () => {
+    setIsVerifyingEmail(true);
+    try {
+      const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + "/user/verifyOTP", {
+        email: profileForm.email,
+        otp: otp
+      });
+
+      const data = response.data;
+
+      if (data.res) {
+        setEmailVerified(true);
+        toast.success("Verified");
+      }
+      else {
+        toast.error(data.msg)
+      }
+    } catch (error) {
+      toast.error("Error Occured")
+    } finally {
+      setIsVerifyingEmail(false);
+    }
+  };
+
+  // Handle OTP input change
+  const handleOtpChange = (e) => {
+    setOtp(e.target.value);
+  };
+
+  // Upload profile image
+  const uploadProfileImage = async (file) => {
+    setIsUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const response = await axios.post("/api/user/upload-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data?.cloudinaryUrl || null;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -94,126 +208,88 @@ const EditProfileModal = ({ isOpen, onClose, userInfo }) => {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
 
+    // Prevent submission if email changed but not verified
+    if (emailChanged && !emailVerified) {
+      toast.error("Verify Email to continue")
+      return;
+    }
+
+    setIsUpdatingProfile(true);
     try {
-      // Create FormData to handle file upload
-      // const formData = new FormData();
-      // formData.append("name", profileForm.name);
-      // formData.append("email", profileForm.email);
-      // formData.append("country", profileForm.country);
-      // formData.append("dob", profileForm.dob);
-
-      // if (profileImage) {
-      //   formData.append("profileImage", profileImage);
-      // }
-
-      // const response = await updateProfile(formData).unwrap();
-
       const updatedProfile = { ...profileForm };
-      if (profileImage) {
-        console.log(profileImage);
-        const imageData = new FormData();
-        imageData.append("image", profileImage);
-        const imageResponse = await uploadImage({
-          type: "wribte",
-          data: imageData,
-        });
 
-        console.log(imageResponse);
+      const res = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/user/updateprofile',updatedProfile, {
+        headers: authHeader()
+      })
 
-        if (imageResponse.data.status == 1) {
-          updatedProfile.profilePhoto = imageResponse?.data?.cloudinaryUrl;
-          //wribateData.coverImage = imageResponse?.data?.cloudinaryUrl;
-        } else {
-          //wribateData.coverImage = "mobilescreen.jpeg";
-          //return;
-        }
-      }
-
-      const response = await updateProfile({
-        id: userInfo._id,
-        updatedProfile,
-      }).unwrap();
-      if (response?.status == 1) {
-        console.log(response);
-
-        const updatedUser = {
-          ...userInfo,
-          name: response?.user?.name,
-          email: response?.user?.email,
-          profilePhoto: response?.user?.profilePhoto,
-          dob: response?.user?.dob,
-          country: response?.user?.country,
-        };
-        dispatch(setCredentials(updatedUser));
-
-        console.log(response);
-
-        Swal.fire({
-          title: "Success!",
-          text: "Your profile has been updated",
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-
+      const data = res.data;
+      console.log(data)
+      if (data.res) {
+        toast.success("Updated!")
+        setUser(data.user);
         onClose();
       }
+      else {
+        toast.error(data.msg)
+      }
     } catch (error) {
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to update profile",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
+      toast.error("Client Error")
       console.error("Error updating profile:", error);
+    } finally {
+      setIsUpdatingProfile(false);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] my-8">
-        <div className="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-lg font-medium">Edit Profile</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-500"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white border-0 shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="bg-blue-900 p-5 text-white">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold">Edit Profile</h2>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-gray-200 transition-colors"
+              aria-label="Close"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <div className="overflow-y-auto max-h-[calc(90vh-64px)]">
+        <div className="overflow-y-auto max-h-[calc(90vh-72px)]">
           <form onSubmit={handleProfileSubmit} className="p-6">
             {/* Profile Image Upload */}
-            {/* Profile Image Upload */}
-            <div className="mb-6 flex flex-col items-center">
-              <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 mb-2">
-                <img
-                  src={profileImagePreview}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
+            <div className="flex justify-center mb-8">
+              <div className="relative">
+                <div className="h-32 w-32 border-4 border-blue-900 overflow-hidden">
+                  <img
+                    src={profileImagePreview}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <label
                   htmlFor="profile-image"
-                  style={{ zIndex: "100" }}
-                  className="absolute -bottom-2 -right-2  bg-white rounded-full p-1 shadow-md cursor-pointer transform -translate-x-2 -translate-y-2 border border-gray-200"
+                  className="absolute bottom-0 right-0 bg-blue-900 p-2 cursor-pointer text-white"
                 >
                   <svg
-                    className="w-6 h-6 text-primary"
+                    className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -223,7 +299,13 @@ const EditProfileModal = ({ isOpen, onClose, userInfo }) => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
                 </label>
@@ -236,114 +318,211 @@ const EditProfileModal = ({ isOpen, onClose, userInfo }) => {
                 />
               </div>
             </div>
+
             {/* Form Fields */}
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-medium mb-2"
-                htmlFor="name"
-              >
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={profileForm.name}
-                onChange={handleProfileChange}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              />
-            </div>
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
+                  htmlFor="name"
+                >
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={profileForm.name}
+                  onChange={handleProfileChange}
+                  className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
+                  required
+                />
+              </div>
 
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-medium mb-2"
-                htmlFor="email"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={profileForm.email}
-                onChange={handleProfileChange}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              />
-            </div>
+              {/* Username Field - New Addition */}
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
+                  htmlFor="username"
+                >
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={profileForm.username}
+                  onChange={handleProfileChange}
+                  className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
+                  required
+                />
+              </div>
 
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-medium mb-2"
-                htmlFor="country"
-              >
-                Country
-              </label>
-              <div className="relative">
-                {loading ? (
-                  <div className="w-full p-2 border border-gray-300 rounded bg-gray-50 text-gray-500">
-                    Loading countries...
-                  </div>
-                ) : (
-                  <select
-                    id="country"
-                    name="country"
-                    value={profileForm.country}
+              {/* Email Field with Verification */}
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
+                  htmlFor="email"
+                >
+                  Email Address {emailVerified && <span className="text-green-600 text-xs ml-2">✓ Verified</span>}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={profileForm.email}
                     onChange={handleProfileChange}
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
-                  >
-                    <option value="">Select a country</option>
-                    {countries.map((country) => (
-                      <option key={country.code} value={country.name}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                  <svg
-                    className="fill-current h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                  </svg>
+                    className={`w-full p-3 border-2 ${emailChanged && !emailVerified
+                        ? "border-yellow-500"
+                        : emailVerified
+                          ? "border-green-500"
+                          : "border-gray-300"
+                      } focus:border-blue-900 focus:outline-none`}
+                    required
+                  />
+                  {emailChanged && !emailVerified && (
+                    <button
+                      type="button"
+                      onClick={handleRequestOtp}
+                      disabled={isRequestingOtp}
+                      className="px-3 py-1 bg-blue-900 text-white font-bold whitespace-nowrap"
+                    >
+                      {isRequestingOtp ? "Sending..." : "Get OTP"}
+                    </button>
+                  )}
                 </div>
+
+                {/* OTP Verification Section */}
+                {emailChanged && otpSent && !emailVerified && (
+                  <div className="mt-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Enter OTP sent to your email"
+                        value={otp}
+                        onChange={handleOtpChange}
+                        className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleVerifyOtp}
+                        disabled={isVerifyingEmail || !otp.trim()}
+                        className="px-3 py-1 bg-blue-900 text-white font-bold whitespace-nowrap"
+                      >
+                        {isVerifyingEmail ? "Verifying..." : "Verify"}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Enter the verification code sent to your email address to confirm your email.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
+                  htmlFor="country"
+                >
+                  Country
+                </label>
+                <div className="relative">
+                  {loading ? (
+                    <div className="w-full p-3 border-2 border-gray-300 bg-gray-50 text-gray-500">
+                      Loading countries...
+                    </div>
+                  ) : (
+                    <select
+                      id="country"
+                      name="country"
+                      value={profileForm.country}
+                      onChange={handleProfileChange}
+                      className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none appearance-none"
+                    >
+                      <option value="">Select a country</option>
+                      {countries.map((country) => (
+                        <option key={country.code} value={country.name}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
+                  htmlFor="dob"
+                >
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  id="dob"
+                  name="dob"
+                  value={profileForm.dob}
+                  onChange={handleProfileChange}
+                  className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
+                />
               </div>
             </div>
 
-            <div className="mb-6">
-              <label
-                className="block text-gray-700 text-sm font-medium mb-2"
-                htmlFor="dob"
-              >
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                id="dob"
-                name="dob"
-                value={profileForm.dob}
-                onChange={handleProfileChange}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            <div className="flex justify-end gap-2">
+            {/* Action Buttons */}
+            <div className="mt-8 pt-5 border-t-2 border-gray-100 flex justify-end gap-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100"
+                className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-bold"
               >
-                Cancel
+                CANCEL
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
-                disabled={isUpdatingProfile}
+                className="px-6 py-3 bg-blue-900 text-white font-bold shadow-md hover:bg-blue-800 transition-colors"
+                disabled={isUpdatingProfile || (emailChanged && !emailVerified)}
               >
-                {isUpdatingProfile ? "Saving..." : "Save Changes"}
+                {isUpdatingProfile ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    SAVING...
+                  </div>
+                ) : (
+                  "SAVE CHANGES"
+                )}
               </button>
             </div>
           </form>
