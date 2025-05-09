@@ -7,6 +7,7 @@ import axios from "axios";
 import formatDate from "../utils/dateFormat";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
+import authHeader from "../utils/authHeader";
 
 const plans = [
     {
@@ -63,7 +64,9 @@ const SubscriptionPage = () => {
             const res = await axios.post(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/createOrder`,
                 { amount: 1700 },
-                { withCredentials: true }
+                { withCredentials: true,
+                    headers: authHeader()
+                 }
             );
 
             const data = res.data;

@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { MdOutlineMenu } from "react-icons/md";
+import { MdLogout } from "react-icons/md";
 
 export default function Navbar() {
   const [expand, setExpand] = useAtom(expandAtom);
@@ -153,6 +154,19 @@ export default function Navbar() {
               <MessageSquare className="w-5 h-5" />
             </Button>
 
+            {
+              user?._id && (
+                <Button
+                  variant='ghost'
+
+                  onClick={logout}
+                  className="hover:bg-gray-100 w-8 h-8 text-gray-700 hidden sm:flex"
+                >
+                  <MdLogout size={30} className="w-8 h-8" />
+                </Button>
+              )
+            }
+
             {/* User Menu */}
             {!user?._id ? (
               <Button
@@ -168,7 +182,7 @@ export default function Navbar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full hover:bg-gray-100 overflow-hidden border-2 border-gray-200"
+                    className="rounded-full sm:hidden hover:bg-gray-100 overflow-hidden border-2 border-gray-200"
                   >
                     {user?.avatar ? (
                       <Image

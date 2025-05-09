@@ -16,11 +16,11 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { User, ArrowUpCircle, PlayCircle } from "lucide-react";
+import authHeader from "../utils/authHeader";
 
 export default function DiscoverHotTopicsPage() {
   const [debates, setDebates] = useState([]);
   const [user] = useAtom(userAtom);
-  const [invoke, setInvoke] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   const categories = ["All", "Politics", "Education", "Sports", "Technology", "Country"];
@@ -32,8 +32,9 @@ export default function DiscoverHotTopicsPage() {
   useEffect(() => {
     const fetchWrites = async () => {
       try {
-        const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose', {
-          withCredentials: true
+        const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose/'+selectedCategory, {
+          withCredentials: true,
+          headers: authHeader()
         });
         const data = res.data;
         if (data.res) setDebates(data.propose);
@@ -42,7 +43,7 @@ export default function DiscoverHotTopicsPage() {
       }
     };
     fetchWrites();
-  }, [invoke]);
+  }, [selectedCategory]);
 
   return (
     <div className="container mx-auto px-4 py-6 min-h-screen bg-gray-100">
@@ -75,8 +76,6 @@ export default function DiscoverHotTopicsPage() {
             <DebateCard
               key={debate._id}
               user={user}
-              invoke={invoke}
-              setInvoke={setInvoke}
               debate={debate}
             />
           ))}
@@ -120,7 +119,6 @@ function DebateCard({ debate, user, setInvoke, invoke }) {
       const data = await res.json();
       if (data.res) {
         toast.success("Voted successfully");
-        setInvoke(!invoke);
         setVotes((prev) => prev + 1);
       } else {
         toast.success("Already voted!");
@@ -137,7 +135,7 @@ function DebateCard({ debate, user, setInvoke, invoke }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-4 flex flex-col gap-2 hover:shadow-lg transition-shadow">
+    <div className="bg-white shadow-md p-4 flex flex-col gap-2 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
           <User size={16} className="text-gray-400" /> {debate.username || "Anonymous"}

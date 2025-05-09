@@ -12,6 +12,7 @@ import { useAtom } from "jotai";
 import { debateAtom, userAtom } from "../states/GlobalStates";
 import axios from "axios";
 import getAuthHeader from "../utils/authHeader";
+import Compressor from 'compressorjs';
 
 const SingleWribate = () => {
   const [uploadImage] = useUploadImageMutation();
@@ -80,19 +81,32 @@ const SingleWribate = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+
+  //image upload
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setFormData((prev) => ({ ...prev, coverImage: file }));
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-      setFormData((prev) => ({ ...prev, coverImageBase64: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    // Use compressor.js to resize and compress the image
+    new Compressor(file, {
+      quality: 0.5, // Adjust quality to fit within size limits (range from 0 to 1)
+      maxWidth: 1024,  // Max width to limit large images (you can adjust this)
+      maxHeight: 1024, // Max height to limit large images (you can adjust this)
+      success(result) {
+        // Convert compressed image to base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+          setFormData((prev) => ({ ...prev, coverImageBase64: reader.result, coverImage: result }));
+        };
+        reader.readAsDataURL(result);  // Convert image to base64
+      },
+      error(err) {
+        console.error("Compression failed: ", err);
+      }
+    });
   };
+
 
   const toggleTooltip = (fieldName) => {
     setActiveTooltip(activeTooltip === fieldName ? null : fieldName);
@@ -114,9 +128,10 @@ const SingleWribate = () => {
       const response = await axios.post(
         process.env.NEXT_PUBLIC_BACKEND_URL + '/user/createWribate',
         wribateData,
-        { withCredentials: true,
+        {
+          withCredentials: true,
           headers: getAuthHeader()
-         }
+        }
       );
 
       if (response.data.res) {
