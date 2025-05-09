@@ -30,7 +30,7 @@ const Home = () => {
       console.log(data);
       console.log(data?.data[0]._id);
 
-      setCategory(data?.data[0].categoryName);
+      setCategory("All");
       dispatch(setCategories(data?.data));
     }
   }, [data]);
