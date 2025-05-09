@@ -206,7 +206,7 @@ const VotingPlatformUI = () => {
   }, [data?.data?.comments]);
 
   const handleChat = (userId) => {
-    router.push(`/app/messages?contact=${userId}`, {
+    router.push(`/messages?contact=${userId}`, {
       query: { wribateId: id, title: data?.data?.title },
     });
   };

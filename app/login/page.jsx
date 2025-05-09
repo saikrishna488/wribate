@@ -151,7 +151,7 @@ const LoginPage = () => {
             <img src="/logo/logo.png" className="h-full w-full object-cover" alt="" />
           </div>
         </div>
-        <div className="sm:w-[70%] bg-white mx-auto p-4 border shadow-md">
+        <div className="sm:w-[70%] w-[95%] bg-white sm:mx-auto p-4 border shadow-md">
 
 
           <h2 className="text-3xl text-center font-bold mb-4">Sign in</h2>
