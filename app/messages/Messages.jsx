@@ -23,6 +23,7 @@ let socket = null;
 /**
  * ChatUI Component
  * A full-featured chat interface with contacts list and message area
+ * Optimized for mobile with improved UI
  */
 const ChatUI = () => {
   // ------------ STATE MANAGEMENT ------------
@@ -31,7 +32,9 @@ const ChatUI = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [chatUser, setChatUser] = useAtom(chatAtom);
-  const [contactId, setContactId] = useState(chatUser._id || null);
+  // Use useRef for contactId to prevent recursive renders
+  const contactIdRef = useRef(chatUser._id || null);
+  const [contactId, setContactId] = useState(contactIdRef.current);
   
   // User state
   const [user] = useAtom(userAtom);
@@ -44,6 +47,9 @@ const ChatUI = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   
+  // Track mounted state to prevent updates on unmounted component
+  const isMountedRef = useRef(true);
+  
   // Message state
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -55,6 +61,7 @@ const ChatUI = () => {
   
   // Refs
   const scrollContainerRef = useRef(null);
+  const inputRef = useRef(null);
 
   // ------------ FILTERED DATA ------------
   const filteredUsers = users?.length > 0 
@@ -67,62 +74,83 @@ const ChatUI = () => {
 
   // ------------ AUTHENTICATION & ROUTING ------------
   // Check if user is logged in
+  // Added cleanup for component unmount
   useEffect(() => {
+    // Set mounted ref
+    isMountedRef.current = true;
+    
     if (!user?._id) {
       router.push('/login');
     }
+    
+    // Cleanup function for component unmount
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [user, router]);
 
-  // Handle URL params and set contact
+  // Handle URL params and set contact - Optimized to reduce unnecessary API calls
   useEffect(() => { 
-
-    if (contactId) {
-
-      const user = users.find(u => u._id == contactId);
-
-      if(user){
-        setSelectedContact(user)
-        return 
-      }
-
-      const fetchUser = async () => {
-        try {
-          setIsLoading(true);
-          const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/getUser/${contactId}`, 
-            { headers: authHeader() }
-          );
-          
-          const data = res.data;
-          
-          if (data.res) {
-            // Check if user already exists in the users array
-            const userExists = users.some(u => u._id === data.user._id);
-            
-            if (!userExists) {
-              setUsers(prevUsers => [...prevUsers, data.user]);
-            }
-            
-            setSelectedContact(data.user);
-            setIsLoading(false);
-          } else {
-            toast.error("Error fetching user");
-            setIsLoading(false);
-          }
-        } catch (err) {
-          console.log(err);
-          toast.error("Failed to fetch user");
-          setIsLoading(false);
-        }
-      };
-
-      fetchUser();
+    if (!contactId) return;
+    
+    // First check if user is already in local state to avoid unnecessary API calls
+    const existingUser = users.find(u => u._id === contactId);
+    
+    if (existingUser) {
+      setSelectedContact(existingUser);
+      if (isMobile) setShowChat(true);
+      return;
     }
-  }, [contactId]);
+    
+    // Only fetch if we don't have the user data locally
+    let isMounted = true; // For handling unmount during async operation
+    
+    const fetchUser = async () => {
+      try {
+        setIsLoading(true);
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/getUser/${contactId}`, 
+          { headers: authHeader() }
+        );
+        
+        if (!isMounted) return; // Prevent state updates if component unmounted
+        
+        const data = res.data;
+        
+        if (data.res) {
+          // Add user to local collection if not exists
+          setUsers(prevUsers => {
+            // Check if user already exists before adding
+            const userExists = prevUsers.some(u => u._id === data.user._id);
+            return userExists ? prevUsers : [...prevUsers, data.user];
+          });
+          
+          setSelectedContact(data.user);
+          if (isMobile) setShowChat(true);
+        } else {
+          toast.error("Error fetching user");
+        }
+      } catch (err) {
+        console.log(err);
+        if (isMounted) toast.error("Failed to fetch user");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchUser();
+    
+    // Cleanup function to handle component unmount
+    return () => {
+      isMounted = false;
+    };
+  }, [contactId, users]);
 
   // ------------ DATA FETCHING ------------
-  // Fetch all users
+  // Fetch all users - Optimized with better error handling and state management
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchUsers = async () => {
       try {
         setIsLoading(true);
@@ -131,23 +159,35 @@ const ChatUI = () => {
           { headers: authHeader() }
         );
 
+        // Prevent state updates if component unmounted
+        if (!isMounted) return;
+        
         const data = res.data;
 
         if (data.res) {
+          // Set users and track that we've loaded them
           setUsers(data.users);
-          setIsLoading(false);
         } else {
           toast.error("Error fetching users");
-          setIsLoading(false);
         }
       } catch (err) {
         console.log(err);
-        toast.error("Failed to fetch users");
-        setIsLoading(false);
+        if (isMounted) {
+          toast.error("Failed to fetch users");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchUsers();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // ------------ SOCKET CONNECTION ------------
@@ -228,23 +268,22 @@ const ChatUI = () => {
   }, [socketConnected]);
 
   // ------------ UI EFFECTS ------------
-  // Sync selected contact with URL parameter
+  // Sync selected contact with URL parameter - optimized to prevent multiple executions
   useEffect(() => {
+    // Only run this effect when contactId or users change
     if (contactId && users?.length > 0) {
       const foundUser = users.find((u) => u._id === contactId);
       if (foundUser) {
         setSelectedContact(foundUser);
+        // Only set showChat when mobile AND contact changes
         if (isMobile) setShowChat(true);
-      } else {
-        // Handle invalid contact ID
-        // const params = new URLSearchParams(searchParams.toString());
-        // params.delete("contact");
-        // router.push(`${pathname}?${params.toString()}`);
       }
-    } else {
+    } else if (contactId === null) {
+      // Only reset selected contact when contactId is explicitly null
       setSelectedContact(null);
     }
-  }, [contactId, users, isMobile, pathname, router, searchParams]);
+    // Removed unnecessary dependencies to prevent excessive re-renders
+  }, [contactId, users]);
 
   // Responsive screen check
   useEffect(() => {
@@ -262,7 +301,14 @@ const ChatUI = () => {
       const container = scrollContainerRef.current;
       container.scrollTop = container.scrollHeight;
     }
-  }, [messages]);
+
+    // Focus input field when chat opens
+    if (showChat && isMobile && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current.focus();
+      }, 300);
+    }
+  }, [messages, showChat, isMobile]);
 
   // Handle state from router
   useEffect(() => {
@@ -284,16 +330,29 @@ const ChatUI = () => {
   }, []);
 
   // ------------ EVENT HANDLERS ------------
-  // Handle contact selection
+  // Handle contact selection - Improved to avoid state conflicts
   const handleContactClick = (user) => {
-    setSelectedContact(user)
-    if (isMobile) setShowChat(true);
+    if (user?._id) {
+      // Set contact ID first
+      setContactId(user._id);
+      // Then set selected contact
+      setSelectedContact(user);
+      // Finally handle mobile UI
+      if (isMobile) setShowChat(true);
+    }
   };
 
-  // Handle back button click in mobile view
+  // Handle back button click in mobile view - Improved to prevent route issues
   const handleBackClick = () => {
+    // First update UI state
     setShowChat(false);
-    router.push(pathname);
+    // Then update URL if needed, without triggering unnecessary navigation
+    if (contactId) {
+      // Use replace to avoid adding to history stack
+      router.replace(pathname, { shallow: true });
+      // Clear contact ID after UI is updated
+      setTimeout(() => setContactId(null), 0);
+    }
   };
 
   // Handle sending messages
@@ -337,39 +396,39 @@ const ChatUI = () => {
 
   // ------------ COMPONENT RENDER ------------
   return (
-    <div>
-      {isLoading && <p className="p-4 text-center">Loading users...</p>}
+    <div className="h-[90vh] flex flex-col bg-gray-100">
+      {isLoading && <div className="p-4 text-center bg-white shadow-sm">Loading users...</div>}
       
-      <div className="flex h-[90vh] bg-gray-100 box-border">
+      <div className="flex flex-1 overflow-hidden">
         {/* Contacts List */}
         <div
-          className={`bg-white w-full md:w-[40%] lg:w-[40%] border-r ${
-            isMobile && showChat ? "hidden" : "block"
+          className={`bg-white md:w-[40%] lg:w-[30%] border-r border-gray-200 flex flex-col ${
+            isMobile && showChat ? "hidden" : "flex-1"
           }`}
         >
-          <div className="p-0 md:p-4 border-box">
+          <div className="p-3 sticky top-0 bg-white z-10 shadow-sm">
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={20}
+                size={18}
               />
               <input
                 type="text"
                 placeholder="Search conversations..."
-                className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-2 focus:ring-purple-300"
+                className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="overflow-y-auto h-[calc(100%-70px)] scrollbar-hide">
+          <div className="overflow-y-auto flex-1 scrollbar-hide">
             {filteredUsers?.length > 0 ? (
               filteredUsers.map((user) => (
                 <div
                   key={user._id}
-                  className={`flex items-center p-4 border-b hover:bg-gray-50 cursor-pointer ${
-                    selectedContact?._id === user._id ? "bg-gray-50" : ""
+                  className={`flex items-center p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+                    selectedContact?._id === user._id ? "bg-blue-50" : ""
                   }`}
                   onClick={() => handleContactClick(user)}
                 >
@@ -377,25 +436,33 @@ const ChatUI = () => {
                     <img
                       src="/user.png"
                       alt={user.name}
-                      className="w-12 h-12 rounded-full"
+                      className="w-12 h-12 rounded-full object-cover border border-gray-200"
                     />
+                    <div
+                      className={`absolute bottom-0 right-0 w-3 h-3 ${
+                        socketConnected && selectedContact?._id === user._id 
+                          ? "bg-green-500" 
+                          : "bg-gray-400"
+                      } rounded-full border-2 border-white`}
+                    ></div>
                   </div>
-                  <div className="ml-4 flex-1">
-                    <div className="flex justify-between">
-                      <h3 className="font-medium">{user.name}</h3>
+                  <div className="ml-3 flex-1">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-medium text-gray-900">{user.name}</h3>
                       <span className="text-xs text-gray-500">
                         {/* Time placeholder */}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 truncate">
+                    <p className="text-sm text-gray-600 truncate mt-1">
                       {user.email}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="p-4 text-center text-gray-500">
-                No users found matching your search
+              <div className="p-6 text-center text-gray-500 flex flex-col items-center">
+                <Search size={40} className="text-gray-300 mb-2" />
+                <p>No users found matching your search</p>
               </div>
             )}
           </div>
@@ -404,90 +471,99 @@ const ChatUI = () => {
         {/* Chat Area */}
         <div
           className={`flex flex-col flex-1 ${
-            isMobile && !showChat ? "hidden" : "block"
+            isMobile && !showChat ? "hidden" : "flex-1"
           }`}
         >
           {selectedContact ? (
             <>
               {/* Chat Header */}
-              <div className="flex items-center justify-between p-0 md:p-4 py-2 border-b bg-white">
+              <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-white shadow-sm sticky top-0 z-10">
                 <div className="flex items-center">
                   {isMobile && (
-                    <button onClick={handleBackClick} className="mr-2">
-                      <ChevronLeft size={24} />
+                    <button 
+                      onClick={handleBackClick} 
+                      className="mr-2 p-1 rounded hover:bg-gray-100 transition-colors"
+                    >
+                      <ChevronLeft size={24} className="text-blue-900" />
                     </button>
                   )}
                   <div className="relative">
                     <img
                       src="/user.png"
                       alt={selectedContact.name}
-                      className="w-10 h-10 rounded-full"
+                      className="w-10 h-10 rounded-full object-cover border border-gray-200"
                     />
                     <div
-                      className={`absolute bottom-0 right-0 w-3 h-3 ${
+                      className={`absolute bottom-0 right-0 w-2.5 h-2.5 ${
                         socketConnected ? "bg-green-500" : "bg-gray-400"
                       } rounded-full border-2 border-white`}
                     ></div>
                   </div>
                   <div className="ml-3">
-                    <h3 className="font-medium">{selectedContact.name}</h3>
+                    <h3 className="font-medium text-gray-900">{selectedContact.name}</h3>
                     <p className="text-xs text-gray-500">
                       {socketConnected ? "Connected" : "Connecting..."}
                     </p>
                   </div>
                 </div>
-                <div className="flex space-x-3">
-                  <Video
-                    size={20}
-                    className="text-gray-600 hover:text-gray-800"
-                  />
-                  <Phone
-                    size={20}
-                    className="text-gray-600 hover:text-gray-800"
-                  />
-                  <MoreVertical
-                    size={20}
-                    className="text-gray-600 hover:text-gray-800"
-                  />
+                <div className="flex space-x-2">
+                  <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <MoreVertical
+                      size={18}
+                      className="text-blue-900"
+                    />
+                  </button>
                 </div>
               </div>
 
               {/* Messages Area */}
               <div
-                className="flex-1 p-1 md:p-4 overflow-y-auto bg-gray-50 scrollbar-hide"
+                className="flex-1 p-3 overflow-y-auto bg-gray-50 scrollbar-hide"
                 ref={scrollContainerRef}
               >
                 {messages.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-gray-500">
-                    No messages yet. Start a conversation!
+                  <div className="flex flex-col items-center justify-center h-full text-gray-500 p-6 text-center">
+                    <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-4">
+                      <Send size={24} className="text-blue-300" />
+                    </div>
+                    <p className="text-lg font-medium text-gray-600">No messages yet</p>
+                    <p className="text-sm text-gray-500 mt-1">Start a conversation!</p>
                   </div>
                 ) : (
                   messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`mb-4 flex ${
+                      className={`mb-3 flex ${
                         msg.sender === user?._id
                           ? "justify-end"
                           : "justify-start"
                       }`}
                     >
                       <div
-                        className={`max-w-xs md:max-w-md p-3 rounded-lg ${
+                        className={`max-w-[85%] md:max-w-md p-3 ${
                           msg.sender === user?._id
-                            ? "bg-purple-100"
-                            : "bg-white"
+                            ? "bg-blue-900 text-white rounded-tl-lg rounded-tr-lg rounded-bl-lg"
+                            : "bg-white text-gray-800 rounded-tl-lg rounded-tr-lg rounded-br-lg shadow-sm"
                         }`}
                       >
                         {msg?.wribateTitle && (
                           <div
-                            className="bg-purple-100 p-2 rounded mb-2 text-sm text-purple-800 cursor-pointer hover:bg-purple-200"
+                            className={`${
+                              msg.sender === user?._id 
+                                ? "bg-blue-800" 
+                                : "bg-blue-50 text-blue-900"
+                            } p-2 rounded mb-2 text-sm cursor-pointer hover:opacity-90 transition-opacity`}
                             onClick={() => handleWribate(msg.wribateId)}
                           >
                             {msg.wribateTitle}
                           </div>
                         )}
-                        <p>{msg.message}</p>
-                        <p className="text-xs mt-1 text-gray-500">
+                        <p className="break-words">{msg.message}</p>
+                        <p className={`text-xs mt-1 ${
+                          msg.sender === user?._id 
+                            ? "text-blue-100" 
+                            : "text-gray-500"
+                        }`}>
                           {timeAgo(msg.timestamp)}
                         </p>
                       </div>
@@ -499,39 +575,40 @@ const ChatUI = () => {
               {/* Message Input Form */}
               <form
                 onSubmit={handleSendMessage}
-                className="border-t p-0 md:p-4 bg-white w-[100%]"
+                className="border-t border-gray-200 p-3 bg-white sticky bottom-0 w-full"
               >
                 {wribate && (
-                  <div className="flex items-center justify-between bg-purple-100 p-2 rounded-t-lg mb-2">
-                    <span className="text-sm text-purple-800">
+                  <div className="flex items-center justify-between bg-blue-50 p-2 rounded-lg mb-2 border border-blue-100">
+                    <span className="text-sm text-blue-900 truncate flex-1">
                       {wribate?.title}
                     </span>
                     <button
                       type="button"
                       onClick={() => setWribate(null)}
-                      className="text-purple-800 hover:text-purple-900 text-lg"
+                      className="text-blue-900 hover:text-blue-700 ml-2 p-1"
                     >
                       ×
                     </button>
                   </div>
                 )}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <input
+                    ref={inputRef}
                     type="text"
                     placeholder="Type a message..."
-                    className="md:flex-1 flex-0 border-none bg-gray-100 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300 w-full"
+                    className="flex-1 border-none bg-gray-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     disabled={!socketConnected}
                   />
                   <button
                     type="submit"
-                    className={`ml-2 ${
-                      socketConnected
-                        ? "bg-purple-800 hover:bg-purple-900"
+                    className={`${
+                      socketConnected && message.trim()
+                        ? "bg-blue-900 hover:bg-blue-800"
                         : "bg-gray-400"
-                    } text-white p-2 rounded-full`}
-                    disabled={!socketConnected}
+                    } text-white p-3 rounded-lg transition-colors`}
+                    disabled={!socketConnected || !message.trim()}
                   >
                     <Send size={20} />
                   </button>
@@ -539,16 +616,26 @@ const ChatUI = () => {
               </form>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              Select a conversation to start chatting
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-500 p-6 text-center">
+              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <Send size={32} className="text-gray-300" />
+              </div>
+              <p className="text-lg font-medium text-gray-600">No conversation selected</p>
+              <p className="text-sm text-gray-500 mt-1">
+                {isMobile ? "Tap a contact to start chatting" : "Select a conversation to start chatting"}
+              </p>
             </div>
           )}
         </div>
       </div>
 
       {users.length === 0 && !isLoading && (
-        <div className="p-4 text-center text-gray-500">
-          No users available. Please try again later.
+        <div className="p-8 text-center text-gray-500 flex flex-col items-center justify-center h-full">
+          <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+            <Search size={32} className="text-gray-300" />
+          </div>
+          <p className="text-lg font-medium text-gray-600">No users available</p>
+          <p className="text-sm text-gray-500 mt-1">Please try again later</p>
         </div>
       )}
     </div>

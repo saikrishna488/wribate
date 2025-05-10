@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,22 +24,45 @@ const WribateProposalForm = () => {
         user_id: user?._id || null
     });
 
-    const categoryOptions = [
-        'Politics', 'Technology', 'Science', 'Economics',
-        'Philosophy', 'Health', 'Environment', 'Education', 'Other'
-    ];
+    const [categories, setCategories] = useState([]);
+    const [countries, setCountries] = useState([]); // fixed spelling from "countires"
 
-    const countryOptions = [
-        'Global', 'United States', 'United Kingdom', 'Canada',
-        'Australia', 'India', 'Germany', 'France', 'Japan', 'Other'
-    ];
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/user/getallcategories');
 
-    const handleFormChange = (field, value) => {
-        setFormData(prevData => ({
-            ...prevData,
-            [field]: value
-        }));
-    };
+                const data = res.data;
+                if (data.res) {
+                    setCategories(data.categories);
+                }
+            } catch (err) {
+                console.log(err);
+                toast.error("Error fetching categories");
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+            try {
+                const res = await axios.get('https://restcountries.com/v3.1/all?fields=name');
+                const data = res.data;
+                // Sort countries alphabetically by common name
+                const sortedCountries = data
+                    .map(country => country.name.common)
+                    .sort((a, b) => a.localeCompare(b));
+                setCountries(sortedCountries);
+            } catch (err) {
+                console.log(err);
+                toast.error("Error fetching countries");
+            }
+        };
+
+        fetchCountries();
+    }, []);
 
     const handleSubmit = async () => {
 
@@ -70,6 +93,17 @@ const WribateProposalForm = () => {
             toast.error("Failed to Add!")
         }
     };
+
+    useEffect(()=>{
+        if(!user?._id){
+            router.push('/login')
+        }
+    })
+
+
+    if(!user?._id){
+        return null
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 py-12">
@@ -109,8 +143,10 @@ const WribateProposalForm = () => {
                                         <SelectValue placeholder="Select a category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {categoryOptions.map(category => (
-                                            <SelectItem key={category} value={category}>{category}</SelectItem>
+                                        {categories.map((category) => (
+                                            <SelectItem key={category._id} value={category.categoryName}>
+                                                {category.categoryName}
+                                            </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -137,8 +173,10 @@ const WribateProposalForm = () => {
                                         <SelectValue placeholder="Select a country" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {countryOptions.map(country => (
-                                            <SelectItem key={country} value={country}>{country}</SelectItem>
+                                        {countries.map((country) => (
+                                            <SelectItem key={country} value={country}>
+                                                {country}
+                                            </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
