@@ -19,6 +19,7 @@ const ProfilePage = () => {
     const router = useRouter();
     const [user, setUser] = useAtom(userAtom);
     const [isUpdatingCategories,setIsUpdatingCategories] = useState(false);
+    const [favoriteCategories,setFavoriteCategories] = useState(user?.favoriteCategories)
 
     // Fetch categories if not already available
     const { data: categoriesData, isLoading: isCategoriesLoading } =
@@ -299,9 +300,11 @@ const ProfilePage = () => {
                                             {categoriesData?.data &&
                                                 categoriesData?.data.length > 0 ? (
                                                 categoriesData.data.map((category) => {
-                                                    const isFavorite = user.favoriteCategories?.some(
-                                                        (fav) => fav?._id === category._id
+                                                    const isFavorite = user?.favoriteCategories?.some(
+                                                        (fav) => fav === category._id
                                                     );
+
+                                                    console.log(isFavorite)
 
                                                     const isSelected = selectedCategories.includes(
                                                         category._id
@@ -320,7 +323,7 @@ const ProfilePage = () => {
                                                                         ? "bg-blue-900 text-white" // editing + selected
                                                                         : "bg-gray-100 hover:bg-gray-200" // editing + not selected
                                                                     : isFavorite
-                                                                        ? "bg-blue-900 bg-opacity-10 border border-blue-900 text-blue-900" // not editing + favorite
+                                                                        ? "bg-blue-900 bg-opacity-10 border border-blue-900 text-white" // not editing + favorite
                                                                         : "bg-gray-100 text-gray-700" // not editing + not favorite
                                                                 }
                                                               md:min-w-[120px] text-center transition-colors font-medium`}

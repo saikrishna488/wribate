@@ -601,7 +601,7 @@ const VotingPlatformUI = () => {
             </div>
           </div>
           <div className="bg-200">
-            <h2>Hello</h2>
+           
           </div>
         </div>
       )}
