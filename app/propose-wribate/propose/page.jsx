@@ -64,6 +64,13 @@ const WribateProposalForm = () => {
         fetchCountries();
     }, []);
 
+
+
+    //handle form change
+    const handleFormChange = (name,value)=>{
+        setFormData({...formData,[name]:value});
+    }
+
     const handleSubmit = async () => {
 
         try {
