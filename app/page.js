@@ -18,9 +18,9 @@ const WribateCard = ({ wribate, onClick }) => {
       <div className="flex flex-row">
         <div className="flex-grow p-3">
           <h3 className="text-base font-medium text-gray-900 line-clamp-2 mb-1">{wribate.title}</h3>
-          <div className="flex flex-col text-xs text-gray-600">
+          <div className="flex flex-row items-center gap-1 text-xs text-gray-600">
             <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full inline-block w-fit mb-1">{wribate.category}</span>
-            {wribate.institution && <span className="text-gray-500">{wribate.institution}</span>}
+            {wribate.institution && <span className="text-gray-500 inline-block">{wribate.institution}</span>}
           </div>
         </div>
         <div className="w-24 h-14 my-auto flex-shrink-0 flex items-center">
@@ -56,15 +56,11 @@ export default function WribateDashboard() {
   const [wribates, setWribates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
   const categoriesRef = useRef(null);
   const wribatesRef = useRef(null)
   const [categories, setCategories] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
   const router = useRouter();
-  const [showDialog, setShowDialog] = useState(false)
 
   // Ad data
   const ads = [
@@ -118,7 +114,7 @@ export default function WribateDashboard() {
 
         if (data.res) {
           setWribates(data.wribates);
-          wribatesRef.current.scrollTop = 0;
+          wribatesRef.current && (wribatesRef.current.scrollTop = 0)
           setIsLoading(false);
         } else {
           toast.error("Error occurred");
@@ -130,52 +126,16 @@ export default function WribateDashboard() {
       }
     };
     fetchWribates();
-
-    // Check if mobile
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      checkScrollPosition();
-    };
-
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
   }, [activeCategory]);
-
-  // Check scroll position to show/hide arrows
-  const checkScrollPosition = () => {
-    if (!categoriesRef.current) return;
-
-    const container = categoriesRef.current;
-    setShowLeftArrow(container.scrollLeft > 0);
-    setShowRightArrow(
-      container.scrollLeft < container.scrollWidth - container.clientWidth
-    );
-  };
-
-  useEffect(() => {
-    const container = categoriesRef.current;
-    if (container) {
-      container.addEventListener('scroll', checkScrollPosition);
-      checkScrollPosition();
-
-      return () => {
-        container.removeEventListener('scroll', checkScrollPosition);
-      };
-    }
-  }, [categoriesRef]);
 
   const handleCardClick = (id) => {
     router.push(`/wribate/${id}`);
   };
 
-  const handleViewMore = (category) => {
+  const handleViewMore = (category, type) => {
     // You can customize this function to navigate to a category-specific page
     // or show more items in the current view
-    router.push(`/wribates/${category.toLowerCase()}`);
+    router.push(`/category/`+category+'?type='+type);
   };
 
   const getWribateStatus = (startDate, durationDays) => {
@@ -300,7 +260,7 @@ export default function WribateDashboard() {
 
       <div className="w-full mx-auto flex flex-col lg:flex-row">
         {/* Main content - Left section */}
-        <div className="w-full lg:w-[50%] px-4">
+        <div className="w-full lg:w-[50%] px-4 border-r border-gray-300">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -309,7 +269,7 @@ export default function WribateDashboard() {
             <>
               {/* Hero Wribate */}
               {heroWribate && (
-                <div id='hero' className="mb-8">
+                <div id='hero' className="mb-8 border-b">
                   <div className="flex justify-between items-center mb-3">
                     <h2 className={`text-xl font-bold text-gray-900 border-l-4 pl-3`}>
                       Featured
@@ -320,7 +280,7 @@ export default function WribateDashboard() {
                     className="bg-white cursor-pointer hover:shadow-lg border transition-shadow duration-300 w-full"
                   >
                     <div className="flex flex-col">
-                      <div className="w-full h-64 md:h-80 relative">
+                      <div className="w-full h-40 md:h-80 relative">
                         <img
                           src={heroWribate.coverImage}
                           alt={heroWribate.title}
@@ -338,11 +298,11 @@ export default function WribateDashboard() {
 
               {/* Free Wribates */}
               {freeWribates.length > 0 && (
-                <div className="mb-8">
+                <div className="mb-8 border-t pt-2 border-gray-300">
                   <SectionHeader
-                    title="Free Debates"
+                    title="Free"
                     borderColor="border-green-700"
-                    onViewMore={() => handleViewMore('free')}
+                    onViewMore={() => handleViewMore(activeCategory,"Free")}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {freeWribates.slice(0, 4).map((wribate) => (
@@ -358,11 +318,11 @@ export default function WribateDashboard() {
 
               {/* Sponsored Wribates */}
               {sponsoredWribates.length > 0 && (
-                <div className="mb-8">
+                <div className="mb-8 border-t pt-2 border-gray-300">
                   <SectionHeader
-                    title="Sponsored Debates"
+                    title="Sponsored"
                     borderColor="border-yellow-600"
-                    onViewMore={() => handleViewMore('sponsored')}
+                    onViewMore={() => handleViewMore(activeCategory,"Sponsored")}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {sponsoredWribates.slice(0, 4).map((wribate) => (
@@ -378,11 +338,11 @@ export default function WribateDashboard() {
 
               {/* Active Wribates */}
               {activeWribates.length > 0 && (
-                <div className="mb-8">
+                <div className="mb-8 border-t pt-2 border-gray-300">
                   <SectionHeader
-                    title="Ongoing Debates"
+                    title="Ongoing"
                     borderColor="border-blue-700"
-                    onViewMore={() => handleViewMore('ongoing')}
+                    onViewMore={() => handleViewMore(activeCategory,"Ongoing")}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {activeWribates.slice(0, 4).map((wribate) => (
@@ -398,11 +358,11 @@ export default function WribateDashboard() {
 
               {/* Completed Wribates */}
               {completedWribates.length > 0 && (
-                <div className="mb-8">
+                <div className="mb-8 border-t pt-2 border-gray-300">
                   <SectionHeader
-                    title="Completed Debates"
+                    title="Completed"
                     borderColor="border-gray-700"
-                    onViewMore={() => handleViewMore('completed')}
+                    onViewMore={() => handleViewMore(activeCategory,"Completed")}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {completedWribates.slice(0, 4).map((wribate) => (
@@ -420,13 +380,13 @@ export default function WribateDashboard() {
         </div>
 
         {/* Middle section - Ongoing Wribates */}
-        <div className="w-full lg:w-[25%] px-4">
+        <div className="w-full lg:w-[25%] px-4  border-r border-gray-300">
           {/* Ongoing Wribates Section */}
           <div className="mb-8">
             <SectionHeader
               title="Ongoing Wribates"
               borderColor="border-purple-700"
-              onViewMore={() => handleViewMore('ongoing')}
+              onViewMore={() => handleViewMore(activeCategory,"Ongoing")}
             />
             {ongoingWribates.length > 0 ? (
               <div className="grid grid-cols-1 gap-4">
@@ -473,9 +433,9 @@ export default function WribateDashboard() {
         <div className="w-full lg:w-[25%] px-4">
           {/* Ad section */}
           <div className="mb-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-3 border-l-4 border-gray-700 pl-3">
+            {/* <h3 className="text-lg font-bold text-gray-900 mb-3 border-l-4 border-gray-700 pl-3">
               Sponsored
-            </h3>
+            </h3> */}
             <div className="grid grid-cols-1 gap-4">
               {ads.map((ad, index) => (
                 <a

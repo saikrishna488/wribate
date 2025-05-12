@@ -1,11 +1,27 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { useAtom } from "jotai";
+import he from "he";
+import Swal from "sweetalert2";
+
+// Components
 import Categories from "../../components/Home/Categories";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
+
+// Icons
 import { FaThumbsUp, FaShareAlt, FaDownload, FaComments } from "react-icons/fa";
 import { LiaFileAudioSolid } from "react-icons/lia";
-import { Button } from "@/components/ui/button";
+
+// Utilities
+import formatDate, { timeAgo } from "../../utils/dateFormat";
+import processArguments from "../../utils/processedArguments";
+
+// API
 import {
   useGetMyWribateByIdQuery,
   useAddArgumentMutation,
@@ -14,24 +30,20 @@ import {
   useAddVoteMutation,
   useGetVotesQuery,
 } from "../../../app/services/authApi";
-import formatDate, { timeAgo } from "../../utils/dateFormat";
-import SharePopup from "../../components/SharePopup";
-// import HtmlCoverter from "../Dummy";
-import he from "he";
-import removeBaseURL from "../../utils/ImageFormat";
-import VotesChart from "./Chart";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Search, PaperclipIcon, Smile, Send, ChevronLeft, Video, Phone, MoreVertical } from "lucide-react";
-import ProgressBar from "./ProgressBar";
-import ReactQuill from "react-quill-new";
-import "react-quill-new/dist/quill.snow.css";
-import processArguments from "../../utils/processedArguments";
-import Swal from "sweetalert2";
-import { useParams } from "next/navigation";
-import { useAtom } from "jotai";
+
+// State
 import { chatAtom, userAtom } from "@/app/states/GlobalStates";
 
-const VotingPlatformUI = () => {
+// Custom Components
+import SharePopup from "../../components/SharePopup";
+import VotesChart from "./Chart";
+import ProgressBar from "./ProgressBar";
+import toast from "react-hot-toast";
+import { Badge } from "@/components/ui/badge";
+import { Eye } from "lucide-react";
+
+const WribateView = () => {
+  // State
   const [user] = useAtom(userAtom);
   const [selectedVote, setSelectedVote] = useState(null);
   const [message, setMessage] = useState("");
@@ -40,44 +52,26 @@ const VotingPlatformUI = () => {
   const [round, setRound] = useState(null);
   const [voteSelection, setVoteSelection] = useState(null);
   const [value, setValue] = useState("");
+  const [chatUser, setChatUser] = useAtom(chatAtom);
+
+  // Refs
   const scrollContainerRef = useRef(null);
-  const [chatUser, setChatUser] = useAtom(chatAtom)
-  
+
+  // Hooks
   const router = useRouter();
   const { id } = useParams();
 
-  const [addArgument, { isLoading: addingArgument, error: addArgumentError }] =
-    useAddArgumentMutation();
-  const [addComment, { isLoading: addingComment, error: addCommentError }] =
-    useAddCommentMutation();
-  const [addVote, { isLoading: addingVote, error: addVoteError }] =
-    useAddVoteMutation();
+  // API Hooks
+  const [addArgument, { isLoading: addingArgument }] = useAddArgumentMutation();
+  const [addComment, { isLoading: addingComment }] = useAddCommentMutation();
+  const [addVote, { isLoading: addingVote }] = useAddVoteMutation();
+  const { data, isLoading, refetch } = useGetMyWribateByIdQuery(id);
+  const { data: votes, isLoading: votesLoading } = useGetVotesQuery(id);
 
-  const { data, isLoading, error, refetch } = useGetMyWribateByIdQuery(id);
-
-  const {
-    data: votes,
-    isLoading: votesLoading,
-    error: votesError,
-  } = useGetVotesQuery(id);
-
-  if (votes) {
-    console.log(votes);
-  }
-
+  // Functions
   const showLoginAlert = () => {
-    Swal.fire({
-      title: "Login Required",
-      text: "Please log in to continue.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Login",
-      cancelButtonText: "Close",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        router.push("/login");
-      }
-    });
+    toast.error("Login to continue!")
+    router.push('/login')
   };
 
   const handleVote = (vote) => {
@@ -94,7 +88,6 @@ const VotingPlatformUI = () => {
     const data = { text: value, roundNumber: round };
     try {
       const response = await addArgument({ id, data });
-
       if (response?.data?.status === "success") {
         refetch();
       }
@@ -113,8 +106,8 @@ const VotingPlatformUI = () => {
     const data = { text: message, type: voteSelection };
     try {
       const response = await addComment({ id, data });
-
       if (response?.data?.status === "success") {
+        setMessage("");
         refetch();
       }
     } catch (err) {
@@ -129,28 +122,62 @@ const VotingPlatformUI = () => {
     }
 
     setSelectedVote(string);
-
     const data = { vote: string };
     try {
       const response = await addVote({ id, data }).unwrap();
-      console.log(response);
       refetch();
     } catch (err) {
       console.error(err);
     }
   };
 
+  const handleChat = (userId) => {
+    setChatUser({
+      _id: userId,
+      title: data?.data?.title
+    });
+    router.push(`/messages`);
+  };
+
+  // Helper functions
+  const getRoundTitle = (roundNumber) => {
+    switch (roundNumber) {
+      case 1:
+        return "Opening Arguments";
+      case 2:
+        return "Rebuttals";
+      case 3:
+        return "Closing Arguments";
+      default:
+        return `Round ${roundNumber}`;
+    }
+  };
+
+  const getArgumentForRound = (roundNumber, side) => {
+    if (!data || !data.data || !data.data.arguments) return null;
+
+    const argument = data.data.arguments.find(
+      arg => arg.roundNumber == roundNumber && arg.panelSide === side
+    );
+
+    return argument?.text || null;
+  };
+
+  // Effects
   useEffect(() => {
+
+    console.log(user?._id, data?.againstId)
     const newTimeStamp = new Date();
     const istOffset = 5.5 * 60 * 60 * 1000;
     const currentTime = new Date(
       newTimeStamp.getTime() + istOffset
     ).toISOString();
+
     if (data && user) {
-      const currentRound = data.data.rounds.find((round, index) => {
+      const currentRound = data.data.rounds.find((round) => {
         return currentTime >= round.startDate && currentTime <= round.endDate;
       });
-      
+
       if (currentRound) {
         setRound(currentRound.roundNumber);
       }
@@ -168,7 +195,7 @@ const VotingPlatformUI = () => {
 
   useEffect(() => {
     if (round) {
-      const email = user?.message?.email;
+      const email = user?.email;
       let type = null;
       if (data.data.leadFor.includes(email)) {
         type = "For";
@@ -190,15 +217,12 @@ const VotingPlatformUI = () => {
 
   useEffect(() => {
     if (id) {
-      refetch(); // Fetch data when component mounts and id is available
+      refetch();
     }
-
-    
   }, [id, refetch]);
 
   useEffect(() => {
     if (scrollContainerRef.current) {
-      // Use requestAnimationFrame for better timing
       requestAnimationFrame(() => {
         const container = scrollContainerRef.current;
         container.scrollTop = container.scrollHeight;
@@ -206,407 +230,365 @@ const VotingPlatformUI = () => {
     }
   }, [data?.data?.comments]);
 
-  const handleChat = (userId) => {
-
-    setChatUser({
-      _id:userId,
-      title: data?.data?.title
-    })
-    router.push(`/messages`);
-  };
-
-  // Get round title based on round number
-  const getRoundTitle = (roundNumber) => {
-    switch (roundNumber) {
-      case 1:
-        return "Opening Arguments";
-      case 2:
-        return "Rebuttals";
-      case 3:
-        return "Closing Arguments";
-      default:
-        return `Round ${roundNumber}`;
-    }
-  };
-
-  // Function to get arguments for specific round and side
-  const getArgumentForRound = (roundNumber, side) => {
-    if (!data || !data.data || !data.data.arguments) return null;
-    
-    const argument = data.data.arguments.find(
-      arg => arg.roundNumber == roundNumber && arg.panelSide === side
-    );
-    
-    return argument?.text || null;
-  };
-
   return (
-    <div className="bg-gray-200">
+    <div className="bg-gray-100 min-h-screen">
       <Categories />
-      {isLoading && <p>Loading Wribate details</p>}
-      {data && (
-        <div className="flex flex-col md:flex-row gap-2 md:px-4">
-          <div className="flex flex-col min-h-screen bg-gray-200 w-full md:w-[75%]">
-            {/* Header */}
-            <div className="flex flex-col p-4 md:flex-row">
-              <div className="w-full ">
-                <div>
-                  <h1 className="text-xl sm:text-4xl font-bold px-2 py-2 bg-white mb-2">
+
+      <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-6">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+          {/* Main Content - Full width on mobile, 70% on desktop */}
+          <div className="w-full lg:w-[70%]">
+            {isLoading ? (
+              <div className="bg-white p-4 sm:p-6 shadow-md rounded-sm">Loading Wribate details...</div>
+            ) : data ? (
+              <>
+                {/* Header Section */}
+                <div className="bg-white border border-gray-200 shadow-sm mb-4 sm:mb-6 rounded-sm overflow-hidden">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
                     {data?.data?.title}
                   </h1>
-                </div>
-                <div className="grid my-4 md:grid-cols-3 px-1 text-xl grid-cols-1 items-center text-white text-center bg-gradient-to-r from-red-500 to-blue-500">
-                  <div className="py-2">
-                    {data?.data?.leadFor || "@Test 1"}
+
+                  <div className="grid grid-cols-2 border-b border-gray-200 text-sm sm:text-lg font-semibold">
+                    <div className="p-2 sm:p-3 text-center bg-red-100 border-r border-gray-200 break-words truncate sm:truncate-0">
+                      {data?.data?.leadFor || "@Test 1"}
+                    </div>
+                    <div className="p-2 sm:p-3 text-center bg-blue-100 break-words truncate sm:truncate-0">
+                      {data?.data?.leadAgainst}
+                    </div>
                   </div>
-                  <div className="py-2">VS</div>
-                  <div className="py-2">{data?.data?.leadAgainst}</div>
-                </div>
-                <img
-                  src={data?.data?.coverImage}
-                  alt="Debate Cover Image"
-                  className="w-full h-48 sm:h-64 md:h-80 object-cover shadow:lg border border-cyan-400"
-                />
-              </div>
-              <div className="w-full md:w-1/4 py-4 flex justify-center items-center flex-col bg-white">
-                <p className="text-sm text-gray-600 font-bold">
-                  Category: {data?.data?.category}
-                </p>
-                <p className="text-sm text-gray-600 font-bold">
-                  University: {data?.data?.institution}
-                </p>
-                <div className="flex sm:justify-between sm:flex-col flex-row flex-wrap px-2 gap-4 border-t border-b border-gray-200 py-2">
-                  <button className="flex items-center justify-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-                      />
-                    </svg>
-                    <span className="ml-2 text-black">Likes</span>
-                  </button>
-                  <button className="flex items-center justify-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                    <span className="ml-2 text-black">View</span>
-                  </button>
-                  <button className="flex items-center justify-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
-                    </svg>
-                    <span className="ml-2 text-black">Comments</span>
-                  </button>
-                  <button className="flex items-center justify-start">
-                    <FaDownload size={20} />
-                    <span className="ml-2 text-black">Downloads</span>
-                  </button>
-                  <button className="flex items-center justify-start">
-                    <LiaFileAudioSolid size={22} />
-                    <span className="ml-2 text-black">Audio</span>
-                  </button>
-                  <button
-                    className="flex items-center justify-start"
-                    onClick={() => setShowSharePopup(true)}
-                  >
-                    <FaShareAlt size={20} />
-                    <span className="ml-2 text-black">Share</span>
-                  </button>
-                </div>
-                {showSharePopup && (
-                  <SharePopup
-                    onClose={() => setShowSharePopup(false)}
-                    product={data?.data}
-                  />
-                )}
-              </div>
-            </div>
 
-            {/* Stats Section */}
-            <ProgressBar rounds={data?.data?.rounds} />
-
-            {/* Voting Section */}
-            <h2 className="font-bold text-2xl mt-8">Voting</h2>
-            <div className="border rounded-lg shadow-lg my-4 py-2 px-4 bg-white">
-              
-              <div className="mb-4">
-                <label className="block mb-2">
-                {data?.data?.title}
-                </label>
-                <button
-                  className={`w-full p-2 mb-2 border rounded-lg text-left 
-                     ${selectedVote == "For" ? "bg-blue-200" : ""}`}
-                  onClick={() => handleSubmitVote("For")}
-                >
-                  For
-                </button>
-                <button
-                  className={`w-full p-2 mb-2 border rounded-lg text-left 
-                    ${selectedVote == "Against" ? "bg-blue-200" : ""}`}
-                  onClick={() => handleSubmitVote("Against")}
-                >
-                  Against
-                </button>
-                <p className="text-sm text-gray-500 mt-2">
-                  <span className="text-red-500">*</span> 2 weeks left
-                </p>
-              </div>
-            </div>
-            {votes?.roundVoteCounts && (
-              <VotesChart
-                data={votes?.roundVoteCounts}
-                title={data?.data?.title}
-              />
-            )}
-
-            {/* Dynamic Arguments Section */}
-            <Card className="w-full mt-6  shadow-none bg-transparent rounded-none">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold">Arguments</CardTitle>
-              </CardHeader>
-
-              <CardContent className="space-y-6 p-0 w-full">
-                {data?.data?.rounds && data.data.rounds.map((roundData) => {
-                  const roundNumber = roundData.roundNumber;
-                  const forArgument = getArgumentForRound(roundNumber, "For");
-                  const againstArgument = getArgumentForRound(roundNumber, "Against");
-
-                  return (
-                    <Card key={roundNumber} className={`p-4 py-5 bg-white shadow-none rounded-xl w-full 
-                      ${roundNumber == 1 ? 'blue-shadow' : ''} 
-                      ${roundNumber == 2 ? 'green-shadow' : ''} 
-                      ${roundNumber == 3 ? 'red-shadow' : ''}`}>
-                      <div className="flex w-full flex-col gap-4">
-                        {/* LEFT - For Argument */}
-                        <div className="self-start sm:w-[95%] border-l-4 items-start border-red-500 pl-4">
-                          <div className="w-full flex flex-row flex-wrap gap-2 mb-4 items-center">
-                            <img src="/user.png" alt="" className="rounded-full w-8 h-8" />
-                            <span className="text-red-800 text-xl">{data.data.leadFor}</span>
-                            <span>•</span>
-                            <span className="text-black text-xl font-bold">
-                              {getRoundTitle(roundNumber)}
-                            </span>
-                          </div>
-
-                          {forArgument ? (
-                            <div
-                              className="text-2xl leading-relaxed"
-                              dangerouslySetInnerHTML={{ __html: he.decode(forArgument) }}
-                            />
-                          ) : (
-                            <p className="text-gray-500 italic text-2xl">No argument submitted.</p>
-                          )}
-                        </div>
-
-                        {/* RIGHT - Against Argument */}
-                        <div className="border-r-4 sm:w-[95%] mt-4 flex flex-col items-end pr-4 border-blue-500 self-end text-left">
-                          <div className="w-full flex flex-row flex-wrap justify-end gap-2 mb-4 items-center">
-                            <span className="text-black text-xl font-bold">
-                              {getRoundTitle(roundNumber)}
-                            </span>
-                            <span>•</span>
-                            <span className="text-red-800 text-xl">{data.data.leadAgainst}</span>
-                            <img src="/user.png" alt="" className="rounded-full w-8 h-8" />
-                          </div>
-
-                          {againstArgument ? (
-                            <div
-                              className="text-2xl leading-relaxed"
-                              dangerouslySetInnerHTML={{ __html: he.decode(againstArgument) }}
-                            />
-                          ) : (
-                            <p className="text-gray-500 italic text-2xl">No argument submitted.</p>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </CardContent>
-
-              {user &&
-                (user?.message?.email === data?.data?.leadFor ||
-                  user?.message?.email === data?.data?.leadAgainst) &&
-                round && (
-                  <CardFooter className="flex bg-white flex-col mt-10 p-4 space-y-4">
-                    <h4 className="font-bold">Enter Your Arguments - Round {round}</h4>
-                    <div className="w-full relative overflow-hidden">
-                      <ReactQuill
-                        theme="snow"
-                        value={value ? he.decode(value) : ""}
-                        onChange={setValue}
-                        style={{
-                          height:'300px',
-                          backgroundColor: "white",
-                          overflowY: "auto"
-                        }}
+                  <div className="p-3 sm:p-4">
+                    <div className="relative h-80 w-full">
+                      <img
+                        src={data?.data?.coverImage}
+                        alt="Debate Cover Image"
+                        className="absolute top-0 left-0 w-full h-full object-cover"
                       />
                     </div>
+                  </div>
 
-                    <div className="w-full pt-2">
-                      <Button onClick={handleSendMessage} className="">Save</Button>
+                  <div className="p-3 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap sm:justify-between items-start sm:items-center border-t border-gray-200 bg-gray-50">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm mb-3 sm:mb-2 md:mb-0 w-full sm:w-auto">
+                      <Badge className="font-semibold mb-1 sm:mb-0">{data?.data?.category}</Badge>
+                      {data?.data?.institution && (
+                        <Badge className="font-semibold">{data.data.institution}</Badge>
+                      )}
                     </div>
-                  </CardFooter>
-                )}
-            </Card>
 
-            {/* Comments Section */}
-            <h4 className="p-4 text-2xl mt-8 font-bold">Comments</h4>
-            <div className="flex flex-col max-h-screen bg-white mt-2 mb-2 rounded-lg shadow-lg border border-gray-200">
-              
-              {/* Chat Messages */}
-              {data?.data?.comments && data?.data?.comments.length > 0 ? (
-                <div
-                  className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide"
-                  ref={scrollContainerRef}
-                >
-                  {data?.data?.comments.map((msg, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${msg.type == "Against" ? "justify-start" : "justify-end"
-                        }`}
-                    >
-                      <div
-                        className={`max-w-xs sm:max-w-md ${msg.type == "Against" ? "order-2" : "order-1"
-                          }`}
+                    <div className="flex flex-wrap gap-3 sm:gap-4">
+                      <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
+                        <Eye size={14} className="mr-1" />
+                        <span>{Math.ceil(Math.random() * 1000)}</span>
+                      </button>
+                      <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
+                        <FaComments size={14} className="mr-1" />
+                        <span>{data?.data?.comments?.length}</span>
+                      </button>
+                      <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
+                        <FaDownload size={14} className="mr-1" />
+                        <span>Download</span>
+                      </button>
+                      <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
+                        <LiaFileAudioSolid size={16} className="mr-1" />
+                        <span>Audio</span>
+                      </button>
+                      <button
+                        className="flex items-center text-gray-600 hover:text-gray-900 text-sm"
+                        onClick={() => setShowSharePopup(true)}
                       >
-                        <div
-                          className={`flex items-center mb-1 ${msg.type == "Against"
-                            ? "justify-start"
-                            : "justify-end"
-                            }`}
-                        >
-                          <div
-                            className={`text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold 
-                            ${msg.type == "Against" ? "bg-red-500" : "bg-blue-500"}
-                          `}
-                          >
-                            {msg?.userId?.name.slice(0, 2)}
-                          </div>
-                          <span className="ml-2 font-semibold text-sm">
-                            {msg?.userId?.name}
-                          </span>
-                          <span className="ml-2 text-xs text-gray-500">
-                            {timeAgo(msg.createdAt)}
-                          </span>
-                        </div>
+                        <FaShareAlt size={14} className="mr-1" />
+                        <span>Share</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
-                        <div
-                          className={`rounded-lg p-3 ${msg.type == "Against"
-                            ? "bg-red-50 border border-gray-200"
-                            : "bg-blue-50 text-black"
+                {/* Progress Bar */}
+                <div className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 mb-4 sm:mb-6 rounded-sm">
+                  <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Debate Progress</h2>
+                  <ProgressBar rounds={data?.data?.rounds} />
+                </div>
+
+                {/* Voting Section */}
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-4 sm:mb-6">
+                  <div className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 w-full sm:w-1/2 rounded-sm">
+                    <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Cast Your Vote</h2>
+                    <div className="mb-3 sm:mb-4">
+                      <p className="mb-2 sm:mb-3 font-medium text-sm sm:text-base">{data?.data?.title}</p>
+                      <div className="space-y-2 sm:space-y-3">
+                        <button
+                          className={`w-full p-2 sm:p-3 border text-left font-medium transition text-sm sm:text-base ${selectedVote === "For"
+                            ? "bg-red-100 border-red-500 text-red-800"
+                            : "bg-gray-50 border-gray-300 hover:bg-gray-100"
                             }`}
+                          onClick={() => handleSubmitVote("For")}
                         >
-                          <p className="text-sm">{msg.text}</p>
+                          For
+                        </button>
+                        <button
+                          className={`w-full p-2 sm:p-3 border text-left font-medium transition text-sm sm:text-base ${selectedVote === "Against"
+                            ? "bg-blue-100 border-blue-500 text-blue-800"
+                            : "bg-gray-50 border-gray-300 hover:bg-gray-100"
+                            }`}
+                          onClick={() => handleSubmitVote("Against")}
+                        >
+                          Against
+                        </button>
+                      </div>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-2 sm:mt-3">
+                        <span className="text-red-500">*</span> 2 weeks left to vote
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 w-full sm:w-1/2 rounded-sm">
+                    {votes?.roundVoteCounts && (
+                      <VotesChart
+                        data={votes?.roundVoteCounts}
+                        title={data?.data?.title}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Arguments Section */}
+                <div className="bg-white border border-gray-200 shadow-sm mb-4 sm:mb-6 rounded-sm">
+                  <div className="p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
+                    <h2 className="text-lg sm:text-xl font-bold">Arguments</h2>
+                  </div>
+
+                  <div className="p-3 sm:p-6 space-y-6 sm:space-y-8">
+                    {data?.data?.rounds && data.data.rounds.map((roundData) => {
+                      const roundNumber = roundData.roundNumber;
+                      const forArgument = getArgumentForRound(roundNumber, "For");
+                      const againstArgument = getArgumentForRound(roundNumber, "Against");
+
+                      return (
+                        <div key={roundNumber} className="border-b border-gray-200 pb-6 sm:pb-8 last:border-b-0 last:pb-0">
+                          <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 pb-2 border-b border-gray-100">
+                            Round {roundNumber}: {getRoundTitle(roundNumber)}
+                          </h3>
+
+                          <div className="grid gap-4 sm:gap-6">
+                            {/* For Argument */}
+                            <div className="border-l-4 border-red-500 pl-3 sm:pl-4 bg-red-50 rounded-r-sm p-2 sm:p-3">
+                              <div className="flex items-center mb-2 sm:mb-3">
+                                <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                                <span className="font-medium text-red-800 text-sm sm:text-base">{data.data.leadFor}</span>
+                              </div>
+
+                              {forArgument ? (
+                                <div
+                                  className="prose max-w-none text-sm sm:text-base"
+                                  dangerouslySetInnerHTML={{ __html: he.decode(forArgument) }}
+                                />
+                              ) : (
+                                <p className="text-gray-500 italic text-sm sm:text-base">No argument submitted.</p>
+                              )}
+                            </div>
+
+                            {/* Against Argument */}
+                            <div className="border-l-4 border-blue-500 pl-3 sm:pl-4 bg-blue-50 rounded-r-sm p-2 sm:p-3">
+                              <div className="flex items-center mb-2 sm:mb-3">
+                                <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                                <span className="font-medium text-blue-800 text-sm sm:text-base">{data.data.leadAgainst}</span>
+                              </div>
+
+                              {againstArgument ? (
+                                <div
+                                  className="prose max-w-none text-sm sm:text-base"
+                                  dangerouslySetInnerHTML={{ __html: he.decode(againstArgument) }}
+                                />
+                              ) : (
+                                <p className="text-gray-500 italic text-sm sm:text-base">No argument submitted.</p>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex mt-2 justify-between">
-                          <FaThumbsUp color="gray" />
-                          <FaComments
-                            color="gray"
-                            onClick={() => handleChat(msg?.userId?._id)}
+                      );
+                    })}
+                  </div>
+
+                  {/* Argument Editor for Participants */}
+                  {user &&
+                    (user?._id == data?.forId ||
+                      user?._id == data?.againstId) &&
+                    round && (
+                      <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
+                        <h3 className="font-bold text-base sm:text-lg mb-3 sm:mb-4">Enter Your Arguments - Round {round}</h3>
+                        <div className="bg-white border border-gray-200">
+                          <ReactQuill
+                            theme="snow"
+                            value={value ? he.decode(value) : ""}
+                            onChange={setValue}
+                            style={{
+                              height: '250px',
+                              backgroundColor: "white",
+                              overflowY: "auto"
+                            }}
                           />
                         </div>
+                        <div className="mt-3 sm:mt-4">
+                          <Button
+                            onClick={handleSendMessage}
+                            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+                          >
+                            Save Argument
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                </div>
+
+                {/* Comments Section */}
+                <div className="bg-white border border-gray-200 shadow-sm mb-4 sm:mb-6 rounded-sm">
+                  <div className="p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
+                    <h2 className="text-lg sm:text-xl font-bold">Comments</h2>
+                  </div>
+
+                  {/* Comment List */}
+                  <div
+                    className="max-h-80 sm:max-h-96 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4"
+                    ref={scrollContainerRef}
+                  >
+                    {data?.data?.comments && data?.data?.comments.length > 0 ? (
+                      data.data.comments.map((comment, index) => (
+                        <div key={index} className={`flex ${comment.type === "Against" ? "justify-start" : "justify-end"}`}>
+                          <div className={`max-w-full sm:max-w-md ${comment.type === "Against" ? "order-2" : "order-1"}`}>
+                            <div className={`flex items-center mb-1 ${comment.type === "Against" ? "justify-start" : "justify-end"}`}>
+                              <div className={`text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs font-bold ${comment.type === "Against" ? "bg-red-500" : "bg-blue-500"}`}>
+                                {comment?.userId?.name?.slice(0, 2)}
+                              </div>
+                              <span className="ml-2 font-semibold text-xs sm:text-sm">
+                                {comment?.userId?.name}
+                              </span>
+                              <span className="ml-2 text-xs text-gray-500">
+                                {timeAgo(comment.createdAt)}
+                              </span>
+                            </div>
+
+                            <div className={`rounded-sm border p-2 sm:p-3 ${comment.type === "Against"
+                              ? "bg-red-50 border-red-100"
+                              : "bg-blue-50 border-blue-100"
+                              }`}>
+                              <p className="text-xs sm:text-sm">{comment.text}</p>
+                            </div>
+
+                            <div className="flex mt-1 sm:mt-2 gap-3 sm:gap-4 text-xs">
+                              <button className="flex items-center text-gray-500 hover:text-gray-700">
+                                <FaThumbsUp size={10} className="mr-1" /> Like
+                              </button>
+                              <button
+                                className="flex items-center text-gray-500 hover:text-gray-700"
+                                onClick={() => handleChat(comment?.userId?._id)}
+                              >
+                                <FaComments size={10} className="mr-1" /> Reply
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-3 sm:p-4 text-center text-gray-500 text-sm sm:text-base">No comments yet. Be the first to comment!</div>
+                    )}
+                  </div>
+
+                  {/* Comment Input */}
+                  <div className="border-t border-gray-200 p-3 sm:p-4">
+                    <div className="flex flex-col space-y-3">
+                      <input
+                        type="text"
+                        placeholder="Type your comment..."
+                        className="w-full p-2 sm:p-3 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                      />
+
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                        <div className="flex gap-2">
+                          <button
+                            className={`px-3 sm:px-4 py-2 border text-xs sm:text-sm flex-1 sm:flex-none ${voteSelection === "For"
+                              ? "bg-red-100 border-red-500 text-red-700"
+                              : "bg-gray-50 border-gray-300"
+                              }`}
+                            onClick={() => handleVote("For")}
+                          >
+                            For
+                          </button>
+
+                          <button
+                            className={`px-3 sm:px-4 py-2 border text-xs sm:text-sm flex-1 sm:flex-none ${voteSelection === "Against"
+                              ? "bg-blue-100 border-blue-500 text-blue-700"
+                              : "bg-gray-50 border-gray-300"
+                              }`}
+                            onClick={() => handleVote("Against")}
+                          >
+                            Against
+                          </button>
+                        </div>
+
+                        <Button
+                          onClick={handleAddComment}
+                          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto text-sm"
+                          disabled={!message || !voteSelection}
+                        >
+                          Post Comment
+                        </Button>
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              ) : (
-                <div className="p-4 text-center text-gray-500">No comments yet</div>
-              )}
+              </>
+            ) : (
+              <div className="bg-white p-4 sm:p-6 shadow-md rounded-sm">
+                Unable to load debate details.
+              </div>
+            )}
+          </div>
 
-              {/* Input Area */}
-              <div className="border-t border-gray-200 p-4 w-full">
-                <div className="bg-white rounded-lg border border-gray-300">
-                  <div className="p-3">
-                    <input
-                      type="text"
-                      placeholder="Type your message..."
-                      className="w-full focus:outline-none text-sm"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex items-center px-3 py-2 border-t border-gray-200 w-full">
-                    <div className="flex space-x-2">
-                      <button
-                        className={`px-4 py-1 rounded-full text-sm flex items-center ${voteSelection === "For"
-                          ? "bg-blue-100 text-blue-500"
-                          : "bg-gray-100"
-                          }`}
-                        onClick={() => handleVote("For")}
-                      >
-                        <span className="w-4 h-4 mr-1 rounded-full border border-current flex items-center justify-center text-xs">
-                          {voteSelection === "For" && "✓"}
-                        </span>
-                        For
-                      </button>
-                      <button
-                        className={`px-4 py-1 rounded-full text-sm flex items-center ${voteSelection === "Against"
-                          ? "bg-blue-100 text-blue-500"
-                          : "bg-gray-100"
-                          }`}
-                        onClick={() => handleVote("Against")}
-                      >
-                        <span className="w-4 h-4 mr-1 rounded-full border border-current flex items-center justify-center text-xs">
-                          {voteSelection === "Against" && "✓"}
-                        </span>
-                        Against
-                      </button>
+          {/* Sidebar for Ads - Hidden on mobile, 30% width on desktop */}
+          <div className="w-full lg:w-[30%] space-y-4 sm:space-y-6 mt-4 lg:mt-0">
+            <div className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 text-center rounded-sm">
+              <div className="mb-2 font-bold uppercase text-xs sm:text-sm tracking-wider text-gray-600">Advertisement</div>
+              <div className="bg-gray-100 h-48 sm:h-64 flex items-center justify-center">
+                <span className="text-gray-400 text-sm">Ad Space</span>
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 text-center rounded-sm">
+              <div className="mb-2 font-bold uppercase text-xs sm:text-sm tracking-wider text-gray-600">Advertisement</div>
+              <div className="bg-gray-100 h-48 sm:h-64 flex items-center justify-center">
+                <span className="text-gray-400 text-sm">Ad Space</span>
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 rounded-sm">
+              <h3 className="font-bold text-base sm:text-lg mb-3 sm:mb-4">Related Debates</h3>
+              <div className="space-y-3 sm:space-y-4">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="border-b border-gray-100 pb-2 sm:pb-3 last:border-b-0">
+                    <h4 className="font-medium hover:text-blue-600 cursor-pointer text-sm sm:text-base">Sample Related Debate Topic {item}</h4>
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>2 days ago</span>
+                      <span>32 comments</span>
                     </div>
-                    <button
-                      className="text-white md:px-8 px-4 py-2 rounded-md text-sm font-medium box-border bg-primary"
-                      onClick={handleAddComment}
-                    >
-                      Send
-                    </button>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
-          <div className="bg-200">
-           
-          </div>
         </div>
+      </div>
+
+      {/* Share Popup */}
+      {showSharePopup && (
+        <SharePopup
+          onClose={() => setShowSharePopup(false)}
+          product={data?.data}
+        />
       )}
     </div>
   );
 };
 
-export default VotingPlatformUI;
+export default WribateView;
