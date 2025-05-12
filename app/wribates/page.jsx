@@ -7,6 +7,51 @@ import axios from 'axios';
 import authHeader from '../utils/authHeader';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { BsThreeDots } from "react-icons/bs";
+import { HiOutlineArrowRight } from 'react-icons/hi';
+
+// Reusable WribateCard component
+const WribateCard = ({ wribate, onClick }) => {
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white cursor-pointer border hover:shadow-lg transition-shadow w-full"
+    >
+      <div className="flex flex-row">
+        <div className="flex-grow p-3">
+          <h3 className="text-base font-medium text-gray-900 line-clamp-2 mb-1">{wribate.title}</h3>
+          <div className="flex flex-col text-xs text-gray-600">
+            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full inline-block w-fit mb-1">{wribate.category}</span>
+            {wribate.institution && <span className="text-gray-500">{wribate.institution}</span>}
+          </div>
+        </div>
+        <div className="w-24 h-14 my-auto flex-shrink-0 flex items-center">
+          <img
+            src={wribate.coverImage}
+            alt={wribate.title}
+            className="w-full h-full object-cover rounded-md"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Section Header with "View more" link
+const SectionHeader = ({ title, borderColor, viewMoreLink, onViewMore }) => {
+  return (
+    <div className="flex justify-between items-center mb-3">
+      <h2 className={`text-xl font-bold text-gray-900 border-l-4 ${borderColor} pl-3`}>
+        {title}
+      </h2>
+      <button
+        onClick={onViewMore}
+        className="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium"
+      >
+        View more <HiOutlineArrowRight className="ml-1" />
+      </button>
+    </div>
+  );
+};
 
 export default function WribateDashboard() {
   const [wribates, setWribates] = useState([]);
@@ -42,10 +87,8 @@ export default function WribateDashboard() {
   ];
 
   useEffect(() => {
-
     const fetchCategories = async () => {
       try {
-
         const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/user/getallcategories', {
           headers: authHeader()
         })
@@ -133,6 +176,12 @@ export default function WribateDashboard() {
     router.push(`/wribate/${id}`);
   };
 
+  const handleViewMore = (category) => {
+    // You can customize this function to navigate to a category-specific page
+    // or show more items in the current view
+    router.push(`/wribates/${category.toLowerCase()}`);
+  };
+
   const getWribateStatus = (startDate, durationDays) => {
     const now = new Date();
     const start = new Date(startDate);
@@ -144,21 +193,7 @@ export default function WribateDashboard() {
     return "Active";
   };
 
-  // Scroll category navigation
-  const scrollCategories = (direction) => {
-    const container = categoriesRef.current;
-    const scrollAmount = 200;
-
-    if (container) {
-      container.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
-      });
-    }
-  };
-
-
-  // Filter wribates based on type and status
+  // Filter wribates based on Type and Status
   const freeWribates = wribates.filter(wribate =>
     (activeCategory === 'All' || wribate.category === activeCategory) &&
     wribate.type === "Free"
@@ -189,14 +224,21 @@ export default function WribateDashboard() {
     new Date(b.createdAt) - new Date(a.createdAt)
   );
 
-  // Extract the most recent wribate
+  // Extract the most recent wribate for hero
   const heroWribate = sortedWribates.length > 0 ? sortedWribates[0] : null;
 
+  // Get ongoing wribates (including upcoming ones for display)
+  const ongoingWribates = [...wribates]
+    .filter(wribate => 
+      getWribateStatus(wribate.startDate, wribate.durationDays) !== "Completed"
+    )
+    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+    .slice(0, 5);
 
   if (categories.length == 0) {
     return (
-      <div className='w-full px-4'>
-        Loading...
+      <div className='w-full px-4 flex justify-center items-center h-64'>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     )
   }
@@ -242,7 +284,7 @@ export default function WribateDashboard() {
                 </button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="start" className=" p-2 bg-white shadow-lg rounded-md z-50 grid grid-cols-3 sm:grid-cols-4 gap-4">
+              <DropdownMenuContent align="start" className="p-2 bg-white shadow-lg rounded-md z-50 grid grid-cols-3 sm:grid-cols-4 gap-4">
                 {categories.slice(8).map((category) => (
                   <DropdownMenuItem
                     key={category._id}
@@ -261,10 +303,8 @@ export default function WribateDashboard() {
       </header>
 
       <div className="w-full mx-auto flex flex-col lg:flex-row">
-        {/* Main content */}
-        <div className="w-full lg:flex-1 px-4">
-
-
+        {/* Main content - Left section */}
+        <div className="w-full lg:w-[50%] px-4">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -273,24 +313,27 @@ export default function WribateDashboard() {
             <>
               {/* Hero Wribate */}
               {heroWribate && (
-                <div id='hero' className="mb-8" >
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-blue-700 pl-3">
-                    Featured Wribate
-                  </h2>
+                <div id='hero' className="mb-8">
+                  <div className="flex justify-between items-center mb-3">
+                    <h2 className={`text-xl font-bold text-gray-900 border-l-4 pl-3`}>
+                      Featured
+                    </h2>
+                  </div>
                   <div
                     onClick={() => handleCardClick(heroWribate._id)}
                     className="bg-white cursor-pointer hover:shadow-lg border transition-shadow duration-300 w-full"
                   >
                     <div className="flex flex-col">
-                      <div className="h-48 sm:h-64 md:h-96 relative">
+                      <div className="w-full h-64 md:h-80 relative">
                         <img
                           src={heroWribate.coverImage}
                           alt={heroWribate.title}
                           className="w-full h-full object-cover"
                         />
-                      </div>
-                      <div className="p-4 bg-white w-full">
-                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{heroWribate.title}</h3>
+                        {/* Overlay for title */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                          <h3 className="text-xl sm:text-2xl font-bold text-white p-4">{heroWribate.title}</h3>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -300,27 +343,18 @@ export default function WribateDashboard() {
               {/* Free Wribates */}
               {freeWribates.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-green-700 pl-3">
-                    Free Debates
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {freeWribates.map((wribate) => (
-                      <div
+                  <SectionHeader
+                    title="Free Debates"
+                    borderColor="border-green-700"
+                    onViewMore={() => handleViewMore('free')}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {freeWribates.slice(0, 4).map((wribate) => (
+                      <WribateCard
                         key={wribate._id}
+                        wribate={wribate}
                         onClick={() => handleCardClick(wribate._id)}
-                        className="bg-white cursor-pointer border hover:shadow-lg transition-shadow duration-300 w-full"
-                      >
-                        <div className="h-32 sm:h-40 relative">
-                          <img
-                            src={wribate.coverImage}
-                            alt={wribate.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="p-2 sm:p-3 bg-white w-full">
-                          <h3 className="text-sm sm:text-base font-medium text-gray-900 line-clamp-2">{wribate.title}</h3>
-                        </div>
-                      </div>
+                      />
                     ))}
                   </div>
                 </div>
@@ -329,27 +363,18 @@ export default function WribateDashboard() {
               {/* Sponsored Wribates */}
               {sponsoredWribates.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-yellow-600 pl-3">
-                    Sponsored Debates
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {sponsoredWribates.map((wribate) => (
-                      <div
+                  <SectionHeader
+                    title="Sponsored Debates"
+                    borderColor="border-yellow-600"
+                    onViewMore={() => handleViewMore('sponsored')}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {sponsoredWribates.slice(0, 4).map((wribate) => (
+                      <WribateCard
                         key={wribate._id}
+                        wribate={wribate}
                         onClick={() => handleCardClick(wribate._id)}
-                        className="bg-white cursor-pointer hover:shadow-lg border transition-shadow duration-300 w-full"
-                      >
-                        <div className="h-32 sm:h-40 relative">
-                          <img
-                            src={wribate.coverImage}
-                            alt={wribate.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="p-2 sm:p-3 bg-white w-full">
-                          <h3 className="text-sm sm:text-base font-medium text-gray-900 line-clamp-2">{wribate.title}</h3>
-                        </div>
-                      </div>
+                      />
                     ))}
                   </div>
                 </div>
@@ -358,27 +383,18 @@ export default function WribateDashboard() {
               {/* Active Wribates */}
               {activeWribates.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-blue-700 pl-3">
-                    Ongoing Debates
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {activeWribates.map((wribate) => (
-                      <div
+                  <SectionHeader
+                    title="Ongoing Debates"
+                    borderColor="border-blue-700"
+                    onViewMore={() => handleViewMore('ongoing')}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {activeWribates.slice(0, 4).map((wribate) => (
+                      <WribateCard
                         key={wribate._id}
+                        wribate={wribate}
                         onClick={() => handleCardClick(wribate._id)}
-                        className="bg-white cursor-pointer hover:shadow-lg border transition-shadow duration-300 w-full"
-                      >
-                        <div className="h-32 sm:h-40 relative">
-                          <img
-                            src={wribate.coverImage}
-                            alt={wribate.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="p-2 sm:p-3 bg-white w-full">
-                          <h3 className="text-sm sm:text-base font-medium text-gray-900 line-clamp-2">{wribate.title}</h3>
-                        </div>
-                      </div>
+                      />
                     ))}
                   </div>
                 </div>
@@ -387,27 +403,18 @@ export default function WribateDashboard() {
               {/* Completed Wribates */}
               {completedWribates.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-gray-700 pl-3">
-                    Completed Debates
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {completedWribates.map((wribate) => (
-                      <div
+                  <SectionHeader
+                    title="Completed Debates"
+                    borderColor="border-gray-700"
+                    onViewMore={() => handleViewMore('completed')}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {completedWribates.slice(0, 4).map((wribate) => (
+                      <WribateCard
                         key={wribate._id}
+                        wribate={wribate}
                         onClick={() => handleCardClick(wribate._id)}
-                        className="bg-white cursor-pointer hover:shadow-lg border transition-shadow duration-300 w-full"
-                      >
-                        <div className="h-32 sm:h-40 relative">
-                          <img
-                            src={wribate.coverImage}
-                            alt={wribate.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="p-2 sm:p-3 bg-white w-full">
-                          <h3 className="text-sm sm:text-base font-medium text-gray-900 line-clamp-2">{wribate.title}</h3>
-                        </div>
-                      </div>
+                      />
                     ))}
                   </div>
                 </div>
@@ -416,13 +423,64 @@ export default function WribateDashboard() {
           )}
         </div>
 
-        {/* Ad section */}
-        <div className="w-full px-4 lg:w-64 lg:pl-6 lg:pr-4 mt-8 lg:mt-0">
-          <div>
+        {/* Middle section - Ongoing Wribates */}
+        <div className="w-full lg:w-[25%] px-4">
+          {/* Ongoing Wribates Section */}
+          <div className="mb-8">
+            <SectionHeader
+              title="Ongoing Wribates"
+              borderColor="border-purple-700"
+              onViewMore={() => handleViewMore('ongoing')}
+            />
+            {ongoingWribates.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4">
+                {ongoingWribates.map((wribate) => (
+                  <div
+                    key={wribate._id}
+                    onClick={() => handleCardClick(wribate._id)}
+                    className="bg-white cursor-pointer border hover:shadow-lg transition-shadow w-full"
+                  >
+                    <div className="flex flex-col">
+                      <div className="w-full h-40 relative">
+                        <img
+                          src={wribate.coverImage}
+                          alt={wribate.title}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Overlay to ensure text is always readable */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        
+                       
+                      </div>
+                      <div className="p-3 bg-white w-full">
+                        <h3 className="text-sm font-medium text-gray-900 line-clamp-2">{wribate.title}</h3>
+                        <div className="flex flex-row mt-1 text-xs text-gray-600 items-center justify-between">
+                          <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{wribate.category}</span>
+                          {wribate.institution && (
+                            <span className="text-gray-500 text-xs truncate max-w-[50%]">{wribate.institution}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white p-4 border text-center text-gray-500">
+                No ongoing wribates available at the moment.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Sidebar - Ads */}
+        <div className="w-full lg:w-[25%] px-4">
+          {/* Ad section */}
+          <div className="mb-8">
             <h3 className="text-lg font-bold text-gray-900 mb-3 border-l-4 border-gray-700 pl-3">
               Sponsored
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {ads.map((ad, index) => (
                 <a
                   key={index}
