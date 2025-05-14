@@ -9,6 +9,7 @@ const FavoriteCategories = ({ user, setUser }) => {
     const [isUpdatingCategories, setIsUpdatingCategories] = useState(false);
     const [isEditingCategories, setIsEditingCategories] = useState(false);
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [displayedFavorites, setDisplayedFavorites] = useState([]);
 
     // Fetch categories if not already available
     const { data: categoriesData, isLoading: isCategoriesLoading } =
@@ -25,6 +26,10 @@ const FavoriteCategories = ({ user, setUser }) => {
                 (category) => category?._id
             );
             setSelectedCategories(favourites);
+            setDisplayedFavorites(favourites);
+        } else {
+            setSelectedCategories([]);
+            setDisplayedFavorites([]);
         }
     }, [user]);
 
@@ -57,6 +62,8 @@ const FavoriteCategories = ({ user, setUser }) => {
             if (data.res) {
                 toast.success("Your favorite categories have been updated");
                 setIsEditingCategories(false);
+                // Update displayed favorites immediately without waiting for the parent to update user
+                setDisplayedFavorites([...selectedCategories]);
                 setUser(data.user);
             }
             setIsUpdatingCategories(false);
@@ -78,7 +85,11 @@ const FavoriteCategories = ({ user, setUser }) => {
                     {isEditingCategories ? (
                         <div className="flex gap-3">
                             <button
-                                onClick={() => setIsEditingCategories(false)}
+                                onClick={() => {
+                                    setIsEditingCategories(false);
+                                    // Reset selection to match current favorites when canceling
+                                    setSelectedCategories([...displayedFavorites]);
+                                }}
                                 className="px-4 py-2 border border-gray-300 text-gray-700 font-medium hover:bg-gray-100"
                             >
                                 CANCEL
@@ -120,13 +131,10 @@ const FavoriteCategories = ({ user, setUser }) => {
                     {categoriesData?.data &&
                         categoriesData?.data.length > 0 ? (
                         categoriesData.data.map((category) => {
-                            const isFavorite = user?.favoriteCategories?.some(
-                                (fav) => fav === category._id
-                            );
-
-                            const isSelected = selectedCategories.includes(
-                                category._id
-                            );
+                            // Use displayedFavorites for rendering when not editing
+                            const isFavorite = displayedFavorites.includes(category._id);
+                            // Use selectedCategories when in edit mode
+                            const isSelected = selectedCategories.includes(category._id);
 
                             return (
                                 <div
@@ -135,13 +143,13 @@ const FavoriteCategories = ({ user, setUser }) => {
                                         isEditingCategories &&
                                         toggleCategorySelection(category._id)
                                     }
-                                    className={`p-3 cursor-${isEditingCategories ? "pointer" : "default"} 
+                                    className={`p-3 ${isEditingCategories ? "cursor-pointer" : "cursor-default"} 
                                       ${isEditingCategories
                                             ? isSelected
                                                 ? "bg-blue-900 text-white" // editing + selected
                                                 : "bg-gray-100 hover:bg-gray-200" // editing + not selected
                                             : isFavorite
-                                                ? "bg-blue-900 bg-opacity-10 border border-blue-900 text-gray-700" // not editing + favorite
+                                                ? "bg-blue-900 bg-opacity-10 border border-blue-900 text-white" // not editing + favorite
                                                 : "bg-gray-100 text-gray-700" // not editing + not favorite
                                         }
                                       md:min-w-[120px] text-center transition-colors font-medium`}
