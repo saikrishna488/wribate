@@ -270,11 +270,11 @@ export default function WribateDashboard() {
               {/* Hero Wribate */}
               {heroWribate && (
                 <div id='hero' className="mb-8 border-b">
-                  <div className="flex justify-between items-center mb-3">
+                  {/* <div className="flex justify-between items-center mb-3">
                     <h2 className={`text-xl font-bold text-gray-900 border-l-4 pl-3`}>
                       Featured
                     </h2>
-                  </div>
+                  </div> */}
                   <div
                     onClick={() => handleCardClick(heroWribate._id)}
                     className="bg-white cursor-pointer hover:shadow-lg border transition-shadow duration-300 w-full"
@@ -296,16 +296,18 @@ export default function WribateDashboard() {
                 </div>
               )}
 
-              {/* Free Wribates */}
-              {freeWribates.length > 0 && (
+           
+
+              {/* Sponsored Wribates */}
+              {sponsoredWribates.length > 0 && (
                 <div className="mb-8 border-t pt-2 border-gray-300">
                   <SectionHeader
-                    title="Free"
-                    borderColor="border-green-700"
-                    onViewMore={() => handleViewMore(activeCategory,"Free")}
+                    title="Featured"
+                    borderColor="border-yellow-600"
+                    onViewMore={() => handleViewMore(activeCategory,"Sponsored")}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {freeWribates.slice(0, 4).map((wribate) => (
+                    {sponsoredWribates.slice(0, 4).map((wribate) => (
                       <WribateCard
                         key={wribate._id}
                         wribate={wribate}
@@ -316,16 +318,39 @@ export default function WribateDashboard() {
                 </div>
               )}
 
-              {/* Sponsored Wribates */}
-              {sponsoredWribates.length > 0 && (
+
+              
+              {/* Completed Wribates */}
+              {completedWribates.length > 0 && (
                 <div className="mb-8 border-t pt-2 border-gray-300">
                   <SectionHeader
-                    title="Sponsored"
-                    borderColor="border-yellow-600"
-                    onViewMore={() => handleViewMore(activeCategory,"Sponsored")}
+                    title="Completed"
+                    borderColor="border-gray-700"
+                    onViewMore={() => handleViewMore(activeCategory,"Completed")}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {sponsoredWribates.slice(0, 4).map((wribate) => (
+                    {completedWribates.slice(0, 4).map((wribate) => (
+                      <WribateCard
+                        key={wribate._id}
+                        wribate={wribate}
+                        onClick={() => handleCardClick(wribate._id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+
+                 {/* Free Wribates */}
+              {freeWribates.length > 0 && (
+                <div className="mb-8 border-t pt-2 border-gray-300">
+                  <SectionHeader
+                    title="Free"
+                    borderColor="border-green-700"
+                    onViewMore={() => handleViewMore(activeCategory,"Free")}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {freeWribates.slice(0, 4).map((wribate) => (
                       <WribateCard
                         key={wribate._id}
                         wribate={wribate}
@@ -356,25 +381,6 @@ export default function WribateDashboard() {
                 </div>
               )}
 
-              {/* Completed Wribates */}
-              {completedWribates.length > 0 && (
-                <div className="mb-8 border-t pt-2 border-gray-300">
-                  <SectionHeader
-                    title="Completed"
-                    borderColor="border-gray-700"
-                    onViewMore={() => handleViewMore(activeCategory,"Completed")}
-                  />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {completedWribates.slice(0, 4).map((wribate) => (
-                      <WribateCard
-                        key={wribate._id}
-                        wribate={wribate}
-                        onClick={() => handleCardClick(wribate._id)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>
@@ -384,7 +390,7 @@ export default function WribateDashboard() {
           {/* Ongoing Wribates Section */}
           <div className="mb-8">
             <SectionHeader
-              title="Ongoing Wribates"
+              title="Trending"
               borderColor="border-purple-700"
               onViewMore={() => handleViewMore(activeCategory,"Ongoing")}
             />
