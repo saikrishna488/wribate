@@ -9,8 +9,8 @@ const WribateCard = ({ wribate, onClick }) => {
       onClick={onClick}
       className="bg-white cursor-pointer border-0 hover:shadow-lg transition-shadow w-full group"
     >
-      <div className="flex flex-row relative overflow-hidden">
-        <div className="flex-grow p-4 border-l-4 border-blue-900">
+      <div className="flex flex-row  relative overflow-hidden">
+        <div className="flex-grow p-4 ">
           <h3 className="text-base font-bold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-900 transition-colors">{wribate.title}</h3>
           <div className="flex flex-row items-center gap-2 text-xs text-gray-600">
             <span className="bg-blue-100 text-blue-900 px-2 py-1 font-medium uppercase tracking-wide inline-block w-fit">{wribate.category}</span>
@@ -108,9 +108,9 @@ const Page = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <div className="flex items-center justify-between mb-8 border-b-2 border-blue-900 pb-4">
-        <div>
+    <div className="container bg-gray-200 min-h-screen w-full py-6">
+      <div className="flex sticky top-0 z-30 py-4 px-4 bg-gray-200 items-center  justify-between mb-8 border-b-2 border-blue-900 pb-4">
+        <div className=''>
           <button 
             onClick={handleBackClick}
             className="flex items-center text-blue-900 hover:text-blue-700 font-medium"
@@ -132,7 +132,7 @@ const Page = () => {
           </div>
         </div>
       ) : wribates.length > 0 ? (
-        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+        <div className="grid lg:grid-cols-3 sm:mx-12  md:grid-cols-2 grid-cols-1 gap-8">
           {wribates.map((wribate) => (
             <WribateCard
               key={wribate._id}

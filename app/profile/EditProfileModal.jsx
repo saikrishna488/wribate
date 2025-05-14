@@ -6,6 +6,8 @@ import { userAtom } from "../states/GlobalStates";
 import toast from "react-hot-toast";
 import authHeader from "../utils/authHeader";
 import Compressor from 'compressorjs';
+import { FaTimes, FaCamera, FaChevronDown } from "react-icons/fa";
+import { AiOutlineLoading } from "react-icons/ai";
 
 const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
   const [user, setUser] = useAtom(userAtom);
@@ -21,6 +23,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
     email: "",
     country: "",
     dob: "",
+    bio: "",
   });
 
   const [profileImage, setProfileImage] = useState(null);
@@ -45,6 +48,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
         email: user.email || "",
         country: user.country || "",
         dob: user.dob || "",
+        bio: user.bio || "", // Include the bio field
       });
 
       // Reset image preview when modal is opened
@@ -254,20 +258,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
               className="text-white hover:text-gray-200 transition-colors"
               aria-label="Close"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <FaTimes />
             </button>
           </div>
         </div>
@@ -277,37 +268,18 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
             {/* Profile Image Upload */}
             <div className="flex justify-center mb-8">
               <div className="relative">
-                <div className="h-32 w-32 border-4 border-blue-900 overflow-hidden">
+                <div className="h-32 w-32 border-4 rounded-full border-blue-900 overflow-hidden">
                   <img
                     src={profileImagePreview}
                     alt="Profile"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full rounded-full object-cover"
                   />
                 </div>
                 <label
                   htmlFor="profile-image"
                   className="absolute bottom-0 right-0 bg-blue-900 p-2 cursor-pointer text-white"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                  <FaCamera className="w-5 h-5" />
                 </label>
                 <input
                   type="file"
@@ -356,6 +328,28 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
                   className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
                   required
                 />
+              </div>
+
+              {/* Bio Field - New Addition */}
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
+                  htmlFor="bio"
+                >
+                  Bio
+                </label>
+                <textarea
+                  id="bio"
+                  name="bio"
+                  value={profileForm.bio}
+                  onChange={handleProfileChange}
+                  rows="4"
+                  placeholder="Write a short bio about yourself..."
+                  className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none resize-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Share a little about yourself. Max 250 characters.
+                </p>
               </div>
 
               {/* Email Field with Verification */}
@@ -449,17 +443,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
                     </select>
                   )}
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                    <svg
-                      className="h-4 w-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <FaChevronDown className="h-4 w-4" />
                   </div>
                 </div>
               </div>
@@ -498,26 +482,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
               >
                 {isUpdatingProfile ? (
                   <div className="flex items-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
+                    <AiOutlineLoading className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
                     SAVING...
                   </div>
                 ) : (
