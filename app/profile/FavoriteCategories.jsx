@@ -23,8 +23,10 @@ const FavoriteCategories = ({ user, setUser }) => {
             user?.favoriteCategories?.length > 0
         ) {
             const favourites = user?.favoriteCategories.map(
-                (category) => category?._id
+                (category) => category
             );
+
+            // console.log(favourites)
             setSelectedCategories(favourites);
             setDisplayedFavorites(favourites);
         } else {
@@ -63,6 +65,7 @@ const FavoriteCategories = ({ user, setUser }) => {
                 toast.success("Your favorite categories have been updated");
                 setIsEditingCategories(false);
                 // Update displayed favorites immediately without waiting for the parent to update user
+
                 setDisplayedFavorites([...selectedCategories]);
                 setUser(data.user);
             }

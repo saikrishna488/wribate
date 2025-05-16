@@ -51,7 +51,6 @@ const WribateView = () => {
   const [round, setRound] = useState(null);
 
   const [value, setValue] = useState("");
-  const [chatUser, setChatUser] = useAtom(chatAtom);
 
   // Refs
   const scrollContainerRef = useRef(null);

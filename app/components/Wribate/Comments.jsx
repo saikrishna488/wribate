@@ -1,15 +1,21 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import formatDate, { timeAgo } from "../../utils/dateFormat";
 import { FaThumbsUp, FaComments } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import {
-  useAddCommentMutation,
+    useAddCommentMutation,
 } from "../../../app/services/authApi";
+import toast from 'react-hot-toast';
+import { useAtom } from 'jotai';
+import { chatAtom } from '@/app/states/GlobalStates';
+import { useRouter } from 'next/navigation';
 
-const Comments = ({ data, scrollContainerRef, user,id, refetch  }) => {
+const Comments = ({ data, scrollContainerRef, user, id, refetch }) => {
     const [message, setMessage] = useState("");
     const [voteSelection, setVoteSelection] = useState(null);
     const [addComment, { isLoading: addingComment }] = useAddCommentMutation();
+    const [chatUser, setChatUser] = useAtom(chatAtom);
+    const router = useRouter();
 
 
     const handleVote = (vote) => {
@@ -37,9 +43,8 @@ const Comments = ({ data, scrollContainerRef, user,id, refetch  }) => {
     };
 
     const handleChat = (userId) => {
-
-
-        if(user?._id == userId){
+        console.log(userId)
+        if (user?._id == userId) {
             return
         }
         setChatUser({
@@ -54,6 +59,7 @@ const Comments = ({ data, scrollContainerRef, user,id, refetch  }) => {
         toast.error("Login to continue!")
         router.push('/login')
     };
+
 
 
     return (
@@ -91,11 +97,12 @@ const Comments = ({ data, scrollContainerRef, user,id, refetch  }) => {
                                 </div>
 
                                 <div className={`flex mt-1 sm:mt-2 gap-3 sm:gap-4 text-xs ${comment.type === "For" ? "justify-start" : "justify-end"}`}>
-                                    {/* <button className="flex items-center text-gray-500 hover:text-gray-700">
+                                    <button className="flex items-center text-gray-500 hover:text-gray-700">
                                         <FaThumbsUp size={10} className="mr-1" /> Like
-                                    </button> */}
+                                    </button>
                                     {
-                                        !user?._id == comment?.userId?._id && (
+                                        user?._id != comment?.userId?._id &&
+                                        (
                                             <button
                                                 className="flex items-center text-gray-500 hover:text-gray-700"
                                                 onClick={() => handleChat(comment?.userId?._id)}
@@ -104,7 +111,7 @@ const Comments = ({ data, scrollContainerRef, user,id, refetch  }) => {
                                             </button>
                                         )
                                     }
-                                    
+
                                 </div>
                             </div>
                         </div>

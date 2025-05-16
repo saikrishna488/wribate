@@ -18,7 +18,7 @@ const ActivitySummary = ({user}) => {
                 {focusAreas.map((area) => (
                     <div
                         key={area.id}
-                        className="p-4 border border-gray-200 flex items-center m-1 flex-1 w-fit"
+                        className="p-4 border border-gray-200 flex items-center m-1  flex-1 w-fit"
                     >
                         <span className="text-2xl mr-4">{area.icon}</span>
                         <div>
