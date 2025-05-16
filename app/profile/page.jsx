@@ -63,7 +63,7 @@ const ProfilePage = () => {
 
                             {/* Main content */}
                             <div className="lg:w-[65%]">
-                                <ActivitySummary />
+                                <ActivitySummary user={user} />
                                 <FavoriteCategories user={user} setUser={setUser} />
                             </div>
                         </div>

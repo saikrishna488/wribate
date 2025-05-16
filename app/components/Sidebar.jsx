@@ -99,11 +99,11 @@ export default function Sidebar() {
             label: 'Why Wribate',
             href: '/why-wribate',
         },
-        {
-            icon: <Handshake className="w-5 h-5" />,
-            label: 'Terms and Conditions',
-            href: '/terms',
-        }
+        // {
+        //     icon: <Handshake className="w-5 h-5" />,
+        //     label: 'Terms and Conditions',
+        //     href: '/terms',
+        // }
     ];
 
     return (
@@ -125,14 +125,13 @@ export default function Sidebar() {
                 <div className="px-4 mb-6 w-full text-center">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="outline"
+                            <button
                                 onClick={() => setPopup(true)}
-                                className={`rounded-full w-fit flex items-center mx-auto gap-1`}
+                                className={`rounded-full  flex border border-gray-300 shadow-md p-2 ${expand ? 'px-4 ': null}  items-center mx-auto gap-1`}
                             >
-                                <Plus size={24} strokeWidth={3} />
+                                <Plus size={32} className='text-blue-700' strokeWidth={3} />
                                 <span className={`${expand ? 'block text-xl' : 'hidden'}`}>Create</span>
-                            </Button>
+                            </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent onCloseAutoFocus={() => setExpand(false)} align="start" className="w-56">
                             <DropdownMenuItem

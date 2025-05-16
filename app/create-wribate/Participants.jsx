@@ -67,7 +67,7 @@ const Participants = ({ formData, handleInputChange, setCurrentSection}) => {
             </div>
 
             {/* Judges */}
-            <div className="mb-8">
+            {/* <div className="mb-8">
                 <div className="flex items-center mb-6">
                     <div className="bg-blue-900 text-white p-2 mr-3">
                         <Check size={20} />
@@ -121,7 +121,7 @@ const Participants = ({ formData, handleInputChange, setCurrentSection}) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             <div className="flex justify-between mt-10">
                 <button

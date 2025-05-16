@@ -32,58 +32,9 @@ const LegalPages = () => {
   
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-30 w-full bg-white shadow-md">
-        <div className="container mx-auto ">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            
-            
-            {/* Desktop Navigation */}
-            <nav className=" mx-auto my-2 flex gap-2">
-              <button 
-                onClick={() => setSelectedSection("privacy")}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  selectedSection === "privacy" 
-                    ? "bg-blue-900 text-white" 
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                Privacy Policy
-              </button>
-              <button 
-                onClick={() => setSelectedSection("terms")}
-                className={`px-2 py-2 rounded-md text-sm font-medium transition-colors ${
-                  selectedSection === "terms" 
-                    ? "bg-blue-900 text-white" 
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                Terms and Conditions
-              </button>
-            </nav>
-          </div>
-        </div>
-      </header>
-
       {/* Main content */}
       <main className={`flex-1 w-full p-4 md:p-6 lg:p-8 overflow-y-auto ${isMobile && sidebarOpen ? "opacity-50" : ""}`}>
-        <div className="container mx-auto max-w-4xl">
-          {selectedSection === 'privacy' ? (
-            <div className="space-y-8">
-              <Introduction />
-              <Two />
-              <Three />
-              <Four />
-              <Five />
-              <Six />
-              <Seven />
-              <Eight />
-              <Nine />
-            </div>
-          ) : (
-            <Terms />
-          )}
-        </div>
+        <Terms/>
       </main>
     </div>
   );

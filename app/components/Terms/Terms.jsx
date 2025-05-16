@@ -98,59 +98,81 @@ const TermsAndConditions = () => {
     }
   ];
 
+ const lastUpdated = "May 10, 2025";
+
   return (
-    <div id="terms" className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div id="terms" className="w-full max-w-4xl mx-auto bg-white border border-gray-200 shadow-md">
       <div className="p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Terms & Conditions</h2>
+        {/* Header with Last Updated */}
+        <div className="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
+          <h2 className="text-2xl font-bold text-blue-900">Terms & Conditions</h2>
+          <div className="text-sm bg-blue-50 px-3 py-1 border-l-4 border-blue-900 text-blue-900">
+            Last Updated: <span className="font-semibold">{lastUpdated}</span>
+          </div>
+        </div>
         
-        <div className="bg-blue-50 p-4 rounded-md border-l-4 border-blue-500 mb-6">
-          <p className="text-gray-700">
+        {/* Introduction Banner */}
+        <div className="bg-blue-50 p-4 border-l-4 border-blue-900 mb-8">
+          <p className="text-gray-800">
             Welcome to Wribate.com. These Terms & Conditions govern your use of our platform. 
             By accessing or using our services, you agree to be bound by these terms. Please read them carefully.
           </p>
         </div>
         
-        <div className="space-y-4">
+        {/* Sections */}
+        <div className="space-y-8">
           {sections.map((section) => (
-            <div key={section.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-              <div 
-                className="flex justify-between items-center cursor-pointer group"
-                onClick={() => toggleSection(section.id)}
-              >
-                <h3 className="flex items-center text-lg font-semibold text-gray-700">
-                  <span className="flex items-center justify-center w-7 h-7 bg-blue-500 text-white rounded-full mr-3 text-sm">
+            <div key={section.id} className="border-t border-gray-200 pt-6 first:border-t-0 first:pt-0">
+              <div className="mb-3">
+                <h3 className="text-lg font-bold text-blue-900 flex items-center">
+                  <span className="flex items-center justify-center w-8 h-8 bg-blue-900 text-white mr-3 text-sm">
                     {section.id}
                   </span>
                   {section.title}
                 </h3>
-                <button className="text-gray-400 hover:text-blue-500 focus:outline-none transition-transform duration-200 transform group-hover:text-blue-500">
-                  {expandedSections[section.id] ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7"></path>
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                  )}
-                </button>
               </div>
               
-              {(expandedSections[section.id] || section.id === 1) && (
-                <div className={`mt-3 text-gray-600 ${section.isImportant ? 'bg-red-50 p-4 rounded-md border-l-4 border-red-400' : ''}`}>
-                  {Array.isArray(section.content) ? (
-                    <ul className="list-disc pl-10 space-y-2">
-                      {section.content.map((item, index) => (
-                        <li key={index}>{item}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="pl-10">{section.content}</p>
-                  )}
-                </div>
-              )}
+              <div className={`text-gray-700 pl-11 ${section.isImportant ? 'bg-red-50 p-4 border-l-4 border-red-500' : ''}`}>
+                {Array.isArray(section.content) ? (
+                  <ul className="list-disc pl-5 space-y-2">
+                    {section.content.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>{section.content}</p>
+                )}
+              </div>
             </div>
           ))}
+        </div>
+        
+        {/* Contact Information */}
+        <div className="mt-10 pt-6 border-t border-gray-200">
+          <h3 className="text-lg font-bold text-blue-900 mb-4">Contact Information</h3>
+          <p className="text-gray-700 mb-4">
+            If you have any questions or concerns about these Terms & Conditions, 
+            you may contact us at:
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <p className="font-semibold text-blue-900">Email:</p>
+              <p className="text-gray-700">
+                <a href="mailto:info@wribate.com" className="text-blue-600 hover:underline">info@wribate.com</a>
+              </p>
+            </div>
+            
+            <div>
+              <p className="font-semibold text-blue-900">Address:</p>
+              <address className="not-italic text-gray-700">
+                C/o INNORIZE ENTERPRISES PRIVATE LIMITED<br />
+                D.No.17-1-389/18-B, 4th Floor,<br />
+                Prashanth Nagar Colony, Saidabad,<br />
+                Hyderabad, Telangana, India-500059.
+              </address>
+            </div>
+          </div>
         </div>
       </div>
     </div>

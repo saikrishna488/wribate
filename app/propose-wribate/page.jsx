@@ -195,7 +195,7 @@ function DebateCard({ debate, user }) {
   };
 
   return (
-    <div className="bg-white border border-gray-200 flex flex-col gap-2">
+    <div className="bg-white border border-gray-200  flex flex-col gap-2">
       {/* Category banner */}
       <div className="bg-blue-900 text-white text-xs px-3 py-1 uppercase tracking-wider font-medium">
         {debate.category}

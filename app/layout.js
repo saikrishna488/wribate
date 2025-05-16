@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Render from './components/Render'
-
+import Footer from './components/Footer'
 import { Source_Serif_4 } from 'next/font/google';
 
 const sourceSerif = Source_Serif_4({
@@ -39,6 +39,7 @@ export default function RootLayout({ children }) {
               <Render />
               <Navbar />
               {children}
+              <Footer/>
             </div>
           </ReduxProvider>
         </div>
