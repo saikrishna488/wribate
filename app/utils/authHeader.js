@@ -1,3 +1,5 @@
+"use client"
+
 export default function authHeader() {
   if (typeof window === 'undefined') {
     return {
