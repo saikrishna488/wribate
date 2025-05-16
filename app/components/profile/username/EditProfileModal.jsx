@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import formatToYMD from "../utils/dateFormat";
+import formatToYMD from "../../../utils/dateFormat";
 import { useAtom } from "jotai";
-import { userAtom } from "../states/GlobalStates";
+import { userAtom } from "../../../states/GlobalStates";
 import toast from "react-hot-toast";
-import authHeader from "../utils/authHeader";
+import authHeader from "../../../utils/authHeader";
 import Compressor from 'compressorjs';
 import { FaTimes, FaCamera, FaChevronDown } from "react-icons/fa";
 import { AiOutlineLoading } from "react-icons/ai";

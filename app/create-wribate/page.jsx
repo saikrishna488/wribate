@@ -56,7 +56,7 @@ const CreateWribateForm = () => {
             Single wribate
           </button>
 
-          {user?.userRole !== "user" && (
+          {user?.userRole !== "usser" && (
             <button
               className={`p-2 border border-gray-300 rounded  ${
                 type == "batched" ? "bg-blue-200" : "bg-white"

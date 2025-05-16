@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
-  FaWhatsapp,
-  FaTwitter,
-  FaInstagram,
-  FaFacebook,
-  FaReddit,
-  FaLinkedin,
+  FaCopy,
   FaTimes,
+  FaShareAlt,
+  FaTwitter,
+  FaFacebook,
+  FaLinkedin,
+  FaInstagram,
 } from "react-icons/fa";
-import { BsInstagram } from "react-icons/bs";
 
 const SharePopup = ({ onClose, product }) => {
   const [productUrl, setProductUrl] = useState("");
@@ -56,163 +55,115 @@ const SharePopup = ({ onClose, product }) => {
     return `Check out this ${product?.category}: ${product?.title} from ${product?.institution}`;
   };
 
-  const shareToWhatsApp = () => {
-    const text = encodeURIComponent(formatShareText() + " " + productUrl);
-
-    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      window.location.href = `whatsapp://send?text=${text}`;
-    } else {
-      window.open(`https://web.whatsapp.com/send?text=${text}`, "_blank");
-    }
-  };
-
-  const shareToTwitter = () => {
-    const text = encodeURIComponent(formatShareText());
-    window.open(
-      `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(
-        productUrl
-      )}`,
-      "_blank"
-    );
-  };
-
-  const shareToFacebook = () => {
-    window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        productUrl
-      )}`,
-      "_blank"
-    );
-  };
-
-  const shareToReddit = () => {
-    const title = encodeURIComponent(
-      product?.title || "Check out this product"
-    );
-    window.open(
-      `https://www.reddit.com/submit?url=${encodeURIComponent(
-        productUrl
-      )}&title=${title}`,
-      "_blank"
-    );
-  };
-
-  const shareToLinkedIn = () => {
-    window.open(
-      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-        productUrl
-      )}`,
-      "_blank"
-    );
-  };
-
-  // For saving recently used Instagram contacts
-  const [recentInstagramUsers, setRecentInstagramUsers] = useState(() => {
-    const saved = localStorage.getItem("recentInstagramUsers");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [newInstagramUsername, setNewInstagramUsername] = useState("");
-
-  const addInstagramUser = (e) => {
-    e.preventDefault();
-    if (newInstagramUsername.trim()) {
-      const newUsers = [
-        ...recentInstagramUsers.filter(
-          (user) => user !== newInstagramUsername.trim()
-        ),
-        newInstagramUsername.trim(),
-      ].slice(-5); // Keep only the 5 most recent
-
-      setRecentInstagramUsers(newUsers);
-      localStorage.setItem("recentInstagramUsers", JSON.stringify(newUsers));
-      setNewInstagramUsername("");
-
-      // Open DM for this user
-      openInstagramDM(newInstagramUsername.trim());
-    }
-  };
+  const socialShareActions = [
+    {
+      name: "Twitter",
+      icon: FaTwitter,
+      color: "text-blue-500",
+      action: () => {
+        const text = encodeURIComponent(formatShareText());
+        window.open(
+          `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(
+            productUrl
+          )}`,
+          "_blank"
+        );
+      },
+    },
+    {
+      name: "Facebook",
+      icon: FaFacebook,
+      color: "text-blue-600",
+      action: () => {
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+            productUrl
+          )}`,
+          "_blank"
+        );
+      },
+    },
+    {
+      name: "LinkedIn",
+      icon: FaLinkedin,
+      color: "text-blue-700",
+      action: () => {
+        window.open(
+          `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+            productUrl
+          )}`,
+          "_blank"
+        );
+      },
+    },
+    {
+      name: "Instagram",
+      icon: FaInstagram,
+      color: "text-pink-500",
+      action: () => {
+        // Instagram direct sharing is limited, so this could open the website
+        window.open(`https://www.instagram.com/`, "_blank");
+      },
+    },
+  ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md relative">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md relative overflow-hidden">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10"
         >
           <FaTimes size={24} />
         </button>
 
-        <h2 className="text-2xl font-bold mb-4">Share this content</h2>
+        {/* Header */}
+        <div className="bg-gray-50 p-6 pb-0 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+            <FaShareAlt className="mr-3 text-gray-600" size={24} />
+            Share this content
+          </h2>
+        </div>
 
         {/* URL Copy Section */}
-        <div className="flex mb-6">
-          <input
-            type="text"
-            value={productUrl}
-            readOnly
-            className="flex-grow p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            onClick={copyToClipboard}
-            className="bg-blue-500 text-white px-4 rounded-r-lg hover:bg-blue-600"
-          >
-            {copied ? "Copied!" : "Copy"}
-          </button>
+        <div className="p-6 pb-0">
+          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+            <input
+              type="text"
+              value={productUrl}
+              readOnly
+              className="flex-grow px-3 py-2 text-sm text-gray-700 focus:outline-none"
+            />
+            <button
+              onClick={copyToClipboard}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 transition-colors flex items-center"
+            >
+              {copied ? (
+                <span className="text-green-600 text-sm">Copied!</span>
+              ) : (
+                <FaCopy size={18} className="text-gray-600" />
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Main Social Media Sharing Buttons */}
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <button
-            onClick={shareToWhatsApp}
-            className="flex flex-col items-center justify-center p-3 bg-green-100 rounded-lg hover:bg-green-200"
-          >
-            <FaWhatsapp size={28} className="text-green-600 mb-1" />
-            <span className="text-xs">WhatsApp</span>
-          </button>
-
-          {/* <button
-            onClick={() => setShowInstagramOptions(!showInstagramOptions)}
-            className="flex flex-col items-center justify-center p-3 bg-pink-100 rounded-lg hover:bg-pink-200"
-          >
-            <FaInstagram size={28} className="text-pink-600 mb-1" />
-            <span className="text-xs">Instagram</span>
-          </button> */}
-
-          <button
-            onClick={shareToTwitter}
-            className="flex flex-col items-center justify-center p-3 bg-blue-100 rounded-lg hover:bg-blue-200"
-          >
-            <FaTwitter size={28} className="text-blue-500 mb-1" />
-            <span className="text-xs">Twitter</span>
-          </button>
-
-          <button
-            onClick={shareToFacebook}
-            className="flex flex-col items-center justify-center p-3 bg-blue-100 rounded-lg hover:bg-blue-200"
-          >
-            <FaFacebook size={28} className="text-blue-800 mb-1" />
-            <span className="text-xs">Facebook</span>
-          </button>
-
-          <button
-            onClick={shareToReddit}
-            className="flex flex-col items-center justify-center p-3 bg-orange-100 rounded-lg hover:bg-orange-200"
-          >
-            <FaReddit size={28} className="text-orange-600 mb-1" />
-            <span className="text-xs">Reddit</span>
-          </button>
-
-          <button
-            onClick={shareToLinkedIn}
-            className="flex flex-col items-center justify-center p-3 bg-blue-100 rounded-lg hover:bg-blue-200"
-          >
-            <FaLinkedin size={28} className="text-blue-700 mb-1" />
-            <span className="text-xs">LinkedIn</span>
-          </button>
+        {/* Social Share Buttons */}
+        <div className="p-6 pt-4 grid grid-cols-4 gap-4">
+          {socialShareActions.map((platform) => (
+            <button
+              key={platform.name}
+              onClick={platform.action}
+              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-gray-100 group transition-colors"
+            >
+              <platform.icon 
+                size={28} 
+                className={`${platform.color} group-hover:scale-110 transition-transform mb-2`} 
+              />
+              <span className="text-xs text-gray-700">{platform.name}</span>
+            </button>
+          ))}
         </div>
-
-        {/* Instagram Direct Messaging Options */}
       </div>
     </div>
   );

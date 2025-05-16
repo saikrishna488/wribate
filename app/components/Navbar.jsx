@@ -144,7 +144,7 @@ export default function Navbar() {
             </Button>
 
             {/* Messages Button */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               onClick={() => router.push('/messages')}
@@ -152,7 +152,7 @@ export default function Navbar() {
               aria-label="Messages"
             >
               <MessageSquare className="w-5 h-5" />
-            </Button>
+            </Button> */}
 
             {
               user?._id && (
