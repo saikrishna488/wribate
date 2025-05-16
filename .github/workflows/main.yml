@@ -1,0 +1,43 @@
+name: Deploy Frontend to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Export Next.js static files (optional)
+        run: npm run export
+        # Remove this step if you are doing SSR or want to deploy the .next folder only
+
+      - name: Set up SSH for deployment
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Sync built files to server
+        run: |
+          # Adjust these paths based on your build output folder
+          rsync -avz --delete out/ root@194.164.149.238:/root/wribate-frontend/
+
+      - name: Restart frontend PM2 process
+        run: |
+          ssh -o StrictHostKeyChecking=no root@194.164.149.238 'pm2 restart frontend || pm2 start npm --name frontend -- start'
