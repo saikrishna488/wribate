@@ -28,6 +28,7 @@
     "compressorjs": "^1.2.1",
     "date-fns": "^4.1.0",
     "firebase": "^11.6.1",
+    "framer-motion": "^12.12.1",
     "he": "^1.2.0",
     "jotai": "^2.12.3",
     "js-cookie": "^3.0.5",
