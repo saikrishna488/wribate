@@ -39,7 +39,7 @@ export default function RootLayout({ children }) {
               <Render />
               <Navbar />
               {children}
-              <Footer/>
+              
             </div>
           </ReduxProvider>
         </div>

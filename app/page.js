@@ -7,6 +7,7 @@ import axios from 'axios';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { BsThreeDots } from "react-icons/bs";
 import { HiOutlineArrowRight } from 'react-icons/hi';
+import Footer from './components/Footer'
 
 // Reusable WribateCard component
 const WribateCard = ({ wribate, onClick }) => {
@@ -193,14 +194,14 @@ export default function WribateDashboard() {
 
   if (categories.length == 0) {
     return (
-      <div className='w-full min-h-screen px-4 flex justify-center items-center h-64'>
+      <div className='w-full min-h-[90vh] overflow-y-auto px-4 flex justify-center items-center h-64'>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     )
   }
 
   return (
-    <div ref={wribatesRef} className="min-h-screen overflow-y-auto bg-gray-50">
+    <div ref={wribatesRef} className="h-[90vh] overflow-y-auto bg-gray-50">
       <header className="mb-6 py-2 bg-gray-50 sticky w-full px-2 top-0 z-20">
         <div className="border-b border-gray-200 relative flex items-center w-full">
           <div
@@ -458,6 +459,7 @@ export default function WribateDashboard() {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 }
