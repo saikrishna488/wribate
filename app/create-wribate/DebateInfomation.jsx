@@ -112,7 +112,7 @@ const SearchableDropdown = ({ id, name, value, onChange, options, placeholder, r
   );
 };
 
-// Custom FieldLabel component with horizontal tooltip styling
+// Custom FieldLabel component with properly horizontal tooltip styling
 const HorizontalFieldLabel = ({ htmlFor, tooltip, children }) => {
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -138,9 +138,14 @@ const HorizontalFieldLabel = ({ htmlFor, tooltip, children }) => {
       padding: '0.5rem 0.75rem',
       borderRadius: '0.25rem',
       fontSize: '0.75rem',
-      maxWidth: '250px',
+      // These width properties create a horizontal rectangle
+      width: '220px',      // Increased fixed width
+      maxHeight: '60px',   // Limit the height
       zIndex: 50,
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      // Make sure text flows properly in this shape
+      display: 'flex',
+      alignItems: 'center'
     },
     arrow: {
       position: 'absolute',
@@ -195,6 +200,7 @@ const HorizontalFieldLabel = ({ htmlFor, tooltip, children }) => {
     </div>
   );
 };
+
 
 const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data, user, setCurrentSection, imagePreview }) => {
     const inputClass = "w-full p-3 border-0 border-b-2 border-gray-300 focus:outline-none focus:border-blue-900 text-sm transition-all duration-200 bg-gray-200";
