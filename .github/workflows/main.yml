@@ -21,10 +21,12 @@ jobs:
       - name: Deploy and restart on server
         run: |
           ssh -o StrictHostKeyChecking=no root@194.164.149.238 << 'EOF'
-            cd /root/wribate-frontend
-            git fetch --all
-            git reset --hard origin/main
-            npm install
-            npm run build
-            pm2 restart frontend || pm2 start npm --name frontend -- start
+          cd /root/wribate-frontend
+          git fetch --all
+          git reset --hard origin/main
+          npm install
+          rm -rf .next
+          npm run build
+          pm2 restart frontend || pm2 start npm --name frontend -- start
           EOF
+
