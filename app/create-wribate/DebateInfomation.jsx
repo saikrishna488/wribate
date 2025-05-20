@@ -4,8 +4,9 @@ import axios from 'axios';
 import FieldLabel, { tooltips } from './FieldLabel'
 import toast from 'react-hot-toast';
 
-// Searchable Dropdown Component
+// Original SearchableDropdown component remains unchanged
 const SearchableDropdown = ({ id, name, value, onChange, options, placeholder, required }) => {
+  // Component code remains unchanged
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
@@ -111,6 +112,90 @@ const SearchableDropdown = ({ id, name, value, onChange, options, placeholder, r
   );
 };
 
+// Custom FieldLabel component with horizontal tooltip styling
+const HorizontalFieldLabel = ({ htmlFor, tooltip, children }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const tooltipStyle = {
+    container: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      marginBottom: '0.5rem'
+    },
+    trigger: {
+      marginLeft: '0.5rem',
+      color: '#9ca3af',
+      cursor: 'pointer'
+    },
+    tooltip: {
+      position: 'absolute',
+      left: 'calc(100% + 10px)',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      backgroundColor: '#1e293b',
+      color: 'white',
+      padding: '0.5rem 0.75rem',
+      borderRadius: '0.25rem',
+      fontSize: '0.75rem',
+      maxWidth: '250px',
+      zIndex: 50,
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+    },
+    arrow: {
+      position: 'absolute',
+      left: '-6px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      width: 0,
+      height: 0,
+      borderTop: '6px solid transparent',
+      borderBottom: '6px solid transparent',
+      borderRight: '6px solid #1e293b'
+    }
+  };
+
+  return (
+    <div style={tooltipStyle.container}>
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-700">
+        {children}
+      </label>
+      {tooltip && (
+        <div className="relative ml-2">
+          <button
+            type="button"
+            style={tooltipStyle.trigger}
+            onClick={() => setShowTooltip(!showTooltip)}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </button>
+          {showTooltip && (
+            <div style={tooltipStyle.tooltip}>
+              <div style={tooltipStyle.arrow}></div>
+              {tooltip}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data, user, setCurrentSection, imagePreview }) => {
     const inputClass = "w-full p-3 border-0 border-b-2 border-gray-300 focus:outline-none focus:border-blue-900 text-sm transition-all duration-200 bg-gray-200";
     
@@ -193,9 +278,9 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
                 </div>
 
                 <div className="mb-6 ">
-                    <FieldLabel htmlFor="title" tooltip={tooltips.title}>
+                    <HorizontalFieldLabel htmlFor="title" tooltip={tooltips.title}>
                         Wribate Title*
-                    </FieldLabel>
+                    </HorizontalFieldLabel>
                     <input
                         id="title"
                         type="text"
@@ -209,9 +294,9 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
                 </div>
 
                 <div className="mb-6">
-                    <FieldLabel htmlFor="context" tooltip={tooltips.context}>
+                    <HorizontalFieldLabel htmlFor="context" tooltip={tooltips.context}>
                         Context
-                    </FieldLabel>
+                    </HorizontalFieldLabel>
                     <textarea
                         id="context"
                         name="context"
@@ -226,9 +311,9 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
                 </div>
 
                 <div className="mb-6">
-                    <FieldLabel htmlFor="coverImage" tooltip={tooltips.coverImage}>
+                    <HorizontalFieldLabel htmlFor="coverImage" tooltip={tooltips.coverImage}>
                         Cover Image
-                    </FieldLabel>
+                    </HorizontalFieldLabel>
                     <div className="border border-dashed border-gray-300 p-6  bg-gray-200">
                         <div className="text-center">
                             {imagePreview ? (
@@ -263,9 +348,9 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <FieldLabel htmlFor="category" tooltip={tooltips.category}>
+                        <HorizontalFieldLabel htmlFor="category" tooltip={tooltips.category}>
                             Category*
-                        </FieldLabel>
+                        </HorizontalFieldLabel>
                         <SearchableDropdown
                             id="category"
                             name="category"
@@ -278,9 +363,9 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
                     </div>
 
                     <div>
-                        <FieldLabel htmlFor="country" tooltip={tooltips.country || "Select the country relevant to this debate"}>
+                        <HorizontalFieldLabel htmlFor="country" tooltip={tooltips.country || "Select the country relevant to this debate"}>
                             Country
-                        </FieldLabel>
+                        </HorizontalFieldLabel>
                         {isLoading ? (
                             <div className={`${inputClass} flex items-center`}>
                                 <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-900 rounded-full animate-spin mr-2"></div>
@@ -308,9 +393,9 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
 
                 {user?.userRole !== "user" && (
                     <div className="mt-6">
-                        <FieldLabel htmlFor="institution" tooltip={tooltips.institution}>
+                        <HorizontalFieldLabel htmlFor="institution" tooltip={tooltips.institution}>
                             Institution
-                        </FieldLabel>
+                        </HorizontalFieldLabel>
                         <input
                             id="institution"
                             type="text"
