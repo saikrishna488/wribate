@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SearchX, MoreHorizontal } from "lucide-react";
+import { SearchX, MoreHorizontal, Loader } from "lucide-react";
 import { debateAtom, userAtom } from "../states/GlobalStates";
 import { useAtom } from "jotai";
 import toast from "react-hot-toast";
@@ -24,27 +24,55 @@ export default function DiscoverHotTopicsPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [categories, setCategories] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [hook, setHook] = useState(false)
-  const [lastId, setLastId] = useState("")
+  const [hook, setHook] = useState(false);
+  const [lastId, setLastId] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const filteredDebates = selectedCategory === "All"
     ? debates
     : debates.filter((debate) => debate.category === selectedCategory);
 
-  useEffect(() => {
-    const fetchWrites = async () => {
-      try {
-        const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose/' + selectedCategory + '?lastId=' + lastId);
-        const data = res.data;
-        if (data.res) {
+  // Function to fetch wribates
+  const fetchWribates = async (reset = false) => {
+    try {
+      setIsLoading(true);
+      // If reset is true, we're changing categories, so we need to reset debates and lastId
+      const id = reset ? "" : lastId;
+      
+      const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose/' + selectedCategory + '?lastId=' + id);
+      const data = res.data;
+      
+      if (data.res) {
+        // If we're resetting, replace the debates array, otherwise append to it
+        if (reset) {
+          setDebates(data?.propose || []);
+        } else {
           setDebates([...debates, ...data?.propose]);
-          setLastId(data.propose?.[data.propose.length - 1]?._id || null);
         }
-      } catch (err) {
-        console.log(err);
+        
+        // Update lastId for pagination
+        const newLastId = data.propose?.[data.propose.length - 1]?._id;
+        setLastId(newLastId || null);
+        
+        // Check if we have more to load
+        setHasMore(data.propose && data.propose.length > 0);
+      } else {
+        setHasMore(false);
       }
-    };
-    fetchWrites();
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to load debates");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // When category changes, reset and fetch new debates
+  useEffect(() => {
+    setDebates([]);
+    setLastId("");
+    fetchWribates(true);
   }, [selectedCategory, hook]);
 
   useEffect(() => {
@@ -61,12 +89,19 @@ export default function DiscoverHotTopicsPage() {
       }
       catch (err) {
         console.log(err);
-        toast.error("error occurred");
+        toast.error("Error occurred while fetching categories");
       }
     };
 
     fetchCategories();
   }, []);
+
+  // Handle load more button click
+  const handleLoadMore = () => {
+    if (!isLoading && hasMore) {
+      fetchWribates();
+    }
+  };
 
   // Separate the visible and dropdown categories
   const visibleCategories = ["All", ...categories.slice(0, 6).map(cat => cat.categoryName)];
@@ -130,17 +165,43 @@ export default function DiscoverHotTopicsPage() {
       </div>
 
       {filteredDebates.length > 0 ? (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredDebates.map((debate) => (
-            <DebateCard
-              key={debate._id}
-              user={user}
-              debate={debate}
-              setHook={setHook}
-              hook={hook}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredDebates.map((debate) => (
+              <DebateCard
+                key={debate._id}
+                user={user}
+                debate={debate}
+                setHook={setHook}
+                hook={hook}
+              />
+            ))}
+          </div>
+          
+          {/* Load More Button */}
+          <div className="flex justify-center mt-8 mb-4">
+            {hasMore && (
+              <Button 
+                onClick={handleLoadMore}
+                disabled={isLoading}
+                className="bg-blue-900 text-white hover:bg-blue-800 transition-colors px-8 py-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader size={16} className="mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  'Load More Wribates'
+                )}
+              </Button>
+            )}
+            
+            {!hasMore && filteredDebates.length > 0 && (
+              <p className="text-gray-500 text-sm">No more wribates to load</p>
+            )}
+          </div>
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <SearchX size={40} className="text-gray-300 mb-2" />
@@ -151,4 +212,3 @@ export default function DiscoverHotTopicsPage() {
     </div>
   );
 }
-

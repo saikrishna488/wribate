@@ -51,7 +51,7 @@ const ChatUI = () => {
   const isMountedRef = useRef(true);
   
   // Message state
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(chatUser.message || "");
   const [messages, setMessages] = useState([]);
   const [wribate, setWribate] = useState(chatUser.title && {title:chatUser.title});
   

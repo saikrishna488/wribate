@@ -1,8 +1,16 @@
 "use client"
 import React, { useState } from 'react';
+import Link from 'next/link'; 
+import { useRouter } from 'next/navigation'; // Added for back button functionality
 
 const TermsAndConditions = () => {
+  const router = useRouter(); // Initialize router
   const [expandedSections, setExpandedSections] = useState({});
+
+  // Back button handler
+  const handleGoBack = () => {
+    router.back();
+  };
 
   const toggleSection = (sectionId) => {
     setExpandedSections(prev => ({
@@ -102,6 +110,17 @@ const TermsAndConditions = () => {
 
   return (
     <div id="terms" className="w-full max-w-4xl mx-auto bg-white border border-gray-200 shadow-md">
+      {/* Back Button - ADDED */}
+      <button 
+        onClick={handleGoBack}
+        className="flex items-center text-blue-900 hover:text-blue-700 font-medium transition-colors ml-6 mt-6"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+        </svg>
+        Back
+      </button>
+
       <div className="p-6">
         {/* Header with Last Updated */}
         <div className="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
@@ -128,7 +147,16 @@ const TermsAndConditions = () => {
                   <span className="flex items-center justify-center w-8 h-8 bg-blue-900 text-white mr-3 text-sm">
                     {section.id}
                   </span>
-                  {section.title}
+                  {section.id === 12 ? (
+                    <Link 
+                      href="/contact" 
+                      className="text-blue-900 underline hover:translate-y-[-2px] transition-transform duration-150"
+                    >
+                      {section.title}
+                    </Link>
+                  ) : (
+                    section.title
+                  )}
                 </h3>
               </div>
               

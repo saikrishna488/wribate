@@ -1,15 +1,21 @@
-import React, { useEffect } from 'react'
+"use client"; // Add this directive at the top
+import React, { useEffect } from 'react';
 import he from "he";
-import ReactQuill from "react-quill-new";
+import dynamic from 'next/dynamic'; // Add dynamic import
 import "react-quill-new/dist/quill.snow.css";
 import {
   useAddArgumentMutation,
 } from "../../../app/services/authApi";
-import { Button } from "@/components/ui/button"; // Added missing Button import
+import { Button } from "@/components/ui/button";
 import toast from 'react-hot-toast';
 
-const Arguments = ({ data, user, id, round, value, setValue,refetch }) => { // Added missing props
+// Replace direct import with dynamic import
+const ReactQuill = dynamic(() => import('react-quill-new'), {
+  ssr: false, // Disable server-side rendering for this component
+  loading: () => <p>Loading editor...</p>
+});
 
+const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
     const [addArgument] = useAddArgumentMutation();
 
     const getArgumentForRound = (roundNumber, side) => {

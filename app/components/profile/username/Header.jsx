@@ -7,7 +7,7 @@ const ProfileHeader = ({ router }) => {
             <div className="flex items-center">
                 <button
                     className="p-2 hover:bg-blue-800 transition-colors"
-                    onClick={() => router.push("/")}
+                    onClick={() => router.back()}
                     aria-label="Back"
                 >
                     <svg
