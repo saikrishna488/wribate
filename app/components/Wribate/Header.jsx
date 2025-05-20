@@ -10,9 +10,12 @@ const Header = ({data, setShowSharePopup}) => {
                 {data?.data?.title}
             </h1>
             
-            <div className="grid grid-cols-2 border-b border-gray-200 text-sm sm:text-lg font-semibold">
+            <div className="grid grid-cols-3 border-b border-gray-200 text-sm sm:text-lg font-semibold">
                 <div className="p-2 sm:p-3 text-center bg-gradient-to-r from-red-400 to-purple-200 border-r border-gray-200 break-words truncate sm:truncate-0">
                     {data?.data?.leadFor || "@Test 1"}
+                </div>
+                <div className="flex items-center justify-center font-bold text-lg text-gray-700">
+                    VS
                 </div>
                 <div className="p-2 sm:p-3 text-center bg-gradient-to-r from-purple-200 to-blue-400 break-words truncate sm:truncate-0">
                     {data?.data?.leadAgainst}

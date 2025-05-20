@@ -108,9 +108,9 @@ export default function SearchDropdown() {
                       >
                         <p className="font-medium">{wribate.title}</p>
                         <p className="text-sm text-gray-500 truncate">
-                          {wribate.description
-                            ? wribate.description.substring(0, 50) + "..."
-                            : "No description available."}
+                          {wribate.context
+                            ? wribate.context.substring(0, 50) + "..."
+                            : "No context available."}
                         </p>
                       </Link>
                     ))}

@@ -9,9 +9,80 @@ import {
   Legend,
   ResponsiveContainer,
   ReferenceLine,
+  ReferenceArea,
 } from "recharts";
 
 export default function VotesChart({ data, title }) {
+  // Define round colors - consistent across both components
+  const roundColors = {
+    round1: "#3B82F6", // Blue 500 for rounds 1-4
+    round2: "#10B981", // Green 500 for rounds 5-8
+    round3: "#8B5CF6", // Purple 500 for rounds 9-12
+    after: "#F97316"   // Orange 500 for round 13
+  };
+  
+  // Custom tick component for colored x-axis numbers
+  const CustomAxisTick = (props) => {
+    const { x, y, payload } = props;
+    
+    // Determine color based on tick value
+    let tickColor;
+    if (payload.value <= 4) {
+      tickColor = roundColors.round1;
+    } else if (payload.value <= 8) {
+      tickColor = roundColors.round2;
+    } else if (payload.value <= 12) {
+      tickColor = roundColors.round3;
+    } else {
+      tickColor = roundColors.after;
+    }
+    
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={16}
+          textAnchor="middle"
+          fill={tickColor}
+          fontWeight="500"
+        >
+          {payload.value}
+        </text>
+      </g>
+    );
+  };
+
+  // Custom dot component to color dots based on round
+  const CustomDot = (props) => {
+    const { cx, cy, payload } = props;
+    
+    // Determine color based on x value (roundNumber)
+    let dotColor;
+    const roundNumber = payload.roundNumber;
+    
+    if (roundNumber <= 4) {
+      dotColor = roundColors.round1;
+    } else if (roundNumber <= 8) {
+      dotColor = roundColors.round2;
+    } else if (roundNumber <= 12) {
+      dotColor = roundColors.round3;
+    } else {
+      dotColor = roundColors.after;
+    }
+    
+    return (
+      <circle 
+        cx={cx} 
+        cy={cy} 
+        r={4} 
+        stroke={dotColor} 
+        strokeWidth={2} 
+        fill="white" 
+      />
+    );
+  };
+
   return (
     <div className="w-full bg-white shadow-lg mb-4 rounded-lg flex flex-col justify-center items-center p-3 md:p-4">
       <h2 className="text-center text-base md:text-lg font-bold mb-2 md:mb-4">
@@ -26,7 +97,7 @@ export default function VotesChart({ data, title }) {
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
               dataKey="roundNumber"
-              tick={{ fontSize: 12 }}
+              tick={<CustomAxisTick />}
               label={{
                 value: "Round",
                 position: "insideBottomRight",
@@ -55,62 +126,40 @@ export default function VotesChart({ data, title }) {
               wrapperStyle={{ fontSize: 12 }}
             />
 
-            {/* Vertical divider lines */}
-            <ReferenceLine x={4.5} stroke="#ccc" strokeDasharray="3 3" />
-            <ReferenceLine x={8.5} stroke="#ccc" strokeDasharray="3 3" />
-            <ReferenceLine x={12.5} stroke="#ccc" strokeDasharray="3 3" />
+            {/* Round background areas */}
+            <ReferenceArea x1={1} x2={4.5} fill={roundColors.round1} fillOpacity={0.05} />
+            <ReferenceArea x1={4.5} x2={8.5} fill={roundColors.round2} fillOpacity={0.05} />
+            <ReferenceArea x1={8.5} x2={12.5} fill={roundColors.round3} fillOpacity={0.05} />
+            <ReferenceArea x1={12.5} x2={13.5} fill={roundColors.after} fillOpacity={0.05} />
 
-            {/* Test group labels with brackets */}
-            <text
-              x="12%"
-              y="98%"
-              textAnchor="middle"
-              fill="#666"
-              fontSize={12}
-              fontWeight="bold"
-            >
+            {/* Divider lines */}
+            <ReferenceLine x={4.5} stroke={roundColors.round1} strokeWidth={2} />
+            <ReferenceLine x={8.5} stroke={roundColors.round2} strokeWidth={2} />
+            <ReferenceLine x={12.5} stroke={roundColors.round3} strokeWidth={2} />
+
+            {/* Group labels */}
+            <text x="12%" y="98%" textAnchor="middle" fill={roundColors.round1} fontSize={12} fontWeight="bold">
               R1 (1-4)
             </text>
-            <text
-              x="42%"
-              y="98%"
-              textAnchor="middle"
-              fill="#666"
-              fontSize={12}
-              fontWeight="bold"
-            >
+            <text x="42%" y="98%" textAnchor="middle" fill={roundColors.round2} fontSize={12} fontWeight="bold">
               R2 (5-8)
             </text>
-            <text
-              x="72%"
-              y="98%"
-              textAnchor="middle"
-              fill="#666"
-              fontSize={12}
-              fontWeight="bold"
-            >
+            <text x="72%" y="98%" textAnchor="middle" fill={roundColors.round3} fontSize={12} fontWeight="bold">
               R3 (9-12)
             </text>
-            <text
-              x="92%"
-              y="98%"
-              textAnchor="middle"
-              fill="#666"
-              fontSize={12}
-              fontWeight="bold"
-            >
+            <text x="92%" y="98%" textAnchor="middle" fill={roundColors.after} fontSize={12} fontWeight="bold">
               After (12)
             </text>
 
-            {/* Chart lines */}
+            {/* Chart lines with custom dots */}
             <Line
               type="linear"
               dataKey="forVotes"
               name="For"
               stroke="#1D4ED8"
               strokeWidth={3}
-              dot={{ r: 4, strokeWidth: 2 }}
-              activeDot={{ r: 6 }}
+              dot={<CustomDot />}
+              activeDot={{ r: 6, fill: "#1D4ED8" }}
             />
             <Line
               type="linear"
@@ -118,8 +167,8 @@ export default function VotesChart({ data, title }) {
               name="Against"
               stroke="#DC2626"
               strokeWidth={3}
-              dot={{ r: 4, strokeWidth: 2 }}
-              activeDot={{ r: 6 }}
+              dot={<CustomDot />}
+              activeDot={{ r: 6, fill: "#DC2626" }}
             />
           </LineChart>
         </ResponsiveContainer>
