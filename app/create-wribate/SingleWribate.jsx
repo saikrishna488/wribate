@@ -49,7 +49,7 @@ const SingleWribate = () => {
     category: debate?.category || "",
     country: debate?.country || "",
     institution: "",
-    context: debate?.title || "",
+    context: debate?.context || "",
     scope: "Open",
     type: "Free",
     prizeAmount: "",
@@ -127,7 +127,7 @@ const SingleWribate = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Create New Wribate</h1>
-          <p className="text-gray-600 mt-1">Set up your debate parameters, invite participants, and establish rules</p>
+          <p className="text-gray-600 mt-1">Set up your wribate parameters, invite participants, and establish rules</p>
         </div>
         <button
           type="button" // Explicitly set button type to prevent form submission

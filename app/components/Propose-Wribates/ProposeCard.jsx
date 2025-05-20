@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
-import { User, ArrowUpCircle, PlayCircle, ThumbsUp, ThumbsDown } from "lucide-react";
-import { debateAtom, userAtom } from "../../states/GlobalStates";
+import { User, PlayCircle, ThumbsUp, ThumbsDown } from "lucide-react";
+import { debateAtom } from "../../states/GlobalStates";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -9,25 +9,29 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import axios from "axios";
 import authHeader from "@/app/utils/authHeader";
+import LaunchDialog from "./LaunchDialog";
 
 function DebateCard({ debate, user, setHook, hook }) {
   const [votes, setVotes] = useState(debate.votes);
   const [propDebate, setPropDebate] = useAtom(debateAtom);
-  const [users, setUsers] = useState([]);
+  const [forUsers, setForUsers] = useState([]);
+  const [againstUsers, setAgainstUsers] = useState([]);
+  const [open, setOpen] = useState(false)
   const router = useRouter();
 
-
-
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchUsers = async (side) => {
       try {
-
-        const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/getusers?wribateId=' + encodeURIComponent(debate._id))
+        const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/getusers?wribateId=' + encodeURIComponent(debate._id)+'&side='+encodeURIComponent(side))
         const data = res.data;
 
-
         if (data.res) {
-          setUsers(data.users);
+          if(side=="for"){
+            setForUsers(data.users)
+          }
+          else{
+            setAgainstUsers(data.users)
+          }
         }
       }
       catch (err) {
@@ -35,10 +39,9 @@ function DebateCard({ debate, user, setHook, hook }) {
       }
     }
 
-    fetchUsers();
+    fetchUsers('for');
+    fetchUsers('against');
   }, [hook])
-
-  // const
 
   const handleUpvote = async (vote) => {
     try {
@@ -85,7 +88,6 @@ function DebateCard({ debate, user, setHook, hook }) {
       debate.context :
     "No context provided.";
 
-
   function formatLikes(number) {
     if (number < 1000) return number.toString();
 
@@ -95,32 +97,49 @@ function DebateCard({ debate, user, setHook, hook }) {
 
     return `${shortNumber.toFixed(1).replace(/\.0$/, "")}${units[index]}`;
   }
+  
   return (
-    <div className="bg-white border border-gray-200 shadow-sm flex flex-col h-full">
+    <div onClick={()=>setOpen(!open)} className="bg-white border cursor-pointer border-gray-200 shadow-sm flex flex-col h-full">
+      <LaunchDialog
+        isOpen = {open}
+        onClose={setOpen}
+        debate={debate}
+      />
       {/* Category banner */}
       <div className="bg-blue-900 text-white text-xs px-3 py-1 uppercase tracking-wider font-medium">
         {debate.category}
       </div>
 
       <div className="p-4 flex flex-col h-full">
-        {/* User info row - fixed height */}
-        <div className="flex items-center gap-2 cursor-pointer h-10" onClick={handleProfileClick}>
-          {debate.profilePhoto ? (
-            <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
-              <Image
-                src={debate.profilePhoto}
-                alt={debate.username || "User"}
-                width={32}
-                height={32}
-                className="object-cover"
-              />
-            </div>
-          ) : (
-            <div className="w-8 h-8 flex justify-center items-center rounded-full bg-gray-100 border border-gray-200 flex-shrink-0">
-              <User size={16} className="text-gray-600" />
-            </div>
-          )}
-          <span className="font-medium text-sm text-gray-800">{debate.username || "Anonymous"}</span>
+        {/* User info row with launch button - fixed height */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={handleProfileClick}>
+            {debate.profilePhoto ? (
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+                <Image
+                  src={debate.profilePhoto}
+                  alt={debate.username || "User"}
+                  width={32}
+                  height={32}
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-8 h-8 flex justify-center items-center rounded-full bg-gray-100 border border-gray-200 flex-shrink-0">
+                <User size={16} className="text-gray-600" />
+              </div>
+            )}
+            <span className="font-medium text-sm text-gray-800">{debate.username || "Anonymous"}</span>
+          </div>
+          
+          <Button
+            onClick={handleLaunch}
+            variant="default"
+            size="sm"
+            className="flex gap-1 items-center text-white bg-blue-900 hover:bg-blue-800"
+          >
+            <PlayCircle size={16} /> Quick Launch
+          </Button>
         </div>
 
         {/* Title - fixed height */}
@@ -146,60 +165,87 @@ function DebateCard({ debate, user, setHook, hook }) {
           </div>
         </div>
 
-        {/* For/Against buttons - fixed height */}
-        <div className="flex gap-2 h-10 mb-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleUpvote("for")}
-            className="flex gap-1 items-center border-red-600 text-red-600 hover:bg-green-50"
-          >
-            <ThumbsUp size={14} /> For {` ${formatLikes(debate.votesFor)}`}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleUpvote("against")}
-            className="flex gap-1 items-center border-blue-600 text-blue-600 hover:bg-red-50"
-          >
-            <ThumbsDown size={14} /> Against {` ${formatLikes(debate.votesAgainst)}`}
-          </Button>
-        </div>
+        {/* For/Against buttons */}
+        <div className="mt-auto">
+          <div className="flex gap-2 mb-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleUpvote("for")}
+              className="flex gap-1 items-center border-red-600 text-red-600 hover:bg-green-50 flex-1"
+            >
+              <ThumbsUp size={14} /> For {` ${formatLikes(debate.votesFor)}`}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleUpvote("against")}
+              className="flex gap-1 items-center border-blue-600 text-blue-600 hover:bg-red-50 flex-1"
+            >
+              <ThumbsDown size={14} /> Against {` ${formatLikes(debate.votesAgainst)}`}
+            </Button>
+          </div>
+          
+          {/* User avatars for For/Against */}
+          <div className="flex justify-between pt-2">
+            {/* For users */}
+            <div className="flex items-center">
+              <div className="flex -space-x-2 mr-2">
+                {forUsers.slice(0, 4).map((user, i) => (
+                  <div
+                    key={i}
+                    className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden flex-shrink-0"
+                  >
+                    {user?.profilePhoto ? (
+                      <img
+                        src={user.profilePhoto}
+                        alt={`User ${i}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-red-600 text-white flex items-center justify-center text-xs uppercase">
+                        {user?.name?.[0] || "?"}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {forUsers.length > 4 && (
+                  <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">
+                    +{forUsers.length - 4}
+                  </div>
+                )}
+              </div>
+            </div>
 
-        {/* Bottom row - user icons and launch button - fixed height */}
-        <div className="flex justify-between items-center mt-auto pt-3 border-t border-gray-100 h-12">
-          <div className="flex items-center">
-            <div className="flex -space-x-2">
-              {users.map((user, i) => (
-                <div
-                  key={i}
-                  className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden flex-shrink-0"
-                >
-                  {user?.profilePhoto ? (
-                    <img
-                      src={user.profilePhoto}
-                      alt={`User ${i}`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-blue-900 text-white flex items-center justify-center text-xs uppercase">
-                      {user?.name?.[0] || "?"}
-                    </div>
-                  )}
-                </div>
-              ))}
+            {/* Against users */}
+            <div className="flex items-center">
+              <div className="flex -space-x-2 ml-2">
+                {againstUsers.slice(0, 4).map((user, i) => (
+                  <div
+                    key={i}
+                    className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden flex-shrink-0"
+                  >
+                    {user?.profilePhoto ? (
+                      <img
+                        src={user.profilePhoto}
+                        alt={`User ${i}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-blue-600 text-white flex items-center justify-center text-xs uppercase">
+                        {user?.name?.[0] || "?"}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {againstUsers.length > 4 && (
+                  <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">
+                    +{againstUsers.length - 4}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-
-
-          <Button
-            onClick={handleLaunch}
-            variant="default"
-            size="sm"
-            className="flex gap-1 items-center text-white bg-blue-900 hover:bg-blue-800"
-          >
-            <PlayCircle size={16} /> Quick Launch
-          </Button>
         </div>
       </div>
     </div>

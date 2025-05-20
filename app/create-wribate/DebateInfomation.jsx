@@ -221,7 +221,7 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
                         placeholder="Provide background information and context for the debate"
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                        Optional: Additional context helps participants understand the scope of the debate
+                        Optional: Additional context helps participants understand the scope of the wribate
                     </p>
                 </div>
 

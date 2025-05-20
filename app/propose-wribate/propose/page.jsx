@@ -134,13 +134,18 @@ const WribateProposalForm = () => {
                 return;
             }
 
-            if (formData.title.length > 100) {
-                toast.error("You have exceeded length of 100 chars");
+            if (formData.title.length > 175) {
+                toast.error("You have exceeded length of 175 chars");
                 return;
             }
 
             if (formData.tags.length === 0) {
                 toast.error("Please add at least one tag");
+                return;
+            }
+
+            if (formData.context.length > 350) {
+                toast.error("You have exceeded length of 350 chars in context");
                 return;
             }
 
@@ -208,7 +213,7 @@ const WribateProposalForm = () => {
                                 />
                                 <div className="text-xs text-gray-500 flex justify-between mt-1">
                                     <span>Be clear and concise</span>
-                                    <span>{formData.title.length}/100 characters</span>
+                                    <span>{formData.title.length}/175 characters</span>
                                 </div>
                             </div>
 
@@ -279,11 +284,20 @@ const WribateProposalForm = () => {
                                 />
                             </div>
 
-                            {formData.title.length > 100 && (
+                            {formData.title.length > 175 && (
                                 <div className="bg-red-50 border-l-4 border-red-500 p-4 flex items-start">
                                     <AlertTriangle className="text-red-500 mr-2 mt-1 flex-shrink-0" size={18} />
                                     <p className="text-sm text-red-700">
-                                        Title exceeds the maximum of 100 characters. Please shorten it.
+                                        Title exceeds the maximum of 175 characters. Please shorten it.
+                                    </p>
+                                </div>
+                            )}
+
+                            {formData.context.length > 350 && (
+                                <div className="bg-red-50 border-l-4 border-red-500 p-4 flex items-start">
+                                    <AlertTriangle className="text-red-500 mr-2 mt-1 flex-shrink-0" size={18} />
+                                    <p className="text-sm text-red-700">
+                                        Context exceeds the maximum of 350 characters. Please shorten it.
                                     </p>
                                 </div>
                             )}
