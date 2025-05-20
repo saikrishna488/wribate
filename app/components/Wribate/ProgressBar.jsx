@@ -51,36 +51,55 @@ const ProgressBar = ({ rounds }) => {
     );
   });
 
-  // Format date to 12-hour format
-  const format12HourTime = (dateString) => {
+  // Calculate midpoints between markers for round labels
+  const midPoints = [
+    (0 + roundPositions[0]) / 2, // Between START and R1
+    (roundPositions[0] + roundPositions[1]) / 2, // Between R1 and R2
+    (roundPositions[1] + roundPositions[2]) / 2, // Between R2 and R3
+    (roundPositions[2] + 100) / 2  // Between R3 and END
+  ];
+
+  // Format date and time separately
+  const formatDateAndTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
+    
+    // Format date part (May 14)
+    const datePart = date.toLocaleDateString('en-US', {
       month: 'short',
-      day: 'numeric',
+      day: 'numeric'
+    });
+    
+    // Format time part (12:00 AM)
+    const timePart = date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
     });
+    
+    return { datePart, timePart };
   };
 
   return (
     <>
-      <div className="w-full p-4 rounded-lg shadow-sm border border-gray-200 bg-white">
-        {/* Status indicator */}
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-sm font-medium text-gray-700">
+      <div className="w-full p-6 rounded-lg shadow-md border border-gray-300 bg-white">
+        {/* Status indicator (removed duplicate heading) */}
+        <div className="mb-6">
+          <span className="text-base font-medium text-gray-700">
             {getEventStatus(rounds[0]?.startDate, rounds[2]?.endDate)}
-          </span>
-          <span className="text-sm text-gray-500">
-            {Math.round(progress)}% Complete
           </span>
         </div>
         
+        {/* START/END labels above timeline */}
+        <div className="flex justify-between mb-2">
+          <span className="font-bold text-lg text-blue-700">START</span>
+          <span className="font-bold text-lg text-blue-700">END</span>
+        </div>
+        
         {/* Progress bar */}
-        <div className="relative w-full bg-gray-200 h-2 rounded-full mb-6">
+        <div className="relative w-full bg-gray-200 h-4 rounded-full mb-8">
           {/* Progress fill */}
           <div
-            className="h-2 bg-blue-600 rounded-full transition-all duration-300"
+            className="h-4 bg-blue-600 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           ></div>
           
@@ -88,47 +107,46 @@ const ProgressBar = ({ rounds }) => {
           {roundPositions.map((pos, index) => (
             <div
               key={`marker-${index}`}
-              className="absolute h-4 w-0.5 bg-gray-400 top-1/2 transform -translate-y-1/2"
+              className="absolute h-8 w-2 bg-blue-800 top-1/2 transform -translate-y-1/2"
               style={{ left: `${pos}%` }}
             ></div>
           ))}
-          
-          {/* Round labels */}
-          {rounds.map((_, index) => (
-            <div 
-              key={`label-${index}`}
-              className="absolute text-xs font-medium text-gray-600 mt-3 transform -translate-x-1/2"
-              style={{ 
-                left: `${roundPositions[index]}%`,
-                top: '100%'
-              }}
-            >
-              R{index + 1}
-            </div>
-          ))}
         </div>
         
-        {/* Time labels - Using flex layout to keep everything in container */}
-        <div className="w-full px-1">
-          <div className="flex justify-between mt-6">
-            {/* First time label - aligned left */}
-            <div className="text-xs text-gray-600 text-left" style={{ width: '25%' }}>
-              {format12HourTime(rounds[0].startDate)}
-            </div>
-            
-            {/* Middle time labels - centered */}
-            <div className="text-xs text-gray-600 text-center" style={{ width: '25%' }}>
-              {format12HourTime(rounds[1].startDate)}
-            </div>
-            
-            <div className="text-xs text-gray-600 text-center" style={{ width: '25%' }}>
-              {format12HourTime(rounds[2].startDate)}
-            </div>
-            
-            {/* End time label - aligned right */}
-            <div className="text-xs text-gray-600 text-right" style={{ width: '25%' }}>
-              {format12HourTime(rounds[2].endDate)}
-            </div>
+        {/* Labels section with better spacing */}
+        <div className="relative w-full" style={{ height: "110px" }}>
+          {/* R1, R2, R3 labels */}
+          <div className="absolute text-blue-800 font-semibold transform -translate-x-1/2" style={{ left: `${roundPositions[0]}%`, top: '0px' }}>R1</div>
+          <div className="absolute text-blue-800 font-semibold transform -translate-x-1/2" style={{ left: `${roundPositions[1]}%`, top: '0px' }}>R2</div>
+          <div className="absolute text-blue-800 font-semibold transform -translate-x-1/2" style={{ left: `${roundPositions[2]}%`, top: '0px' }}>R3</div>
+          
+          {/* Round 1, Round 2, Round 3 labels */}
+          <div className="absolute text-gray-700 font-medium transform -translate-x-1/2" style={{ left: `${midPoints[1]}%`, top: '25px' }}>Round 1</div>
+          <div className="absolute text-gray-700 font-medium transform -translate-x-1/2" style={{ left: `${midPoints[2]}%`, top: '25px' }}>Round 2</div>
+          <div className="absolute text-gray-700 font-medium transform -translate-x-1/2" style={{ left: `${midPoints[3]}%`, top: '25px' }}>Round 3</div>
+          
+          {/* Date and time labels - moved up closer to R labels */}
+          {/* First date label shifted right by adding 2% to its position */}
+          <div className="absolute flex flex-col items-center transform -translate-x-1/2" 
+               style={{ left: `${roundPositions[0] + 2}%`, top: '50px' }}>
+            <div className="text-sm font-medium text-gray-600">{formatDateAndTime(rounds[0].startDate).datePart}</div>
+            <div className="text-xs text-gray-500">{formatDateAndTime(rounds[0].startDate).timePart}</div>
+          </div>
+          
+          <div className="absolute flex flex-col items-center transform -translate-x-1/2" style={{ left: `${roundPositions[1]}%`, top: '50px' }}>
+            <div className="text-sm font-medium text-gray-600">{formatDateAndTime(rounds[1].startDate).datePart}</div>
+            <div className="text-xs text-gray-500">{formatDateAndTime(rounds[1].startDate).timePart}</div>
+          </div>
+          
+          <div className="absolute flex flex-col items-center transform -translate-x-1/2" style={{ left: `${roundPositions[2]}%`, top: '50px' }}>
+            <div className="text-sm font-medium text-gray-600">{formatDateAndTime(rounds[2].startDate).datePart}</div>
+            <div className="text-xs text-gray-500">{formatDateAndTime(rounds[2].startDate).timePart}</div>
+          </div>
+          
+          {/* End date (far right) */}
+          <div className="absolute flex flex-col items-center text-right" style={{ right: '0px', top: '50px' }}>
+            <div className="text-sm font-medium text-gray-600">{formatDateAndTime(rounds[2].endDate).datePart}</div>
+            <div className="text-xs text-gray-500">{formatDateAndTime(rounds[2].endDate).timePart}</div>
           </div>
         </div>
       </div>

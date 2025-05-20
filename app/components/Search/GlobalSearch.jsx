@@ -86,7 +86,7 @@ const GlobalSearch = () => {
                                         >
                                             <h4 className="font-medium">{wribate.title}</h4>
                                             <p className="text-sm text-gray-500 truncate">
-                                                {wribate.description?.substring(0, 50)}
+                                                {wribate.context?.substring(0, 50)}
                                             </p>
                                         </Link>
                                     ))}
@@ -103,7 +103,7 @@ const GlobalSearch = () => {
                                         >
                                             <h4 className="font-medium">{proposal.title}</h4>
                                             <p className="text-sm text-gray-500 truncate">
-                                                {proposal.description?.substring(0, 50)}
+                                                {proposal.context?.substring(0, 50)}
                                             </p>
                                         </Link>
                                     ))}
