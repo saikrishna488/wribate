@@ -9,7 +9,6 @@ const page = () => {
       <SearchPage />
     </Suspense>
   )
-
 }
 
 export default page

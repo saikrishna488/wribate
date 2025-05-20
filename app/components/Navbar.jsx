@@ -191,6 +191,7 @@ export default function Navbar() {
               {showDropdown && (
                 <div 
                   className="absolute left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-[80vh] overflow-y-auto animate-fadeIn"
+
                   style={{ 
                     marginTop: '8px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
