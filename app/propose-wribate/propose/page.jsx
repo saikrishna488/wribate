@@ -6,26 +6,82 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { X, Edit3, MapPin, BookOpen, Tag, AlertTriangle } from "lucide-react";
 import toast from 'react-hot-toast';
 import { useAtom } from 'jotai';
 import { userAtom } from '@/app/states/GlobalStates';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
+// Custom Tags Input Component
+const TagsInput = ({ value, onChange }) => {
+  const [inputValue, setInputValue] = useState('');
+  
+  const handleKeyDown = (e) => {
+    // Add tag on Enter or comma
+    if ((e.key === 'Enter' || e.key === ',') && inputValue.trim()) {
+      e.preventDefault();
+      const newTag = inputValue.trim();
+      
+      // Check if tag already exists
+      if (!value.includes(newTag)) {
+        onChange([...value, newTag]);
+      }
+      setInputValue('');
+    } 
+    // Remove last tag on Backspace if input is empty
+    else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
+      onChange(value.slice(0, -1));
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    onChange(value.filter(tag => tag !== tagToRemove));
+  };
+
+  return (
+    <div className="flex flex-wrap w-full border-2 border-gray-200 rounded-none p-1 focus-within:border-blue-900 focus-within:ring-0 bg-white">
+      {value.map((tag, index) => (
+        <div 
+          key={index} 
+          className="flex items-center bg-blue-900 text-white rounded-none px-2 py-1 m-1 text-sm"
+        >
+          <span>{tag}</span>
+          <button 
+            type="button" 
+            onClick={() => removeTag(tag)} 
+            className="ml-1 text-white hover:text-blue-200 focus:outline-none"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      ))}
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        className="flex-grow outline-none border-none p-2 min-w-[100px] bg-transparent"
+        placeholder={value.length === 0 ? "Type tags and press Enter" : ""}
+      />
+    </div>
+  );
+};
+
 const WribateProposalForm = () => {
     const [user, setUser] = useAtom(userAtom);
-    const router = useRouter()
+    const router = useRouter();
     const [formData, setFormData] = useState({
         title: '',
         category: '',
-        tag: '',
+        tags: [], // Changed from 'tag' to 'tags' as an array
         country: '',
         context: '',
         user_id: user?._id || null
     });
 
     const [categories, setCategories] = useState([]);
-    const [countries, setCountries] = useState([]); // fixed spelling from "countires"
+    const [countries, setCountries] = useState([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -36,6 +92,8 @@ const WribateProposalForm = () => {
                 if (data.res) {
                     setCategories(data.categories);
                 }
+
+                console.log(data.categories)
             } catch (err) {
                 console.log(err);
                 toast.error("Error fetching categories");
@@ -64,154 +122,193 @@ const WribateProposalForm = () => {
         fetchCountries();
     }, []);
 
-
-
     //handle form change
-    const handleFormChange = (name,value)=>{
-        setFormData({...formData,[name]:value});
+    const handleFormChange = (name, value) => {
+        setFormData({...formData, [name]: value});
     }
 
     const handleSubmit = async () => {
-
         try {
-
             if (!user?._id) {
-                toast.error("login to continue")
+                toast.error("Login to continue");
                 return;
             }
 
             if (formData.title.length > 100) {
-                toast("You have exceeded lenth of 100 chars");
+                toast.error("You have exceeded length of 100 chars");
+                return;
+            }
+
+            if (formData.tags.length === 0) {
+                toast.error("Please add at least one tag");
+                return;
             }
 
             const res = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose', formData, {
                 withCredentials: true
-            })
+            });
 
             const data = res.data;
 
             if (data.res) {
-                toast.success("Proposed")
-                router.push('/propose-wribate')
+                toast.success("Proposed");
+                router.push('/propose-wribate');
             }
         }
         catch (err) {
             console.log(err);
-            toast.error("Failed to Add!")
+            toast.error("Failed to Add!");
         }
     };
 
-    useEffect(()=>{
-        if(!user?._id){
-            router.push('/login')
+    useEffect(() => {
+        if(!user?._id) {
+            router.push('/login');
         }
-    })
+    }, [user, router]);
 
-
-    if(!user?._id){
-        return null
+    if(!user?._id) {
+        return null;
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-extrabold text-gray-900">Propose a Wribate</h1>
-                    <p className="mt-2 text-lg text-gray-600">
-                        Create a new debate topic for the community to discuss
+        <div className="min-h-screen bg-gray-100 py-8">
+            <div className="max-w-4xl mx-auto px-4">
+                <div className="mb-8 border-l-4 border-blue-900 pl-4">
+                    <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-tight">PROPOSE A WRIBATE</h1>
+                    <div className="h-1 w-24 bg-blue-900 mt-2"></div>
+                    <p className="mt-3 text-gray-600 font-medium">
+                        Create a thoughtful debate topic for the Wribate community
                     </p>
                 </div>
 
-                <Card className="shadow-md">
-                    <CardHeader>
-                        <CardTitle className="text-xl font-semibold text-gray-900">New Wribate Details</CardTitle>
-                        <CardDescription>Fill in the information below to create your Wribate</CardDescription>
+                <Card className="shadow-lg rounded-none border-t-4 border-blue-900">
+                    <CardHeader className="border-b bg-gray-50">
+                        <CardTitle className="text-xl font-bold text-blue-900 flex items-center">
+                            <Edit3 className="mr-2" size={20} />
+                            New Wribate Submission
+                        </CardTitle>
+                        <CardDescription className="text-gray-600">
+                            Fill in the form below with your debate proposal details
+                        </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="space-y-5">
+                    <CardContent className="pt-6 px-6">
+                        <div className="space-y-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="title" className="font-medium">Title</Label>
+                                <Label htmlFor="title" className="font-semibold text-gray-800 flex items-center">
+                                    <BookOpen className="mr-2" size={16} />
+                                    Title
+                                </Label>
                                 <Input
                                     id="title"
                                     placeholder="Enter your debate topic"
                                     value={formData.title}
                                     onChange={(e) => handleFormChange("title", e.target.value)}
-                                    className="h-10"
+                                    className="h-12 rounded-none border-2 border-gray-200 focus:border-blue-900 focus:ring-0"
                                 />
+                                <div className="text-xs text-gray-500 flex justify-between mt-1">
+                                    <span>Be clear and concise</span>
+                                    <span>{formData.title.length}/100 characters</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="category" className="font-semibold text-gray-800">Category</Label>
+                                    <Select
+                                        value={formData.category}
+                                        onValueChange={(value) => handleFormChange("category", value)}
+                                    >
+                                        <SelectTrigger id="category" className="h-12 rounded-none border-2 border-gray-200 focus:border-blue-900 focus:ring-0">
+                                            <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-none">
+                                            {categories.map((category) => (
+                                                <SelectItem key={category._id} value={category.categoryName}>
+                                                    {category.categoryName}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="country" className="font-semibold text-gray-800 flex items-center">
+                                        <MapPin className="mr-2" size={16} />
+                                        Country
+                                    </Label>
+                                    <Select
+                                        value={formData.country}
+                                        onValueChange={(value) => handleFormChange("country", value)}
+                                    >
+                                        <SelectTrigger id="country" className="h-12 rounded-none border-2 border-gray-200 focus:border-blue-900 focus:ring-0">
+                                            <SelectValue placeholder="Select a country" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-none">
+                                            {countries.map((country) => (
+                                                <SelectItem key={country} value={country}>
+                                                    {country}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="category" className="font-medium">Category</Label>
-                                <Select
-                                    value={formData.category}
-                                    onValueChange={(value) => handleFormChange("category", value)}
-                                >
-                                    <SelectTrigger id="category" className="h-10">
-                                        <SelectValue placeholder="Select a category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.map((category) => (
-                                            <SelectItem key={category._id} value={category.categoryName}>
-                                                {category.categoryName}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="tag" className="font-medium">Tag</Label>
-                                <Input
-                                    id="tag"
-                                    placeholder="Enter a tag"
-                                    value={formData.tag}
-                                    onChange={(e) => handleFormChange("tag", e.target.value)}
-                                    className="h-10"
+                                <Label htmlFor="tags" className="font-semibold text-gray-800 flex items-center">
+                                    <Tag className="mr-2" size={16} />
+                                    Tags
+                                </Label>
+                                <TagsInput 
+                                    value={formData.tags}
+                                    onChange={(tags) => handleFormChange("tags", tags)}
                                 />
+                                <p className="text-xs text-gray-500 mt-1">Press Enter or comma to add a tag</p>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="country" className="font-medium">Country</Label>
-                                <Select
-                                    value={formData.country}
-                                    onValueChange={(value) => handleFormChange("country", value)}
-                                >
-                                    <SelectTrigger id="country" className="h-10">
-                                        <SelectValue placeholder="Select a country" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {countries.map((country) => (
-                                            <SelectItem key={country} value={country}>
-                                                {country}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="context" className="font-medium">Context</Label>
+                                <Label htmlFor="context" className="font-semibold text-gray-800">Context</Label>
                                 <Textarea
                                     id="context"
                                     placeholder="Provide additional context for your debate topic"
                                     value={formData.context}
                                     onChange={(e) => handleFormChange("context", e.target.value)}
-                                    rows={4}
-                                    className="resize-none"
+                                    rows={5}
+                                    className="resize-none rounded-none border-2 border-gray-200 focus:border-blue-900 focus:ring-0"
                                 />
                             </div>
 
-                            <div className="flex justify-end pt-4">
-                                <Button
-                                    onClick={handleSubmit}
-                                    className="bg-blue-800 hover:bg-blue-900 text-white px-6"
-                                >
-                                    Submit Proposal
-                                </Button>
-                            </div>
+                            {formData.title.length > 100 && (
+                                <div className="bg-red-50 border-l-4 border-red-500 p-4 flex items-start">
+                                    <AlertTriangle className="text-red-500 mr-2 mt-1 flex-shrink-0" size={18} />
+                                    <p className="text-sm text-red-700">
+                                        Title exceeds the maximum of 100 characters. Please shorten it.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
+                    <CardFooter className="bg-gray-50 border-t px-6 py-4 flex justify-between">
+                        <Button 
+                            variant="outline" 
+                            className="rounded-none border-2 border-gray-300 hover:bg-gray-100 text-gray-700"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleSubmit}
+                            className="bg-blue-900 hover:bg-blue-800 text-white px-6 rounded-none"
+                            disabled={formData.title.length > 100}
+                        >
+                            Submit Proposal
+                        </Button>
+                    </CardFooter>
                 </Card>
+                
+                <div className="mt-6 text-center text-sm text-gray-500">
+                    All submissions are reviewed by our editorial team before publication
+                </div>
             </div>
         </div>
     );

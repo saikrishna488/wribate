@@ -47,9 +47,9 @@ const SingleWribate = () => {
     startDate: "",
     durationDays: 1,
     category: debate?.category || "",
-    country: "",
+    country: debate?.country || "",
     institution: "",
-    context: "",
+    context: debate?.title || "",
     scope: "Open",
     type: "Free",
     prizeAmount: "",
@@ -122,9 +122,6 @@ const SingleWribate = () => {
     }
   };
 
-
-  
-
   return (
     <div className="w-full max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center mb-8">
@@ -133,6 +130,7 @@ const SingleWribate = () => {
           <p className="text-gray-600 mt-1">Set up your debate parameters, invite participants, and establish rules</p>
         </div>
         <button
+          type="button" // Explicitly set button type to prevent form submission
           onClick={() => setPreviewMode(!previewMode)}
           className="bg-white border-2 border-blue-900 text-blue-900 font-bold py-2 px-6 flex items-center"
         >
@@ -143,60 +141,47 @@ const SingleWribate = () => {
       {previewMode ? (
         <DebatePreview formData={formData} imagePreview={imagePreview} setPreviewMode={setPreviewMode} />
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white shadow-lg">
+        <div className="bg-white shadow-lg">
           <NavigationBar setCurrentSection={setCurrentSection} currentSection={currentSection} />
 
           <div className="p-6">
             {/* Section 1: Debate Information */}
             {currentSection === 1 && (
-              <DebateInfomation  formData={formData} imagePreview={imagePreview} handleInputChange={handleInputChange} handleFileUpload={handleFileUpload} data={data} user={user} setCurrentSection={setCurrentSection}/>
+              <DebateInfomation 
+                formData={formData} 
+                imagePreview={imagePreview} 
+                handleInputChange={handleInputChange} 
+                handleFileUpload={handleFileUpload} 
+                data={data} 
+                user={user} 
+                setCurrentSection={setCurrentSection}
+              />
             )}
 
             {/* Section 2: Participants */}
             {currentSection === 2 && (
-              <Participants formData={formData} handleInputChange={handleInputChange} setCurrentSection={setCurrentSection}/>
+              <Participants 
+                formData={formData} 
+                handleInputChange={handleInputChange} 
+                setCurrentSection={setCurrentSection}
+              />
             )}
 
             {/* Section 3: Settings & Schedule */}
             {currentSection === 3 && (
-             <Settings formData={formData} handleInputChange={handleInputChange} setCurrentSection={setCurrentSection}  handleToggleChange={handleToggleChange} isLoading={isLoading}/>
+              <form onSubmit={handleSubmit}>
+                <Settings 
+                  formData={formData} 
+                  handleInputChange={handleInputChange} 
+                  setCurrentSection={setCurrentSection}  
+                  handleToggleChange={handleToggleChange} 
+                  isLoading={isLoading}
+                />
+              </form>
             )}
           </div>
-        </form>
-      )}
-
-      {/* Floating Preview Box (appears when not in preview mode) */}
-      {/* {!previewMode && (
-        <div className="fixed bottom-6 right-6 bg-white shadow-lg border border-gray-200 p-4 max-w-xs">
-          <h3 className="font-bold text-gray-800 mb-2 border-b border-gray-200 pb-2">Quick Preview</h3>
-          <div className="text-sm">
-            <p className="font-bold text-gray-900 truncate">{formData.title || "Untitled Debate"}</p>
-            <p className="text-gray-600 text-xs mb-2 truncate">{formData.context || "No context provided"}</p>
-            
-            <div className="flex items-center mb-1 text-xs">
-              <Calendar size={12} className="text-blue-900 mr-1" />
-              <span>{formData.startDate ? new Date(formData.startDate).toLocaleDateString() : "Date not set"}</span>
-            </div>
-            
-            <div className="flex mt-2">
-              <span className={`px-2 py-1 text-xs ${formData.scope === "Private" ? "bg-gray-200" : "bg-green-100 text-green-800"}`}>
-                {formData.scope}
-              </span>
-              <span className="mx-1"></span>
-              <span className={`px-2 py-1 text-xs ${formData.type === "Sponsored" ? "bg-yellow-100 text-yellow-800" : "bg-gray-200"}`}>
-                {formData.type}
-              </span>
-            </div>
-            
-            <button 
-              onClick={() => setPreviewMode(true)}
-              className="w-full mt-3 bg-blue-900 text-white text-xs font-bold py-2 px-3 flex items-center justify-center"
-            >
-              Full Preview <ChevronRight size={12} className="ml-1" />
-            </button>
-          </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 };
