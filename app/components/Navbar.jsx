@@ -572,11 +572,11 @@ export default function Navbar() {
                                     <h4 className="font-medium text-gray-800 line-clamp-1">{wribate.title}</h4>
                                     <div className="flex items-center mt-1.5">
                                       <span className="px-2 py-0.5 inline-flex text-xs leading-5 font-medium rounded-full bg-gray-100 text-gray-800">
-                                        User 1
+                                        {wribate.leadFor}
                                       </span>
                                       <span className="mx-1.5 px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-xs font-medium">VS</span>
                                       <span className="px-2 py-0.5 inline-flex text-xs leading-5 font-medium rounded-full bg-gray-100 text-gray-800">
-                                        User 2
+                                        {wribate.leadAgainst}
                                       </span>
                                     </div>
                                   </div>
