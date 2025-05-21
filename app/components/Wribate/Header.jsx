@@ -43,7 +43,7 @@ const Header = ({data, setShowSharePopup}) => {
                 <div className="flex flex-wrap gap-3 sm:gap-4">
                     <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
                         <Eye size={14} className="mr-1" />
-                        <span>{Math.ceil(Math.random() * 1000)}</span>
+                        <span>{data?.data?.views}</span>
                     </button>
                     <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
                         <FaComments size={14} className="mr-1" />

@@ -71,7 +71,7 @@ export default function Sidebar() {
         },
         {
             icon: <TbViewfinder className="w-5 h-5" />,
-            label: 'Discover Wribates',
+            label: 'Explore Topics',
             href: '/propose-wribate',
         },
         {

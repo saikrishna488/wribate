@@ -148,7 +148,7 @@ export default function LaunchDialog({ isOpen, onClose, debate }) {
                                     <ThumbsDown size={12} className={sideColor} />
                                 )}
                                 <span className={`text-xs font-medium ${sideColor}`}>
-                                    {user.side === "for" ? "Supporting" : "Opposing"}
+                                    {user.side === "for" ? "For" : "Against"}
                                 </span>
                             </div>
                         </div>
