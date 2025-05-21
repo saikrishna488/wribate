@@ -19,7 +19,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Search states
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState({ users: [], wribates: [], discoverWribates: [] });
@@ -48,7 +48,7 @@ export default function Navbar() {
         setShowDropdown(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -72,28 +72,28 @@ export default function Navbar() {
   const toggleSidebar = () => {
     setExpand(!expand);
   };
-  
+
   // Search functionality
   const handleSearchInput = async (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    
+
     if (!query.trim()) {
       setShowDropdown(false);
       setSearchResults({ users: [], wribates: [], discoverWribates: [] });
       return;
     }
-    
+
     setLoading(true);
     setShowDropdown(true);
-    
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/search?query=${encodeURIComponent(query)}`,
         { headers: { 'Content-Type': 'application/json' } }
       );
       const data = await response.json();
-      
+
       if (data.success) {
         setSearchResults(data.data);
       }
@@ -104,7 +104,7 @@ export default function Navbar() {
       setLoading(false);
     }
   };
-  
+
   // Search form submission
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -173,8 +173,8 @@ export default function Navbar() {
                   <Search className="h-4 w-4 text-gray-400" />
                 </div>
                 {searchQuery.length > 0 && (
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       setSearchQuery('');
                       setSearchResults({ users: [], wribates: [], discoverWribates: [] });
@@ -186,13 +186,13 @@ export default function Navbar() {
                   </button>
                 )}
               </form>
-              
+
               {/* Desktop dropdown - Enhanced styling */}
               {showDropdown && (
-                <div 
+                <div
                   className="absolute left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-[80vh] overflow-y-auto animate-fadeIn"
 
-                  style={{ 
+                  style={{
                     marginTop: '8px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
                     top: "100%"
@@ -214,13 +214,13 @@ export default function Navbar() {
                           <ul className="py-2">
                             {searchResults.users.map((user) => (
                               <li key={user._id} className="px-1">
-                                <button 
+                                <button
                                   onClick={() => handleItemClick(`/profile/${user.userName}`)}
                                   className="flex items-center w-full p-2.5 transition-all duration-150 hover:bg-blue-50 active:bg-blue-100 rounded-md"
                                 >
                                   <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-200">
                                     {user.profilePhoto ? (
-                                      <img 
+                                      <img
                                         src={user.profilePhoto || '/default-avatar.png'}
                                         alt={user.name || 'User'}
                                         className="w-full h-full object-cover"
@@ -231,7 +231,7 @@ export default function Navbar() {
                                   </div>
                                   <div className="ml-3 overflow-hidden">
                                     <p className="font-medium text-gray-800">{user.name}</p>
-                                    <p className="text-xs text-gray-500 truncate">@{user.userName}</p>
+                                    <p className="text-xs text-left text-gray-500 truncate">@{user.userName}</p>
                                   </div>
                                 </button>
                               </li>
@@ -239,7 +239,7 @@ export default function Navbar() {
                           </ul>
                         </div>
                       )}
-                      
+
                       {/* Wribates Section - Enhanced header styling */}
                       {searchResults.wribates?.length > 0 && (
                         <div className="border-b border-gray-300">
@@ -263,11 +263,11 @@ export default function Navbar() {
                                       <h4 className="font-medium text-gray-800 line-clamp-1">{wribate.title}</h4>
                                       <div className="flex items-center mt-1.5">
                                         <span className="px-2 py-0.5 inline-flex text-xs leading-5 font-medium rounded-full bg-gray-100 text-gray-800">
-                                          User 1
+                                          {wribate.leadFor}
                                         </span>
                                         <span className="mx-1.5 px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-xs font-medium">VS</span>
                                         <span className="px-2 py-0.5 inline-flex text-xs leading-5 font-medium rounded-full bg-gray-100 text-gray-800">
-                                          User 2
+                                          {wribate.leadAgainst}
                                         </span>
                                       </div>
                                     </div>
@@ -278,7 +278,7 @@ export default function Navbar() {
                           </ul>
                         </div>
                       )}
-                      
+
                       {/* Discover Wribates Section - Enhanced header styling */}
                       {searchResults.discoverWribates?.length > 0 && (
                         <div>
@@ -311,21 +311,21 @@ export default function Navbar() {
                           </ul>
                         </div>
                       )}
-                      
+
                       {/* No Results Message */}
-                      {searchQuery.trim() && 
-                       !searchResults.users?.length && 
-                       !searchResults.wribates?.length && 
-                       !searchResults.discoverWribates?.length && (
-                        <div className="p-8 text-center">
-                          <div className="inline-block p-3 mb-3 rounded-full bg-gray-100">
-                            <Search className="h-6 w-6 text-gray-400" />
+                      {searchQuery.trim() &&
+                        !searchResults.users?.length &&
+                        !searchResults.wribates?.length &&
+                        !searchResults.discoverWribates?.length && (
+                          <div className="p-8 text-center">
+                            <div className="inline-block p-3 mb-3 rounded-full bg-gray-100">
+                              <Search className="h-6 w-6 text-gray-400" />
+                            </div>
+                            <p className="text-gray-600 font-medium">No results found for "{searchQuery}"</p>
+                            <p className="text-sm text-gray-500 mt-1">Try a different search term</p>
                           </div>
-                          <p className="text-gray-600 font-medium">No results found for "{searchQuery}"</p>
-                          <p className="text-sm text-gray-500 mt-1">Try a different search term</p>
-                        </div>
-                      )}
-                      
+                        )}
+
                       {/* See All Link */}
                       {searchQuery.trim() && (searchResults.users?.length > 0 || searchResults.wribates?.length > 0 || searchResults.discoverWribates?.length > 0) && (
                         <div className="p-3 border-t border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors">
@@ -503,7 +503,7 @@ export default function Navbar() {
                 <Search className="h-4 w-4 text-gray-400" />
               </div>
             </form>
-            
+
             {/* Mobile dropdown with enhanced styling */}
             {showDropdown && (
               <div className="absolute left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 max-h-[60vh] overflow-y-auto z-[9999]">
@@ -523,13 +523,13 @@ export default function Navbar() {
                         <ul className="py-2">
                           {searchResults.users.map((user) => (
                             <li key={user._id} className="px-1">
-                              <button 
+                              <button
                                 onClick={() => handleItemClick(`/profile/${user.userName}`)}
                                 className="flex items-center w-full p-2.5 transition-all duration-150 hover:bg-blue-50 active:bg-blue-100 rounded-md"
                               >
                                 <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-200">
                                   {user.profilePhoto ? (
-                                    <img 
+                                    <img
                                       src={user.profilePhoto || '/default-avatar.png'}
                                       alt={user.name || 'User'}
                                       className="w-full h-full object-cover"
@@ -548,7 +548,7 @@ export default function Navbar() {
                         </ul>
                       </div>
                     )}
-                    
+
                     {/* Wribates Section - Enhanced styling */}
                     {searchResults.wribates?.length > 0 && (
                       <div className="border-b border-gray-300">
@@ -587,7 +587,7 @@ export default function Navbar() {
                         </ul>
                       </div>
                     )}
-                    
+
                     {/* Discover Wribates Section - Enhanced styling */}
                     {searchResults.discoverWribates?.length > 0 && (
                       <div>
@@ -620,17 +620,17 @@ export default function Navbar() {
                         </ul>
                       </div>
                     )}
-                    
+
                     {/* No Results Message */}
-                    {searchQuery.trim() && 
-                     !searchResults.users?.length && 
-                     !searchResults.wribates?.length && 
-                     !searchResults.discoverWribates?.length && (
-                      <div className="p-6 text-center">
-                        <p className="text-gray-500">No results found for "{searchQuery}"</p>
-                      </div>
-                    )}
-                    
+                    {searchQuery.trim() &&
+                      !searchResults.users?.length &&
+                      !searchResults.wribates?.length &&
+                      !searchResults.discoverWribates?.length && (
+                        <div className="p-6 text-center">
+                          <p className="text-gray-500">No results found for "{searchQuery}"</p>
+                        </div>
+                      )}
+
                     {/* See All Link */}
                     {searchQuery.trim() && (searchResults.users?.length > 0 || searchResults.wribates?.length > 0 || searchResults.discoverWribates?.length > 0) && (
                       <div className="p-3 border-t border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors">

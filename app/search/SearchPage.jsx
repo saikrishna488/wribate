@@ -246,11 +246,11 @@ export default function SearchPage() {
                         <h3 className="font-bold text-xl text-gray-800">{wribate.title}</h3>
                         <div className="flex items-center mt-2">
                           <span className="px-3 py-1 inline-flex text-sm leading-5 font-medium rounded-full bg-gray-100 text-gray-800">
-                            {wribate.forEmail ? maskEmail(wribate.forEmail) : "User 1"}
+                            {wribate.leadFor}
                           </span>
                           <span className="mx-2 px-2 py-0.5 bg-gray-200 text-gray-700 rounded font-medium">VS</span>
                           <span className="px-3 py-1 inline-flex text-sm leading-5 font-medium rounded-full bg-gray-100 text-gray-800">
-                            {wribate.againstEmail ? maskEmail(wribate.againstEmail) : "User 2"}
+                            {wribate.leadAgainst}
                           </span>
                         </div>
                       </div>

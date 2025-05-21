@@ -144,7 +144,7 @@ const WribateProposalForm = () => {
                 return;
             }
 
-            if (formData.context.length > 350) {
+            if (formData.context.length > 500) {
                 toast.error("You have exceeded length of 350 chars in context");
                 return;
             }
@@ -183,7 +183,7 @@ const WribateProposalForm = () => {
                     <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-tight">PROPOSE A WRIBATE</h1>
                     <div className="h-1 w-24 bg-blue-900 mt-2"></div>
                     <p className="mt-3 text-gray-600 font-medium">
-                        Create a thoughtful debate topic for the Wribate community
+                        Create a thoughtful wribate topic for the Wribate community
                     </p>
                 </div>
 
@@ -194,7 +194,7 @@ const WribateProposalForm = () => {
                             New Wribate Submission
                         </CardTitle>
                         <CardDescription className="text-gray-600">
-                            Fill in the form below with your debate proposal details
+                            Fill in the form below with your wribate proposal details
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6 px-6">
@@ -282,6 +282,10 @@ const WribateProposalForm = () => {
                                     rows={5}
                                     className="resize-none rounded-none border-2 border-gray-200 focus:border-blue-900 focus:ring-0"
                                 />
+                                <div className="text-xs text-gray-500 flex justify-between mt-1">
+                                    <span>Be clear and concise</span>
+                                    <span>{formData.context.length}/500 characters</span>
+                                </div>
                             </div>
 
                             {formData.title.length > 175 && (

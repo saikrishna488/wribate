@@ -46,27 +46,28 @@ const CreateWribateForm = () => {
   return (
     <div className=" flex relative justify-center gap-4 items-start flex-col md:flex-row">
       <div className="w-full md:w-[75%]">
-        {/* <div className="w-full flex flex-row justify-center md:gap-20 gap-4 md:p-2">
-          <button
-            className={`p-2 border border-gray-300 rounded  ${
-              type == "single" ? "bg-blue-200" : "bg-white"
-            }`}
-            onClick={() => setType("single")}
-          >
-            Single wribate
-          </button>
+        <div className="w-full flex flex-row justify-center md:gap-20 gap-4 md:p-2">
 
-          {user?.userRole !== "usser" && (
-            <button
-              className={`p-2 border border-gray-300 rounded  ${
-                type == "batched" ? "bg-blue-200" : "bg-white"
-              }`}
-              onClick={() => setType("batched")}
-            >
-              Batched Wribate
-            </button>
+
+          {user?.userRole !== "user" && (
+            <>
+              <button
+                className={`p-2 border border-gray-300 rounded  ${type == "single" ? "bg-blue-200" : "bg-white"
+                  }`}
+                onClick={() => setType("single")}
+              >
+                Single wribate
+              </button>
+              <button
+                className={`p-2 border border-gray-300 rounded  ${type == "batched" ? "bg-blue-200" : "bg-white"
+                  }`}
+                onClick={() => setType("batched")}
+              >
+                Batched Wribate
+              </button>
+            </>
           )}
-        </div> */}
+        </div>
         {type == "single" && <SingleWribate />}
         {type == "batched" && <BatchedWribate />}
       </div>
