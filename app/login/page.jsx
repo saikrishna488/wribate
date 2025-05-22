@@ -15,8 +15,8 @@ import { FaXTwitter, FaFacebook, FaYahoo, FaApple, FaGithub } from "react-icons/
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("alluarjun@gmail.com");
-  const [password, setPassword] = useState("alluarjun123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
   const [login, { isLoading }] = useLoginMutation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);

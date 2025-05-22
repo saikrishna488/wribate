@@ -540,7 +540,7 @@ export default function Navbar() {
                                 </div>
                                 <div className="ml-3 overflow-hidden">
                                   <p className="font-medium text-gray-800">{user.name}</p>
-                                  <p className="text-xs text-gray-500 truncate">@{user.userName}</p>
+                                  <p className="text-xs text-left text-gray-500 truncate">@{user.userName}</p>
                                 </div>
                               </button>
                             </li>
