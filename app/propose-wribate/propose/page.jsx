@@ -297,11 +297,11 @@ const WribateProposalForm = () => {
                                 </div>
                             )}
 
-                            {formData.context.length > 350 && (
+                            {formData.context.length > 500 && (
                                 <div className="bg-red-50 border-l-4 border-red-500 p-4 flex items-start">
                                     <AlertTriangle className="text-red-500 mr-2 mt-1 flex-shrink-0" size={18} />
                                     <p className="text-sm text-red-700">
-                                        Context exceeds the maximum of 350 characters. Please shorten it.
+                                        Context exceeds the maximum of 500 characters. Please shorten it.
                                     </p>
                                 </div>
                             )}
@@ -317,7 +317,7 @@ const WribateProposalForm = () => {
                         <Button
                             onClick={handleSubmit}
                             className="bg-blue-900 hover:bg-blue-800 text-white px-6 rounded-none"
-                            disabled={formData.title.length > 100}
+                            disabled={formData.title.length > 175}
                         >
                             Submit Proposal
                         </Button>
