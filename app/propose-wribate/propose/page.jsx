@@ -180,7 +180,7 @@ const WribateProposalForm = () => {
         <div className="min-h-screen bg-gray-100 py-8">
             <div className="max-w-4xl mx-auto px-4">
                 <div className="mb-8 border-l-4 border-blue-900 pl-4">
-                    <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-tight">PROPOSE A WRIBATE</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-tight">PROPOSE A WRIBATE TOPIC</h1>
                     <div className="h-1 w-24 bg-blue-900 mt-2"></div>
                     <p className="mt-3 text-gray-600 font-medium">
                         Create a thoughtful wribate topic for the Wribate community
@@ -319,7 +319,7 @@ const WribateProposalForm = () => {
                             className="bg-blue-900 hover:bg-blue-800 text-white px-6 rounded-none"
                             disabled={formData.title.length > 175}
                         >
-                            Submit Proposal
+                            Submit Topic
                         </Button>
                     </CardFooter>
                 </Card>
