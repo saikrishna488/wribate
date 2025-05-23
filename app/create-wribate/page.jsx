@@ -6,32 +6,12 @@ import { useSelector } from "react-redux";
 import { useAtom } from "jotai";
 import { userAtom } from "../states/GlobalStates";
 import { useRouter } from "next/navigation";
+import { AdSpaceContent } from "../components/Advertisements/Advertisement";
 
 const CreateWribateForm = () => {
   const [type, setType] = useState("single");
-  // const { user } = useSelector((state) => state.auth);
   const [user] = useAtom(userAtom);
   const router = useRouter(userAtom);
-
-  const ads = [
-    {
-      src: "/Ads/01.png",
-      alt: "Ad 1",
-      link: "https://sponsor1.com"
-    },
-    {
-      src: "/Ads/02.png",
-      alt: "Ad 2",
-      link: "https://sponsor2.com"
-    },
-    {
-      src: "/Ads/03.png",
-      alt: "Ad 3",
-      link: "https://sponsor3.com"
-    }
-  ];
-
-
 
   useEffect(() => {
     if (!user?._id) {
@@ -44,23 +24,19 @@ const CreateWribateForm = () => {
   }
 
   return (
-    <div className=" flex relative justify-center gap-4 items-start flex-col md:flex-row">
+    <div className="flex relative justify-center gap-4 items-start flex-col md:flex-row">
       <div className="w-full md:w-[75%]">
         <div className="w-full flex flex-row justify-center md:gap-20 gap-4 md:p-2">
-
-
           {user?.userRole !== "user" && (
             <>
               <button
-                className={`p-2 border border-gray-300 rounded  ${type == "single" ? "bg-blue-200" : "bg-white"
-                  }`}
+                className={`p-2 border border-gray-300 rounded  ${type == "single" ? "bg-blue-200" : "bg-white"}`}
                 onClick={() => setType("single")}
               >
                 Single wribate
               </button>
               <button
-                className={`p-2 border border-gray-300 rounded  ${type == "batched" ? "bg-blue-200" : "bg-white"
-                  }`}
+                className={`p-2 border border-gray-300 rounded  ${type == "batched" ? "bg-blue-200" : "bg-white"}`}
                 onClick={() => setType("batched")}
               >
                 Batched Wribate
@@ -72,20 +48,15 @@ const CreateWribateForm = () => {
         {type == "batched" && <BatchedWribate />}
       </div>
       <div className="md:w-[25%] p-4 space-y-4">
-        {ads.map((ad, index) => (
-          <a
-            key={index}
-            href={ad.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block mb-4"
-          >
-            <img
-              src={ad.src}
-              alt={ad.alt}
-              className="w-full h-auto shadow-md hover:opacity-90 transition"
-            />
-          </a>
+        {[0, 1, 2].map((index) => (
+          <div key={index}>
+            <div className="text-center mb-2">
+              <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
+            </div>
+            <div className="overflow-hidden hover:shadow-md transition-shadow">
+              <AdSpaceContent startingAd={index} />
+            </div>
+          </div>
         ))}
       </div>
     </div>

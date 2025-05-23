@@ -1,6 +1,7 @@
 import React from "react";
 import ArticleCard from "../ArticleCard";
 import { formatDistanceToNow } from "date-fns";
+import { AdSpaceContent } from "../Advertisements/Advertisement";
 
 const NewsSections = ({
   mainWribate,
@@ -18,26 +19,6 @@ const NewsSections = ({
       return "";
     }
   };
-
-  const ads = [
-    {
-      src: "/Ads/01.png",
-      alt: "Ad 1",
-      link: "https://sponsor1.com"
-    },
-    {
-      src: "/Ads/02.png",
-      alt: "Ad 2",
-      link: "https://sponsor2.com"
-    },
-    {
-      src: "/Ads/03.png",
-      alt: "Ad 3",
-      link: "https://sponsor3.com"
-    }
-  ];
-
-
 
   return (
     <div className="flex flex-col h-[80vh] lg:flex-row justify-between md:p-2 p-1">
@@ -158,20 +139,15 @@ const NewsSections = ({
 
       {/* Featured News Column - individually scrollable */}
       <div className="md:w-[20%] border-l border-gray-400 p-2 space-y-4">
-        {ads.map((ad, index) => (
-          <a
-            key={index}
-            href={ad.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block mb-4"
-          >
-            <img
-              src={ad.src}
-              alt={ad.alt}
-              className="w-full h-auto shadow-md hover:opacity-90 transition"
-            />
-          </a>
+        {[0, 1, 2].map((index) => (
+          <div key={index}>
+            <div className="text-center mb-2">
+              <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
+            </div>
+            <div className="overflow-hidden hover:shadow-md transition-shadow">
+              <AdSpaceContent startingAd={index} />
+            </div>
+          </div>
         ))}
       </div>
     </div>
