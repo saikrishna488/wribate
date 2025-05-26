@@ -1,0 +1,35 @@
+import SectionHeader from './SectionHeader'
+import WribateCard from './WribateCard'
+
+const FreeWribates = ({ wribates, activeCategory, handleViewMore, handleCardClick }) => {
+
+    // Filter wribates based on Type and Status
+    const freeWribates = wribates.filter(wribate =>
+        (activeCategory === 'All' || wribate.category === activeCategory) &&
+        wribate.type === "Free"
+    );
+    return (
+        <>
+            {freeWribates.length > 0 && (
+                <div className="mb-8 border-t pt-2 border-gray-300">
+                    <SectionHeader
+                        title="Free"
+                        borderColor="border-green-700"
+                        onViewMore={() => handleViewMore(activeCategory, "Free")}
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {freeWribates.slice(0, 4).map((wribate) => (
+                            <WribateCard
+                                key={wribate._id}
+                                wribate={wribate}
+                                onClick={() => handleCardClick(wribate._id)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+        </>
+    )
+}
+
+export default FreeWribates

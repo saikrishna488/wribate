@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { User, PlayCircle, ThumbsUp, ThumbsDown } from "lucide-react";
+import { User, PlayCircle, ThumbsUp, ThumbsDown,Rocket } from "lucide-react";
 import { debateAtom } from "../../states/GlobalStates";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,20 +16,23 @@ function DebateCard({ debate, user, setHook, hook }) {
   const [propDebate, setPropDebate] = useAtom(debateAtom);
   const [forUsers, setForUsers] = useState([]);
   const [againstUsers, setAgainstUsers] = useState([]);
+  const [readyToWribate, setReadyToWribate] = useState(null);
   const [open, setOpen] = useState(false)
   const router = useRouter();
 
   useEffect(() => {
     const fetchUsers = async (side) => {
       try {
-        const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/getusers?wribateId=' + encodeURIComponent(debate._id)+'&side='+encodeURIComponent(side))
+        const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/getusers?wribateId=' + encodeURIComponent(debate._id) + '&side=' + encodeURIComponent(side))
         const data = res.data;
 
+        console.log(data)
+
         if (data.res) {
-          if(side=="for"){
+          if (side == "for") {
             setForUsers(data.users)
           }
-          else{
+          else {
             setAgainstUsers(data.users)
           }
         }
@@ -63,6 +66,7 @@ function DebateCard({ debate, user, setHook, hook }) {
         toast.success("Voted successfully");
         setVotes((prev) => prev + 1);
         vote == "for" ? debate.votesFor += 1 : debate.votesAgainst += 1
+        setReadyToWribate(data.ready)
       } else {
         toast.success("Already voted!");
       }
@@ -71,6 +75,26 @@ function DebateCard({ debate, user, setHook, hook }) {
       console.log(err);
     }
   };
+
+  const handleReadyToWribate = async ()=>{
+    try{
+
+      const res = axios.post(process.env.NEXT_PUBLIC_BACKEND_URL+'/readytowribate',{
+        userId:user?._id,
+        proposeId:debate._id
+      })
+
+      if(res.data){
+        toast.success("Find Users Here!")
+        setOpen(true)
+      }
+
+    }
+    catch(err){
+      console.log(err);
+      toast.error("Something went wrong");
+    }
+  }
 
   const handleLaunch = () => {
     setPropDebate(debate);
@@ -97,24 +121,70 @@ function DebateCard({ debate, user, setHook, hook }) {
 
     return `${shortNumber.toFixed(1).replace(/\.0$/, "")}${units[index]}`;
   }
-  
+
+
+  console.log(debate.ready, debate.title)
+
   return (
-    <div onClick={()=>setOpen(!open)} className="bg-white border cursor-pointer border-gray-200 shadow-sm flex flex-col h-full">
+    <div onClick={() => setOpen(!open)} className="bg-white border-1 cursor-pointer border-gray-300 hover:shadow-xl shadow-md flex flex-col h-full">
       <LaunchDialog
-        isOpen = {open}
+        isOpen={open}
         onClose={setOpen}
         debate={debate}
       />
       {/* Category banner */}
-      <div className="bg-blue-900 text-white text-xs px-3 py-1 uppercase tracking-wider font-medium">
+      {/* <div className="bg-blue-900 text-white text-xs px-3 py-1 uppercase tracking-wider font-medium">
         {debate.category}
-      </div>
+      </div> */}
 
       <div className="p-4 flex flex-col h-full">
         {/* User info row with launch button - fixed height */}
+
+        {/* Title with Image - fixed height */}
+        <div className="min-h-[3rem] mb-2 flex items-start gap-3">
+          {/* Small image rectangle */}
+          <div className="w-16 h-10 flex-shrink-0 rounded overflow-hidden border border-gray-200">
+            {debate.image ? (
+              <img
+                src={debate.image}
+                alt="Debate topic"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100"></div>
+            )}
+          </div>
+
+          {/* Title */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-md font-bold text-gray-900 leading-tight line-clamp-2">{debate.title}</h2>
+          </div>
+        </div>
+
+        {/* Context - fixed height */}
+        <div className="text-sm text-gray-700 border-l-4 border-gray-200 pl-3 min-h-[3rem] mb-2">
+          <p className="line-clamp-3">{truncatedContext}</p>
+        </div>
+
+        {/* Country and tags - fixed height */}
+        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 min-h-[2rem] mb-2">
+          <span className="text-blue-900 font-medium">{debate.country}</span>
+          <span>•</span>
+          <span className="text-blue-900 font-medium">{debate.category}</span>
+          <span>•</span>
+          <div className="flex flex-wrap gap-1">
+            {debate.tags &&
+              Array.isArray(debate.tags) &&
+              debate.tags.slice(0, 2).map((tag, index) => (
+                <Badge key={index} variant="outline" className="bg-gray-50 text-xs">
+                  {tag}
+                </Badge>
+              ))}
+          </div>
+        </div>
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={handleProfileClick}>
-            {debate.profilePhoto ? (
+          {/* <div className="flex items-center gap-2 cursor-pointer" onClick={handleProfileClick}>
+              {debate.profilePhoto ? (
               <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
                 <Image
                   src={debate.profilePhoto}
@@ -129,9 +199,21 @@ function DebateCard({ debate, user, setHook, hook }) {
                 <User size={16} className="text-gray-600" />
               </div>
             )}
-            <span className="font-medium text-sm text-gray-800">{debate.username || "Anonymous"}</span>
-          </div>
-          
+              <span className="font-medium text-sm text-gray-800">{debate.username || "Anonymous"}</span>
+            </div> */}
+          {
+            readyToWribate || debate.ready && (
+              <Button
+                onClick={handleReadyToWribate}
+                variant="default"
+                size="sm"
+                className="flex gap-1 items-center text-white bg-blue-900 hover:bg-blue-800"
+              >
+                <Rocket size={16} /> Ready To Wribate
+              </Button>
+            )
+          }
+
           <Button
             onClick={handleLaunch}
             variant="default"
@@ -140,29 +222,6 @@ function DebateCard({ debate, user, setHook, hook }) {
           >
             <PlayCircle size={16} /> Quick Launch
           </Button>
-        </div>
-
-        {/* Title - fixed height */}
-        <div className="min-h-[3rem] mb-2">
-          <h2 className="text-xl font-bold text-gray-900 leading-tight line-clamp-2">{debate.title}</h2>
-        </div>
-
-        {/* Context - fixed height */}
-        <div className="text-sm text-gray-700 border-l-4 border-gray-200 pl-3 min-h-[3rem] mb-2">
-          <p className="line-clamp-3">{truncatedContext}</p>
-        </div>
-
-        {/* Country and tags - fixed height */}
-        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 min-h-[2rem] mb-2">
-          <span className="font-medium">{debate.country}</span>
-          <span>•</span>
-          <div className="flex flex-wrap gap-1">
-            {debate.tags && Array.isArray(debate.tags) && debate.tags.map((tag, index) => (
-              <Badge key={index} variant="outline" className="bg-gray-50 text-xs">
-                {tag}
-              </Badge>
-            ))}
-          </div>
         </div>
 
         {/* For/Against buttons */}
@@ -185,7 +244,9 @@ function DebateCard({ debate, user, setHook, hook }) {
               <ThumbsDown size={14} /> Against {` ${formatLikes(debate.votesAgainst)}`}
             </Button>
           </div>
-          
+
+
+
           {/* User avatars for For/Against */}
           <div className="flex justify-between pt-2">
             {/* For users */}
@@ -246,6 +307,8 @@ function DebateCard({ debate, user, setHook, hook }) {
               </div>
             </div>
           </div>
+
+
         </div>
       </div>
     </div>

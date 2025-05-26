@@ -95,9 +95,10 @@ const SingleWribate = () => {
       wribateData.judges = [formData.judge1, formData.judge2, formData.judge3];
       delete wribateData.coverImage;
 
-      const istOffset = 5.5 * 60 * 60 * 1000;
-      const istDate = new Date(wribateData.startDate).getTime() + istOffset;
-      wribateData.startDate = new Date(istDate).toISOString();
+      // const istOffset = 5.5 * 60 * 60 * 1000;
+      // const istDate = new Date(wribateData.startDate).getTime() + istOffset;
+      // wribateData.startDate = new Date(istDate).toISOString();
+      wribateData.startDate = new Date(wribateData.startDate).toISOString();
 
       const response = await axios.post(
         process.env.NEXT_PUBLIC_BACKEND_URL + '/user/createWribate',
@@ -141,7 +142,7 @@ const SingleWribate = () => {
       {previewMode ? (
         <DebatePreview formData={formData} imagePreview={imagePreview} setPreviewMode={setPreviewMode} />
       ) : (
-        <div className="bg-white shadow-lg">
+        <div className="bg-white">
           <NavigationBar setCurrentSection={setCurrentSection} currentSection={currentSection} />
 
           <div className="p-6">

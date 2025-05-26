@@ -6,8 +6,6 @@ import { useAtom } from "jotai";
 
 
 // Components
-import Categories from "../../components/Home/Categories";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 
 import Arguments from '../../components/Wribate/Arguments'
 import Header from '../../components/Wribate/Header'

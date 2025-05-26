@@ -1,41 +1,75 @@
 import { useState, useEffect } from "react";
-import { formatUTCDate, getEventStatus } from "../../utils/dateFormat";
 
 const ProgressBar = ({ rounds }) => {
   const [progress, setProgress] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Get event status function
+  const getEventStatus = (startDate, endDate) => {
+    const now = Date.now();
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+
+    if (now < start) {
+      return "Upcoming Event";
+    } else if (now >= start && now <= end) {
+      return "Event Live";
+    } else {
+      return "Event Concluded";
+    }
+  };
+
+  // Get status color based on event status
+  const getStatusColor = () => {
+    const status = getEventStatus(rounds[0]?.startDate, rounds[2]?.endDate);
+    switch (status) {
+      case "Upcoming Event":
+        return "text-amber-600 bg-amber-50 border-amber-200";
+      case "Event Live":
+        return "text-green-600 bg-green-50 border-green-200";
+      case "Event Concluded":
+        return "text-gray-600 bg-gray-50 border-gray-200";
+      default:
+        return "text-blue-600 bg-blue-50 border-blue-200";
+    }
+  };
 
   useEffect(() => {
     const updateProgress = () => {
-      const IST_OFFSET = 5.5 * 60 * 60 * 1000; // 5 hours 30 minutes
-      
-      // Get the current IST time
-      const now = new Date().getTime() + IST_OFFSET;
-      
-      // Convert round start and end times to IST
+      const now = Date.now();
       const startTime = new Date(rounds[0].startDate).getTime();
       const endTime = new Date(rounds[2].endDate).getTime();
-      
-      // Check if dates are valid
+
       if (isNaN(startTime) || isNaN(endTime)) {
-        console.error("Invalid timestamps detected!", { startTime, endTime });
+        console.error("Invalid timestamps detected!");
         return;
       }
-      
+
       const totalDuration = endTime - startTime;
-      
+
       if (now < startTime) {
-        setProgress(0); // Before Round 1 starts
+        setProgress(0);
       } else if (now > endTime) {
-        setProgress(100); // After Round 3 ends
+        setProgress(100);
       } else {
-        const progressPercentage = ((now - startTime) / totalDuration) * 100;
-        setProgress(progressPercentage);
+        const elapsed = now - startTime;
+        const progressPercentage = (elapsed / totalDuration) * 100;
+        setProgress(Math.min(100, Math.max(0, progressPercentage)));
       }
     };
-    
-    updateProgress(); // Initial calculation
-    
-    // Update progress every minute
+
+    updateProgress();
     const intervalId = setInterval(updateProgress, 60000);
     return () => clearInterval(intervalId);
   }, [rounds]);
@@ -43,115 +77,249 @@ const ProgressBar = ({ rounds }) => {
   // Calculate marker positions
   const startTime = new Date(rounds[0].startDate).getTime();
   const endTime = new Date(rounds[2].endDate).getTime();
+  const totalDuration = endTime - startTime;
+  
   const roundPositions = rounds.map((round) => {
-    return (
-      ((new Date(round.startDate).getTime() - startTime) /
-        (endTime - startTime)) *
-      100
-    );
+    const roundTime = new Date(round.startDate).getTime();
+    const elapsed = roundTime - startTime;
+    const position = (elapsed / totalDuration) * 100;
+    return Math.min(100, Math.max(0, position));
   });
 
-  // Calculate midpoints between markers for round labels
+  // Calculate midpoints for round labels
   const midPoints = [
-    (0 + roundPositions[0]) / 2, // Between START and R1
-    (roundPositions[0] + roundPositions[1]) / 2, // Between R1 and R2
-    (roundPositions[1] + roundPositions[2]) / 2, // Between R2 and R3
-    (roundPositions[2] + 100) / 2  // Between R3 and END
+    roundPositions[0] / 2,
+    (roundPositions[0] + roundPositions[1]) / 2,
+    (roundPositions[1] + roundPositions[2]) / 2,
+    (roundPositions[2] + 100) / 2
   ];
 
-  // Format date and time separately
+  // Format date and time for local timezone
   const formatDateAndTime = (dateString) => {
     const date = new Date(dateString);
-    
-    // Format date part (May 14)
-    const datePart = date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
-    });
-    
-    // Format time part (12:00 AM)
-    const timePart = date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
+    const options = { 
+      month: 'short', 
+      day: 'numeric', 
+      hour: 'numeric', 
       minute: '2-digit',
-      hour12: true
-    });
+      hour12: true 
+    };
     
-    return { datePart, timePart };
+    return {
+      datePart: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      timePart: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      fullDate: date.toLocaleString('en-US', options)
+    };
   };
 
-  return (
-    <>
-      <div className="w-full p-6 rounded-lg shadow-md border border-gray-300 bg-white">
-        {/* Status indicator (removed duplicate heading) */}
-        <div className="mb-6">
-          <span className="text-base font-medium text-gray-700">
-            {getEventStatus(rounds[0]?.startDate, rounds[2]?.endDate)}
-          </span>
+  const roundLabels = ["Opening", "Rebuttals", "Closing"];
+  const roundFullLabels = ["Opening Remarks", "Rebuttals", "Closing Remarks"];
+
+  if (isMobile) {
+    return (
+      <div className="w-full bg-white border border-gray-200 shadow-sm">
+        {/* Mobile Header */}
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold text-gray-900">Event Timeline</h2>
+            <div className={`px-2 py-1 text-xs font-medium rounded border ${getStatusColor()}`}>
+              {getEventStatus(rounds[0]?.startDate, rounds[2]?.endDate)}
+            </div>
+          </div>
         </div>
-        
-        {/* START/END labels above timeline */}
-        <div className="flex justify-between mb-2">
-          <span className="font-bold text-lg text-blue-700">START</span>
-          <span className="font-bold text-lg text-blue-700">END</span>
-        </div>
-        
-        {/* Progress bar */}
-        <div className="relative w-full bg-gray-200 h-4 rounded-full mb-8">
-          {/* Progress fill */}
-          <div
-            className="h-4 bg-blue-600 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          ></div>
-          
-          {/* Round markers */}
-          {roundPositions.map((pos, index) => (
+
+        {/* Mobile Content */}
+        <div className="px-4 py-4">
+          {/* Progress Bar */}
+          <div className="relative w-full bg-gray-200 h-2 mb-4 rounded-full">
             <div
-              key={`marker-${index}`}
-              className="absolute h-8 w-2 bg-blue-800 top-1/2 transform -translate-y-1/2"
-              style={{ left: `${pos}%` }}
-            ></div>
-          ))}
-        </div>
-        
-        {/* Labels section with better spacing */}
-        <div className="relative w-full" style={{ height: "110px" }}>
-          {/* R1, R2, R3 labels */}
-          <div className="absolute text-blue-800 font-semibold transform -translate-x-1/2" style={{ left: `${roundPositions[0]}%`, top: '0px' }}>R1</div>
-          <div className="absolute text-blue-800 font-semibold transform -translate-x-1/2" style={{ left: `${roundPositions[1]}%`, top: '0px' }}>R2</div>
-          <div className="absolute text-blue-800 font-semibold transform -translate-x-1/2" style={{ left: `${roundPositions[2]}%`, top: '0px' }}>R3</div>
-          
-          {/* Round 1, Round 2, Round 3 labels */}
-          <div className="absolute text-gray-700 font-medium transform -translate-x-1/2" style={{ left: `${midPoints[1]}%`, top: '25px' }}>Round 1</div>
-          <div className="absolute text-gray-700 font-medium transform -translate-x-1/2" style={{ left: `${midPoints[2]}%`, top: '25px' }}>Round 2</div>
-          <div className="absolute text-gray-700 font-medium transform -translate-x-1/2" style={{ left: `${midPoints[3]}%`, top: '25px' }}>Round 3</div>
-          
-          {/* Date and time labels - moved up closer to R labels */}
-          {/* First date label shifted right by adding 2% to its position */}
-          <div className="absolute flex flex-col items-center transform -translate-x-1/2" 
-               style={{ left: `${roundPositions[0] + 2}%`, top: '50px' }}>
-            <div className="text-sm font-medium text-gray-600">{formatDateAndTime(rounds[0].startDate).datePart}</div>
-            <div className="text-xs text-gray-500">{formatDateAndTime(rounds[0].startDate).timePart}</div>
+              className="h-full bg-blue-600 transition-all duration-500 ease-out rounded-full"
+              style={{ width: `${progress}%` }}
+            />
+            
+            {/* Round Markers */}
+            {roundPositions.map((pos, index) => (
+              <div
+                key={`marker-${index}`}
+                className="absolute w-0.5 h-4 bg-blue-900 top-1/2 transform -translate-y-1/2 -translate-x-1/2"
+                style={{ left: `${pos}%` }}
+              />
+            ))}
           </div>
-          
-          <div className="absolute flex flex-col items-center transform -translate-x-1/2" style={{ left: `${roundPositions[1]}%`, top: '50px' }}>
-            <div className="text-sm font-medium text-gray-600">{formatDateAndTime(rounds[1].startDate).datePart}</div>
-            <div className="text-xs text-gray-500">{formatDateAndTime(rounds[1].startDate).timePart}</div>
+
+          {/* Round Cards */}
+          <div className="space-y-3">
+            {rounds.map((round, index) => {
+              const isActive = progress >= roundPositions[index] && (index === rounds.length - 1 || progress < roundPositions[index + 1]);
+              const isCompleted = progress > roundPositions[index];
+              
+              return (
+                <div
+                  key={`round-${index}`}
+                  className={`flex items-center p-3 rounded-lg border-2 transition-all ${
+                    isActive 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : isCompleted 
+                        ? 'border-green-200 bg-green-50' 
+                        : 'border-gray-200 bg-white'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mr-3 ${
+                    isActive 
+                      ? 'bg-blue-600 text-white' 
+                      : isCompleted 
+                        ? 'bg-green-600 text-white' 
+                        : 'bg-gray-300 text-gray-600'
+                  }`}>
+                    R{index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900 text-sm">
+                      {roundFullLabels[index]}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {formatDateAndTime(round.startDate).fullDate}
+                    </div>
+                  </div>
+                  {isActive && (
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-          
-          <div className="absolute flex flex-col items-center transform -translate-x-1/2" style={{ left: `${roundPositions[2]}%`, top: '50px' }}>
-            <div className="text-sm font-medium text-gray-600">{formatDateAndTime(rounds[2].startDate).datePart}</div>
-            <div className="text-xs text-gray-500">{formatDateAndTime(rounds[2].startDate).timePart}</div>
-          </div>
-          
-          {/* End date (far right) */}
-          <div className="absolute flex flex-col items-center text-right" style={{ right: '0px', top: '50px' }}>
-            <div className="text-sm font-medium text-gray-600">{formatDateAndTime(rounds[2].endDate).datePart}</div>
-            <div className="text-xs text-gray-500">{formatDateAndTime(rounds[2].endDate).timePart}</div>
+
+          {/* Event Duration */}
+          <div className="mt-4 pt-4 border-t border-gray-200 text-center">
+            <div className="text-xs text-gray-500">
+              Event Duration: {formatDateAndTime(rounds[0].startDate).fullDate} - {formatDateAndTime(rounds[2].endDate).fullDate}
+            </div>
           </div>
         </div>
       </div>
-    </>
+    );
+  }
+
+  // Desktop View
+  return (
+    <div className="w-full bg-white border border-gray-200 shadow-sm">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Event Timeline</h2>
+          <div className={`px-3 py-1 text-sm font-medium rounded border ${getStatusColor()}`}>
+            {getEventStatus(rounds[0]?.startDate, rounds[2]?.endDate)}
+          </div>
+        </div>
+      </div>
+
+      {/* Timeline Content */}
+      <div className="px-6 py-6">
+        {/* START/END Labels */}
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-sm font-semibold text-blue-900">START</span>
+          <span className="text-sm font-semibold text-blue-900">END</span>
+        </div>
+
+        {/* Round Labels */}
+        <div className="relative mb-4 h-6">
+          {roundFullLabels.map((label, index) => (
+            <div
+              key={`label-${index}`}
+              className="absolute text-xs font-medium text-gray-600 transform -translate-x-1/2 whitespace-nowrap"
+              style={{ left: `${midPoints[index + 1]}%` }}
+            >
+              {label}
+            </div>
+          ))}
+        </div>
+
+        {/* Progress Bar */}
+        <div className="relative w-full bg-gray-200 h-3 mb-6 rounded-full">
+          {/* Progress Fill */}
+          <div
+            className="h-full bg-blue-600 transition-all duration-500 ease-out rounded-full"
+            style={{ width: `${progress}%` }}
+          />
+
+          {/* Round Markers */}
+          {roundPositions.map((pos, index) => (
+            <div
+              key={`marker-${index}`}
+              className="absolute w-1 h-6 bg-blue-900 top-1/2 transform -translate-y-1/2 -translate-x-1/2 rounded"
+              style={{ left: `${pos}%` }}
+            >
+              {/* Round Number */}
+              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
+                <div className="w-6 h-6 bg-blue-900 text-white text-xs font-bold flex items-center justify-center rounded">
+                  R{index + 1}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Date/Time Labels */}
+        <div className="relative h-12">
+          {/* Start Date */}
+          <div className="absolute left-0 flex flex-col items-start">
+            <div className="text-sm font-medium text-gray-700">
+              {formatDateAndTime(rounds[0].startDate).datePart}
+            </div>
+            <div className="text-xs text-gray-500">
+              {formatDateAndTime(rounds[0].startDate).timePart}
+            </div>
+          </div>
+
+          {/* Round 2 Date (Center) */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+            <div className="text-sm font-medium text-gray-700">
+              {formatDateAndTime(rounds[1].startDate).datePart}
+            </div>
+            <div className="text-xs text-gray-500">
+              {formatDateAndTime(rounds[1].startDate).timePart}
+            </div>
+          </div>
+
+          {/* End Date */}
+          <div className="absolute right-0 flex flex-col items-end">
+            <div className="text-sm font-medium text-gray-700">
+              {formatDateAndTime(rounds[2].endDate).datePart}
+            </div>
+            <div className="text-xs text-gray-500">
+              {formatDateAndTime(rounds[2].endDate).timePart}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default ProgressBar;
+// Demo with sample data
+const App = ({rounds}) => {
+  const sampleRounds = [
+    {
+      startDate: "2025-05-26T14:00:00.000Z",
+      endDate: "2025-05-26T14:30:00.000Z"
+    },
+    {
+      startDate: "2025-05-26T15:00:00.000Z",
+      endDate: "2025-05-26T15:30:00.000Z"
+    },
+    {
+      startDate: "2025-05-26T16:00:00.000Z",
+      endDate: "2025-05-26T16:30:00.000Z"
+    }
+  ];
+
+  return (
+    <div className=" bg-gray-100">
+      <div className="w-full">
+        <ProgressBar rounds={rounds} />
+      </div>
+    </div>
+  );
+};
+
+export default App;
