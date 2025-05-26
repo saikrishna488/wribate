@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SearchX, MoreHorizontal, Loader, Search, ChevronDown } from "lucide-react";
@@ -17,6 +17,7 @@ import {
   DropdownMenuItem
 } from "@/components/ui/dropdown-menu";
 import DebateCard from '../components/Propose-Wribates/ProposeCard';
+import CountryDropdown from '../components/Propose-Wribates/CountryDropdown'
 
 export default function ProposeWribateContent() {
   const [debates, setDebates] = useState([]);
