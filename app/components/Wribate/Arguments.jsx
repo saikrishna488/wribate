@@ -8,6 +8,7 @@ import {
 } from "../../../app/services/authApi";
 import { Button } from "@/components/ui/button";
 import toast from 'react-hot-toast';
+import { AdSpaceContent, StaticAdvertisement } from '../Advertisements/Advertisement';
 
 // Replace direct import with dynamic import
 const ReactQuill = dynamic(() => import('react-quill-new'), {
@@ -80,13 +81,14 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
             </div>
 
             <div className="p-3 sm:p-6 space-y-6 sm:space-y-8">
-                {data?.data?.rounds && data.data.rounds.map((roundData) => {
+                {data?.data?.rounds && data.data.rounds.map((roundData, index) => {
                     const roundNumber = roundData.roundNumber;
                     const forArgument = getArgumentForRound(roundNumber, "For");
                     const againstArgument = getArgumentForRound(roundNumber, "Against");
 
                     return (
-                        <div key={roundNumber} className="border-b border-gray-200 pb-6 sm:pb-8 last:border-b-0 last:pb-0">
+                        <React.Fragment key={roundNumber}>
+                            <div className={`${index !== 0 ? 'border-t border-gray-200 pt-6 sm:pt-8' : ''}`}>
                             <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 pb-2 border-b border-gray-100">
                                 Round {roundNumber}: {getRoundTitle(roundNumber)}
                             </h3>
@@ -126,7 +128,20 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                     )}
                                 </div>
                             </div>
+
+                                {/* Add static advertisement before the border line */}
+                                {index < data.data.rounds.length - 1 && (
+                                    <div className="mt-8">
+                                        <div className="text-center mb-2">
+                                            <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
+                                        </div>
+                                        <div className="transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                                            <StaticAdvertisement type={`sponsor${index + 1}`} />
+                                        </div>
+                                    </div>
+                                )}
                         </div>
+                        </React.Fragment>
                     );
                 })}
             </div>
@@ -159,6 +174,16 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                         </div>
                     </div>
                 )}
+
+            {/* Final advertisement before comments section */}
+            <div className="mt-8">
+                <div className="text-center mb-2">
+                    <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
+                </div>
+                <div className="transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                    <StaticAdvertisement type="sponsor3" />
+                </div>
+            </div>
         </div>
     )
 }

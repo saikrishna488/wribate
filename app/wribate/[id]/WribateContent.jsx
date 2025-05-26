@@ -1,26 +1,18 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAtom } from "jotai";
 
-
 // Components
-import Categories from "../../components/Home/Categories";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-
+;
 import Arguments from '../../components/Wribate/Arguments'
 import Header from '../../components/Wribate/Header'
 import Voting from '../../components/Wribate/Voting'
 import Comments from '../../components/Wribate/Comments'
 import Sidebar from '../../components/Wribate/Sidebar'
 
-// Icons
-import { FaThumbsUp, FaShareAlt, FaDownload, FaComments } from "react-icons/fa";
-
-
 // Utilities
-
 import processArguments from "../../utils/processedArguments";
 
 // API
@@ -37,19 +29,15 @@ import { chatAtom, userAtom } from "@/app/states/GlobalStates";
 
 // Custom Components
 import SharePopup from "../../components/SharePopup";
-
 import ProgressBar from "../../components/Wribate/ProgressBar";
 
-
-const WribateView = () => {
+export default function WribateContent() {
   // State
   const [user] = useAtom(userAtom);
   const [selectedVote, setSelectedVote] = useState(null);
-
   const [showSharePopup, setShowSharePopup] = useState(false);
   const [filteredArguments, setFilteredArguments] = useState(null);
   const [round, setRound] = useState(null);
-
   const [value, setValue] = useState("");
 
   // Refs
@@ -65,7 +53,6 @@ const WribateView = () => {
   const [addVote, { isLoading: addingVote }] = useAddVoteMutation();
   const { data, isLoading, refetch } = useGetMyWribateByIdQuery(id);
   const { data: votes, isLoading: votesLoading } = useGetVotesQuery(id);
-
 
   // Effects
   useEffect(() => {
@@ -154,7 +141,7 @@ const WribateView = () => {
                 </div>
 
                 {/* Voting Section */}
-                <Voting id={id} setSelectedVote={setSelectedVote} user={user} refetch={refetch}  data={data} selectedVote={selectedVote} votes={votes} />
+                <Voting id={id} setSelectedVote={setSelectedVote} user={user} refetch={refetch} data={data} selectedVote={selectedVote} votes={votes} />
 
                 {/* Arguments Section */}
                 <Arguments refetch={refetch} data={data} user={user} id={id} round={round} value={value} setValue={setValue} />
@@ -169,8 +156,8 @@ const WribateView = () => {
             )}
           </div>
 
-          {/* Sidebar for Ads - Hidden on mobile, 30% width on desktop */}
-         <Sidebar/>
+          {/* Sidebar - Hidden on mobile, 30% on desktop */}
+          <Sidebar/>
         </div>
       </div>
 
@@ -183,6 +170,4 @@ const WribateView = () => {
       )}
     </div>
   );
-};
-
-export default WribateView;
+} 

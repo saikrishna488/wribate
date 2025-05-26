@@ -19,12 +19,13 @@ const ProfilePage = () => {
 
     useEffect(() => {
         if (!user._id) {
-            console.log("navigating to login");
-            router.push("/login");
+            toast.error("Login to access")
+            router.push('/login')
         }
     }, [user]);
 
     const handleLogout = async () => {
+        router.push('/')
         setUser({})
         localStorage.removeItem("token")
         toast.success("Logged out")

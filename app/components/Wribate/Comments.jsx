@@ -1,3 +1,5 @@
+// 'use client';
+
 import React, { useEffect, useState } from 'react'
 import formatDate, { timeAgo } from "../../utils/dateFormat";
 import { FaThumbsUp, FaComments } from "react-icons/fa";
