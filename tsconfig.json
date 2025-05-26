@@ -32,7 +32,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "app/app/page.jsx", "app/components/Sidebar.jsx", "app/components/Navbar.jsx", "app/admin/blogs/post-blog/page.jsx", "app/admin/blogs/page.jsx", "app/admin/login/page.jsx", "app/components/admin/Navbar.jsx", "app/admin/page.jsx", "app/admin/layout.jsx", "app/blogs/[id]/page.jsx", "app/blogs/page.jsx"  ],
+, "app/app/page.jsx", "app/components/Sidebar.jsx", "app/components/Navbar.jsx", "app/admin/blogs/post-blog/page.jsx", "app/admin/blogs/page.jsx", "app/admin/login/page.jsx", "app/components/admin/Navbar.jsx", "app/admin/page.jsx", "app/admin/layout.jsx", "app/blogs/[id]/page.jsx", "app/blogs/page.jsx", "app/wribate/[id]/page.jsx", "app/propose-wribate/page.js"  ],
   "exclude": [
     "node_modules"
   ]

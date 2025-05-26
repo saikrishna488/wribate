@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { User, PlayCircle, ThumbsUp, ThumbsDown,Rocket } from "lucide-react";
+import { User, PlayCircle, ThumbsUp, ThumbsDown, Rocket } from "lucide-react";
 import { debateAtom } from "../../states/GlobalStates";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -76,21 +76,21 @@ function DebateCard({ debate, user, setHook, hook }) {
     }
   };
 
-  const handleReadyToWribate = async ()=>{
-    try{
+  const handleReadyToWribate = async () => {
+    try {
 
-      const res = axios.post(process.env.NEXT_PUBLIC_BACKEND_URL+'/readytowribate',{
-        userId:user?._id,
-        proposeId:debate._id
+      const res = axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/readytowribate', {
+        userId: user?._id,
+        proposeId: debate._id
       })
 
-      if(res.data){
+      if (res.data) {
         toast.success("Find Users Here!")
         setOpen(true)
       }
 
     }
-    catch(err){
+    catch (err) {
       console.log(err);
       toast.error("Something went wrong");
     }
@@ -201,18 +201,17 @@ function DebateCard({ debate, user, setHook, hook }) {
             )}
               <span className="font-medium text-sm text-gray-800">{debate.username || "Anonymous"}</span>
             </div> */}
-          {
-            readyToWribate || debate.ready && (
-              <Button
-                onClick={handleReadyToWribate}
-                variant="default"
-                size="sm"
-                className="flex gap-1 items-center text-white bg-blue-900 hover:bg-blue-800"
-              >
-                <Rocket size={16} /> Ready To Wribate
-              </Button>
-            )
-          }
+          {(readyToWribate || debate.ready) && (
+            <Button
+              onClick={handleReadyToWribate}
+              variant="default"
+              size="sm"
+              className="flex gap-1 items-center text-white bg-blue-900 hover:bg-blue-800"
+            >
+              <Rocket size={16} /> Ready To Wribate
+            </Button>
+          )}
+
 
           <Button
             onClick={handleLaunch}
@@ -225,7 +224,7 @@ function DebateCard({ debate, user, setHook, hook }) {
         </div>
 
         {/* For/Against buttons */}
-        <div className="mt-auto">
+        <div className="">
           <div className="flex gap-2 mb-2">
             <Button
               variant="outline"
