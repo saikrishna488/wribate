@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { useAtom } from "jotai";
 import { userAtom } from "../states/GlobalStates";
 import { useRouter } from "next/navigation";
+import { AdSpaceContent } from "../components/Advertisements/Advertisement";
 
 const CreateWribateForm = () => {
   const [type, setType] = useState("single");

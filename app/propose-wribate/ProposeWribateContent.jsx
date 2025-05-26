@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SearchX, MoreHorizontal, Loader, Search, ChevronDown } from "lucide-react";
@@ -16,10 +16,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem
 } from "@/components/ui/dropdown-menu";
-import DebateCard from '../components/Propose-Wribates/ProposeCard'
-import CountryDropdown from '../components/Propose-Wribates/CountryDropdown'
+import DebateCard from '../components/Propose-Wribates/ProposeCard';
 
-export default function DiscoverHotTopicsPage() {
+export default function ProposeWribateContent() {
   const [debates, setDebates] = useState([]);
   const [user] = useAtom(userAtom);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -296,4 +295,4 @@ export default function DiscoverHotTopicsPage() {
       )}
     </div>
   );
-}
+} 

@@ -6,23 +6,21 @@ import { useEffect, useState } from 'react';
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { FaWhatsapp, FaFacebookF, FaArrowLeft, FaShareAlt } from 'react-icons/fa';
-import { FaXTwitter } from "react-icons/fa6"; // Add relevant icons
+import { FaXTwitter } from "react-icons/fa6";
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-export default function SingleBlogPage() {
+export default function BlogContent() {
   const { id } = useParams();
-  const [blog,setBlog] = useState({});
+  const [blog, setBlog] = useState({});
   const [copied, setCopied] = useState(false);
-  const router = useRouter(); // Use router hook
+  const router = useRouter();
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchBlog = async () => {
       try {
-
-        const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/blog/'+id)
+        const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/blog/' + id)
         const data = res.data;
-
         if (data.res) {
           setBlog(data.blog)
         }
@@ -32,9 +30,8 @@ export default function SingleBlogPage() {
         toast.error("client error")
       }
     }
-
     fetchBlog();
-  },[])
+  }, [id])
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
@@ -44,12 +41,11 @@ export default function SingleBlogPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!blog) return <p className="text-center text-red-600 mt-20">Loading.</p>;
+  if (!blog) return <p className="text-center text-red-600 mt-20">Loading...</p>;
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10 bg-white min-h-screen text-gray-900">
       <article>
-        {/* Back Button positioned at the top */}
         <Button
           onClick={() => router.back()}
           className="bg-blue-900 text-white hover:bg-blue-800 mb-4 flex items-center gap-2"
@@ -107,4 +103,4 @@ export default function SingleBlogPage() {
       </article>
     </main>
   );
-}
+} 
