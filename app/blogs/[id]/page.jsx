@@ -2,11 +2,7 @@ import { Metadata } from 'next';
 import { generateMetadata as generatePageMetadata } from '@/app/utils/metadata';
 import BlogContent from './BlogContent';
 
-interface PageParams {
-  params: Promise<{ id: string }> | { id: string };
-}
-
-export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
   
