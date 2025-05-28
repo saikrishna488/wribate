@@ -34,7 +34,7 @@ const OngoingWribate = ({ wribates, activeCategory, handleViewMore, handleCardCl
                         <img
                           src={wribate.coverImage}
                           alt={wribate.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-fill"
                         />
                         {/* Overlay to ensure text is always readable */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>

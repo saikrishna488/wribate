@@ -1,5 +1,4 @@
-
-
+import { Badge } from "../../../components/ui/badge";
 const WribateCard = ({ wribate, onClick }) => {
   return (
     <div
@@ -10,15 +9,15 @@ const WribateCard = ({ wribate, onClick }) => {
         <div className="flex-grow p-3">
           <h3 className="text-base font-medium text-gray-900 line-clamp-2 mb-1">{wribate.title}</h3>
           <div className="flex flex-row items-center gap-1 text-xs text-gray-600">
-            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full inline-block w-fit mb-1">{wribate.category}</span>
-            {wribate.institution && <span className="text-gray-500 inline-block">{wribate.institution}</span>}
+            <Badge className="bg-blue-200 text-blue-900">{wribate.category}</Badge>
+            {wribate.institution && <Badge className="text-white text-xs inline-block">{wribate.institution}</Badge>}
           </div>
         </div>
         <div className="w-24 h-14 my-auto flex-shrink-0 flex items-center">
           <img
             src={wribate.coverImage}
             alt={wribate.title}
-            className="w-full h-full object-cover rounded-md"
+            className="w-full h-full object-fill rounded-md"
           />
         </div>
       </div>

@@ -65,7 +65,13 @@ function DebateCard({ debate, user, setHook, hook }) {
       if (data.res) {
         toast.success("Voted successfully");
         setVotes((prev) => prev + 1);
-        vote == "for" ? debate.votesFor += 1 : debate.votesAgainst += 1
+        if (vote === "for") {
+          debate.votesFor += 1;
+          debate.votesAgainst -= 1;
+        } else {
+          debate.votesAgainst += 1;
+          debate.votesFor -= 1;
+        }
         setReadyToWribate(data.ready)
       } else {
         toast.success("Already voted!");
@@ -142,22 +148,24 @@ function DebateCard({ debate, user, setHook, hook }) {
 
         {/* Title with Image - fixed height */}
         <div className="min-h-[3rem] mb-2 flex items-start gap-3">
-          {/* Small image rectangle */}
-          <div className="w-16 h-10 flex-shrink-0 rounded overflow-hidden border border-gray-200">
-            {debate.image ? (
-              <img
-                src={debate.image}
-                alt="Debate topic"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-100"></div>
-            )}
-          </div>
+
 
           {/* Title */}
           <div className="flex-1 min-w-0">
             <h2 className="text-md font-bold text-gray-900 leading-tight line-clamp-2">{debate.title}</h2>
+          </div>
+
+          {/* Small image rectangle */}
+          <div className="w-18 h-12 flex-shrink-0 rounded overflow-hidden border border-gray-200">
+            {debate.image ? (
+              <img
+                src={debate.image}
+                alt="Debate topic"
+                className="w-full h-full object-fill"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100"></div>
+            )}
           </div>
         </div>
 
@@ -232,7 +240,7 @@ function DebateCard({ debate, user, setHook, hook }) {
               onClick={() => handleUpvote("for")}
               className="flex gap-1 items-center border-red-600 text-red-600 hover:bg-green-50 flex-1"
             >
-              <ThumbsUp size={14} /> For {` ${formatLikes(debate.votesFor)}`}
+              <ThumbsUp size={14} /> For {` ${formatLikes(debate?.votesFor < 0 ? 0 : debate.votesFor)}`}
             </Button>
             <Button
               variant="outline"
@@ -240,7 +248,7 @@ function DebateCard({ debate, user, setHook, hook }) {
               onClick={() => handleUpvote("against")}
               className="flex gap-1 items-center border-blue-600 text-blue-600 hover:bg-red-50 flex-1"
             >
-              <ThumbsDown size={14} /> Against {` ${formatLikes(debate.votesAgainst)}`}
+              <ThumbsDown size={14} /> Against {` ${formatLikes(debate?.votesAgainst < 0 ? 0 : debate.votesAgainst)}`}
             </Button>
           </div>
 

@@ -23,11 +23,11 @@ const Header = ({data, setShowSharePopup}) => {
             </div>
             
             <div className="p-3 sm:p-4">
-                <div className="relative h-56 sm:h-80 w-full">
+                <div className="relative h-56 sm:h-80 w-full mx-auto sm:w-[80%]">
                     <img
                         src={data?.data?.coverImage}
                         alt="Debate Cover Image"
-                        className="absolute top-0 left-0 w-full h-full object-cover"
+                        className="absolute top-0 left-0 w-full h-full object-fill"
                     />
                 </div>
             </div>
