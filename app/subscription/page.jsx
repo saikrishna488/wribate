@@ -16,6 +16,25 @@ const SubscriptionPage = () => {
     const [razorpayLoaded, setRazorpayLoaded] = useState(false);
     const router = useRouter();
 
+    // ✅ HELPER FUNCTIONS FROM TEAMMATE
+    const getFutureDate = (unit, amount) => {
+        const date = new Date();
+        if (unit === "month") {
+            date.setMonth(date.getMonth() + amount);
+        } else if (unit === "year") {
+            date.setFullYear(date.getFullYear() + amount);
+        } else {
+            throw new Error("Invalid unit. Use 'month' or 'year'.");
+        }
+        return date;
+    };
+
+    const getDaysBetween = (date1, date2) => {
+        const msPerDay = 1000 * 60 * 60 * 24;
+        const diffInMs = date2 - date1;
+        return Math.round(diffInMs / msPerDay);
+    };
+
     // Function to decode HTML entities
     const decodeHtmlEntities = (html) => {
         if (!html) return '';
@@ -122,15 +141,19 @@ const SubscriptionPage = () => {
 
             if (res.data.res) {
                 if (selectedPlan.price === 0) {
+                    const startDate = new Date();
+                    const expiryDate = getFutureDate(selectedPlan.pricePerDuration, selectedPlan.duration);
+                    const durationInDays = getDaysBetween(startDate, expiryDate);
+
                     const updatedUser = {
                         ...user,
                         subscription: {
                             ...user.subscription,
                             id: selectedPlan._id,
                             isActive: true,
-                            startDate: new Date().toISOString(),
-                            expiryDate: new Date(Date.now() + (selectedPlan.duration * 24 * 60 * 60 * 1000)).toISOString(),
-                            durationInDays: selectedPlan.duration
+                            startDate: startDate.toISOString(),
+                            expiryDate: expiryDate.toISOString(),
+                            durationInDays: durationInDays
                         }
                     };
                     setUser(updatedUser);
@@ -156,15 +179,19 @@ const SubscriptionPage = () => {
                     description: `${selectedPlan.name} Subscription`,
                     order_id: razorpayOrderId,
                     handler: async function (response) {
+                        const startDate = new Date();
+                        const expiryDate = getFutureDate(selectedPlan.pricePerDuration, selectedPlan.duration);
+                        const durationInDays = getDaysBetween(startDate, expiryDate);
+
                         const updatedUser = {
                             ...user,
                             subscription: {
                                 ...user.subscription,
                                 id: selectedPlan._id,
                                 isActive: true,
-                                startDate: new Date().toISOString(),
-                                expiryDate: new Date(Date.now() + (selectedPlan.duration * 24 * 60 * 60 * 1000)).toISOString(),
-                                durationInDays: selectedPlan.duration
+                                startDate: startDate.toISOString(),
+                                expiryDate: expiryDate.toISOString(),
+                                durationInDays: durationInDays
                             }
                         };
                         setUser(updatedUser);
@@ -254,7 +281,7 @@ const SubscriptionPage = () => {
                 isCurrentPlan: true,
                 message: "✓ Current Plan",
                 showDates: true,
-                buttonStyle: "bg-blue-900 text-white cursor-not-allowed"  // Changed to blue-900
+                buttonStyle: "bg-blue-900 text-white cursor-not-allowed"
             };
         } else {
             if (plan.price === 0) {
@@ -315,7 +342,7 @@ const SubscriptionPage = () => {
                 </p>
             </div>
 
-            {/* EQUAL HEIGHT CARDS WITH ALIGNED BUTTONS */}
+            {/* ✅ COMPACT LAYOUT WITH BIGGER FONTS */}
             <div className="max-w-7xl mx-auto">
                 <div className={`grid gap-8 ${
                     plans.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 
@@ -328,75 +355,89 @@ const SubscriptionPage = () => {
                         const decodedDescription = decodeHtmlEntities(plan.description);
 
                         return (
-                            <div key={plan._id} className="relative h-full">
-                                {/* CURRENT PLAN BADGE - BLUE-900 */}
-                                {planStatus.isCurrentPlan && (
-                                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                                        <span className="bg-blue-900 text-white text-sm font-bold px-4 py-1 rounded-full shadow-lg">
-                                            ✓ Current Plan
+                            <div key={plan._id} className="relative">
+                                {/* ✅ CARD WITH OPTIMIZED SPACING */}
+                                <div 
+                                    className={`bg-white rounded-xl shadow-lg overflow-hidden h-full flex flex-col relative p-5
+                                        ${planStatus.isCurrentPlan
+                                            ? "ring-2 ring-blue-900 shadow-xl"
+                                            : "hover:shadow-xl"
+                                        } transition-all duration-300`}
+                                >
+                                    {/* ✅ HEADER ROW: BIGGER FONTS, TIGHTER SPACING */}
+                                    <div className="flex justify-between items-start mb-2">
+                                        {/* Plan Name - Bigger Font */}
+                                        <h3 className="text-2xl font-bold text-gray-900 capitalize leading-tight">
+                                            {plan.name}
+                                        </h3>
+                                        
+                                        {/* Current Plan Badge - Better Size */}
+                                        {planStatus.isCurrentPlan && (
+                                            <span className="bg-blue-900 text-white text-sm font-bold px-3 py-1.5 rounded-full">
+                                                ✓ Current Plan
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* ✅ PRICE - MUCH BIGGER, REDUCED SPACING */}
+                                    <div className="mb-1">
+                                        <span className="text-4xl font-bold text-blue-900">
+                                            {plan.currency}
+                                            {plan.price === 0 ? 'Free' : plan.price}
+                                            {plan.price > 0 && (
+                                                <span className="text-2xl text-gray-600 font-semibold">
+                                                    /{plan.pricePerDuration}
+                                                </span>
+                                            )}
                                         </span>
                                     </div>
-                                )}
-                                
-                                {/* FLEX CARD FOR EQUAL HEIGHT AND BUTTON ALIGNMENT */}
-                                <div 
-                                    className={`bg-white rounded-2xl overflow-hidden shadow-lg h-full flex flex-col
-                                        ${planStatus.isCurrentPlan
-                                            ? "outline outline-2 outline-blue-900 shadow-xl transform scale-105"  // Changed to blue-900
-                                            : ""
-                                        } transition-all duration-300 hover:shadow-xl`}
-                                >
-                                    {/* CARD CONTENT - FLEXIBLE GROW */}
-                                    <div className="p-6 flex-grow" style={{ 
-                                        '--card-border': 'none', 
-                                        '--card-shadow': 'none',
-                                        '--box-shadow': 'none',
-                                        'border': 'none'
-                                    }}>
+                                    
+                                    {/* ✅ DURATION - BIGGER FONT, TIGHT SPACING */}
+                                    <p className="text-base text-gray-600 font-medium mb-3">
+                                        Duration: {plan.duration} {plan.pricePerDuration}{plan.duration > 1 ? 's' : ''}
+                                    </p>
+
+                                    {/* ✅ FEATURES SECTION - COMPACT */}
+                                    <div className="flex-grow mb-3">
                                         <div
-                                            className="modified-plan-content h-full"
+                                            className="plan-features"
                                             dangerouslySetInnerHTML={{ __html: decodedDescription }}
-                                            style={{
-                                                '--card-border': 'none',
-                                                '--box-shadow': 'none',
-                                                'boxShadow': 'none',
-                                                'border': 'none',
-                                                'borderRadius': '0'
-                                            }}
                                         />
                                     </div>
 
-                                    {/* SUBSCRIPTION DATES - BLUE-900 THEME */}
+                                    {/* SUBSCRIPTION DATES - COMPACT */}
                                     {planStatus.showDates && (
-                                        <div className="px-6 pb-4">
-                                            <div className="bg-blue-50 border-l-4 border-blue-900 p-4 rounded-md">
-                                                {user?.subscription?.startDate && (
-                                                    <p className="text-sm text-blue-900 mb-2">
-                                                        <span className="font-semibold">Subscription started on:</span>{" "}
-                                                        {formatDate(user.subscription.startDate)}
+                                        <div className="mb-3">
+                                            <div className="bg-blue-50 border-l-4 border-blue-900 p-3 rounded-r-md">
+                                                <div className="space-y-1">
+                                                    {user?.subscription?.startDate && (
+                                                        <p className="text-sm text-blue-900 font-medium">
+                                                            <span className="font-semibold">Started:</span>{" "}
+                                                            {formatDate(user.subscription.startDate)}
+                                                        </p>
+                                                    )}
+                                                    <p className="text-sm text-blue-900 font-medium">
+                                                        <span className="font-semibold">Ends:</span>{" "}
+                                                        {user?.subscription?.expiryDate
+                                                            ? formatDate(user?.subscription?.expiryDate)
+                                                            : "N/A"}
                                                     </p>
-                                                )}
-                                                <p className="text-sm text-blue-900 font-medium">
-                                                    <span className="font-semibold">Subscription ends on:</span>{" "}
-                                                    {user?.subscription?.expiryDate
-                                                        ? formatDate(user?.subscription?.expiryDate)
-                                                        : "N/A"}
-                                                </p>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* BUTTON - FIXED AT BOTTOM */}
-                                    <div className="p-6 pt-0 mt-auto">
+                                    {/* ✅ ACTION BUTTON - BIGGER, BETTER SPACING */}
+                                    <div className="mt-auto">
                                         <button
                                             onClick={() => handlePlanAction(plan)}
                                             disabled={planStatus.isCurrentPlan || isProcessingThisPlan}
-                                            className={`w-full py-4 rounded-xl text-lg font-semibold transition-all duration-300 shadow-md hover:shadow-lg ${
+                                            className={`w-full py-4 rounded-lg text-lg font-bold transition-all duration-300 ${
                                                 planStatus.isCurrentPlan
-                                                    ? "bg-blue-900 text-white cursor-not-allowed"  // Changed to blue-900
+                                                    ? "bg-blue-900 text-white cursor-not-allowed shadow-md"
                                                     : isProcessingThisPlan
-                                                        ? "bg-gray-400 text-white cursor-wait"
-                                                        : planStatus.buttonStyle
+                                                        ? "bg-gray-400 text-white cursor-wait shadow-md"
+                                                        : `${planStatus.buttonStyle} shadow-md hover:shadow-lg transform hover:scale-105`
                                             }`}
                                         >
                                             {isProcessingThisPlan
@@ -411,7 +452,7 @@ const SubscriptionPage = () => {
                 </div>
             </div>
 
-            {/* Enhanced Why Choose Premium Section - BLUE-900 */}
+            {/* Enhanced Why Choose Premium Section */}
             <div className="mt-20 bg-white border border-gray-200 shadow-lg p-8 rounded-2xl max-w-4xl mx-auto">
                 <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Why Choose Premium?</h2>
                 <div className="grid md:grid-cols-2 gap-6">
@@ -493,24 +534,39 @@ const SubscriptionPage = () => {
     );
 };
 
-// Add CSS to prevent nested card appearance
+// ✅ OPTIMIZED CSS FOR COMPACT FEATURES
 const styleElement = typeof document !== 'undefined' ? document.createElement('style') : null;
 if (styleElement) {
     styleElement.textContent = `
-        .modified-plan-content > div,
-        .modified-plan-content > div > div {
+        .plan-features > div,
+        .plan-features > div > div {
             box-shadow: none !important;
             border: none !important;
             border-radius: 0 !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
-        .modified-plan-content ul {
+        .plan-features ul {
             list-style: none;
             padding-left: 0;
+            margin: 0;
         }
-        .modified-plan-content ul li {
-            margin-bottom: 0.5rem;
+        .plan-features ul li {
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
+            font-size: 15px;
+            line-height: 1.4;
+            color: #374151;
+            font-weight: 500;
+        }
+        .plan-features ul li:last-child {
+            margin-bottom: 0;
+        }
+        .plan-features * {
+            box-shadow: none !important;
+            border: none !important;
         }
     `;
     document.head.appendChild(styleElement);

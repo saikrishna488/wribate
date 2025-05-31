@@ -1,7 +1,7 @@
-"use client"; // Add this directive at the top
-import React, { useEffect } from 'react';
+"use client";
+import React, { useEffect, useState } from 'react';
 import he from "he";
-import dynamic from 'next/dynamic'; // Add dynamic import
+import dynamic from 'next/dynamic';
 import "react-quill-new/dist/quill.snow.css";
 import {
   useAddArgumentMutation,
@@ -9,15 +9,51 @@ import {
 import { Button } from "@/components/ui/button";
 import toast from 'react-hot-toast';
 import { AdSpaceContent, StaticAdvertisement } from '../Advertisements/Advertisement';
+import axios from "axios";
+import authHeader from "../../utils/authHeader";
 
-// Replace direct import with dynamic import
 const ReactQuill = dynamic(() => import('react-quill-new'), {
-  ssr: false, // Disable server-side rendering for this component
+  ssr: false,
   loading: () => <p>Loading editor...</p>
 });
 
 const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
     const [addArgument] = useAddArgumentMutation();
+    const [plans, setPlans] = useState([]);
+    const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+
+    // Fetch subscription plans
+    useEffect(() => {
+        const fetchSubscriptionPlans = async () => {
+            try {
+                setIsLoadingPlans(true);
+                const response = await axios.get(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/getSubscriptionPlans`
+                );
+                
+                if (response.data.res && response.data.plans) {
+                    setPlans(response.data.plans);
+                }
+            } catch (error) {
+                console.error("Error fetching subscription plans:", error);
+            } finally {
+                setIsLoadingPlans(false);
+            }
+        };
+
+        fetchSubscriptionPlans();
+    }, []);
+
+    // Check if user is premium
+    const isPremiumUser = () => {
+        if (!user?.subscription?.isActive || !plans.length) return false;
+        
+        const currentPlan = plans.find(plan => 
+            String(plan._id) === String(user.subscription.id)
+        );
+        
+        return currentPlan && currentPlan.price > 0;
+    };
 
     const getArgumentForRound = (roundNumber, side) => {
         if (!data || !data.data || !data.data.arguments) return null;
@@ -29,8 +65,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
         return argument?.text || null;
     };
 
-     // Helper functions
-      const getRoundTitle = (roundNumber) => {
+    const getRoundTitle = (roundNumber) => {
         switch (roundNumber) {
           case 1:
             return "Opening Arguments";
@@ -41,43 +76,56 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
           default:
             return `Round ${roundNumber}`;
         }
-      };
+    };
 
-      // Helper function for showing login alert (added based on usage in code)
-      const showLoginAlert = () => {
-        // Placeholder implementation
+    const showLoginAlert = () => {
         console.error("Login required!");
-      };
+    };
 
-      const handleSendMessage = async (e) => {
-          e.preventDefault();
-          if (!user) {
-            showLoginAlert();
-            return;
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!user) {
+          showLoginAlert();
+          return;
+        }
+    
+        const data = { text: value, roundNumber: round };
+        try {
+          const response = await addArgument({ id, data });
+          if (response?.data?.status === "success") {
+              toast.success("Added")
+              refetch()
           }
-      
-          const data = { text: value, roundNumber: round };
-          try {
-            const response = await addArgument({ id, data });
-            if (response?.data?.status === "success") {
-                toast.success("Added")
-                refetch()
-            }
-          } catch (err) {
-            console.error(err);
-          }
-        };
+        } catch (err) {
+          console.error(err);
+        }
+    };
 
+    useEffect(()=>{
+         console.log(user?._id, data?.againstId, data?.forId, round)
+    },[])
 
-        useEffect(()=>{
-             console.log(user?._id, data?.againstId, data?.forId, round)
-        },[])
-
+    // Get premium status
+    const userIsPremium = isPremiumUser();
+    
+    console.log("Premium user check:", {
+        isLoggedIn: !!user,
+        hasActiveSubscription: user?.subscription?.isActive,
+        subscriptionId: user?.subscription?.id,
+        plansLoaded: !isLoadingPlans,
+        isPremium: userIsPremium
+    });
 
     return (
         <div className="bg-white border border-gray-200 shadow-sm mb-4 sm:mb-6 rounded-sm">
             <div className="p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
                 <h2 className="text-lg sm:text-xl font-bold">Arguments</h2>
+                {/* Debug info - remove in production */}
+                {user && (
+                    <div className="text-xs text-gray-500 mt-1">
+                        {userIsPremium ? "🎉 Premium User - Ad-free experience" : "Free User - Ads enabled"}
+                    </div>
+                )}
             </div>
 
             <div className="p-3 sm:p-6 space-y-6 sm:space-y-8">
@@ -129,17 +177,29 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                 </div>
                             </div>
 
-                                {/* Add static advertisement before the border line */}
-                                {index < data.data.rounds.length - 1 && (
-                                    <div className="mt-8">
-                                        <div className="text-center mb-2">
-                                            <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
-                                        </div>
-                                        <div className="transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                                            <StaticAdvertisement type={`sponsor${index + 1}`} />
-                                        </div>
+                            {/* ✅ CONDITIONAL AD RENDERING - Hide for premium users */}
+                            {index < data.data.rounds.length - 1 && !userIsPremium && (
+                                <div className="mt-8">
+                                    <div className="text-center mb-2">
+                                        <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
                                     </div>
-                                )}
+                                    <div className="transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                                        <StaticAdvertisement type={`sponsor${index + 1}`} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ✅ PREMIUM USER MESSAGE (Optional) */}
+                            {index < data.data.rounds.length - 1 && userIsPremium && (
+                                <div className="mt-8 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                                    <div className="flex items-center">
+                                        <span className="text-blue-600 mr-2">🎉</span>
+                                        <p className="text-blue-800 font-medium text-sm">
+                                            Ad-free experience - Thank you for being a premium user!
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         </React.Fragment>
                     );
@@ -175,15 +235,32 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                     </div>
                 )}
 
-            {/* Final advertisement before comments section */}
-            <div className="mt-8">
-                <div className="text-center mb-2">
-                    <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
+            {/* ✅ CONDITIONAL FINAL AD - Hide for premium users */}
+            {!userIsPremium && (
+                <div className="mt-8">
+                    <div className="text-center mb-2">
+                        <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
+                    </div>
+                    <div className="transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                        <StaticAdvertisement type="sponsor3" />
+                    </div>
                 </div>
-                <div className="transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                    <StaticAdvertisement type="sponsor3" />
+            )}
+
+            {/* ✅ PREMIUM USER FINAL MESSAGE (Optional) */}
+            {userIsPremium && (
+                <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                    <div className="text-center">
+                        <span className="text-2xl mb-2 block">🎉</span>
+                        <p className="text-blue-800 font-medium">
+                            Enjoying your premium ad-free experience!
+                        </p>
+                        <p className="text-blue-600 text-sm mt-1">
+                            Thank you for supporting Wribate
+                        </p>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }

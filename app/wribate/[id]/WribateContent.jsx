@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import { useAtom } from "jotai";
 
 // Components
-;
 import Arguments from '../../components/Wribate/Arguments'
 import Header from '../../components/Wribate/Header'
 import Voting from '../../components/Wribate/Voting'
@@ -40,6 +39,14 @@ export default function WribateContent() {
   const [round, setRound] = useState(null);
   const [value, setValue] = useState("");
 
+  // ✅ SEEN STATE MANAGEMENT
+  const [seenSections, setSeenSections] = useState({
+    voting: false,
+    arguments: false,
+    comments: false,
+    progress: false
+  });
+
   // Refs
   const scrollContainerRef = useRef(null);
 
@@ -52,9 +59,126 @@ export default function WribateContent() {
   const [addComment, { isLoading: addingComment }] = useAddCommentMutation();
   const [addVote, { isLoading: addingVote }] = useAddVoteMutation();
   const { data, isLoading, refetch } = useGetMyWribateByIdQuery(id);
-  const { data: votes, isLoading: votesLoading } = useGetVotesQuery(id);
+  const { data: votes, isLoading: votesLoading, refetch: refetchVotes } = useGetVotesQuery(id);
 
-  // Effects
+  // Enhanced refetch function
+  const handleRefetch = async () => {
+    try {
+      await Promise.all([
+        refetch(),
+        refetchVotes()
+      ]);
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
+  // ✅ MARK SECTION AS SEEN
+  const markSectionAsSeen = (sectionName) => {
+    setSeenSections(prev => ({
+      ...prev,
+      [sectionName]: true
+    }));
+    
+    // Store in localStorage for persistence
+    const storageKey = `wribate_${id}_seen`;
+    const currentSeen = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    currentSeen[sectionName] = true;
+    localStorage.setItem(storageKey, JSON.stringify(currentSeen));
+  };
+
+  // ✅ LOAD SEEN STATE FROM LOCALSTORAGE
+  useEffect(() => {
+    if (id) {
+      const storageKey = `wribate_${id}_seen`;
+      const savedSeen = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      setSeenSections(prev => ({
+        ...prev,
+        ...savedSeen
+      }));
+    }
+  }, [id]);
+
+  // ✅ ENHANCED SCROLL TO SECTION WITH MARK AS SEEN
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+      
+      const newUrl = `${window.location.pathname}#${sectionId}`;
+      window.history.pushState(null, null, newUrl);
+      
+      // Mark as seen when clicked
+      markSectionAsSeen(sectionId);
+    }
+  };
+
+  // ✅ INTERSECTION OBSERVER TO MARK AS SEEN WHEN SCROLLED INTO VIEW
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-50% 0px -50% 0px', // Only trigger when section is in center of viewport
+      threshold: 0.1
+    };
+
+    const observerCallback = (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          markSectionAsSeen(sectionId);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observe all sections
+    const sections = ['progress', 'voting', 'arguments', 'comments'];
+    sections.forEach(sectionId => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [data]); // Re-observe when data loads
+
+  // Handle URL fragment on page load
+  useEffect(() => {
+    const handleFragmentScroll = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash && data) {
+        setTimeout(() => {
+          const element = document.getElementById(hash);
+          if (element) {
+            element.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+            // Mark as seen when loaded with fragment
+            markSectionAsSeen(hash);
+          }
+        }, 500);
+      }
+    };
+
+    if (data) {
+      handleFragmentScroll();
+    }
+
+    const handlePopState = () => {
+      handleFragmentScroll();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [data]);
+
+  // Existing effects
   useEffect(() => {
     const newTimeStamp = new Date();
     const istOffset = 5.5 * 60 * 60 * 1000;
@@ -106,9 +230,9 @@ export default function WribateContent() {
 
   useEffect(() => {
     if (id) {
-      refetch();
+      handleRefetch();
     }
-  }, [id, refetch]);
+  }, [id]);
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -121,33 +245,60 @@ export default function WribateContent() {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      {/* <Categories /> */}
-
       <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-6">
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-          {/* Main Content - Full width on mobile, 70% on desktop */}
           <div className="w-full lg:w-[70%]">
             {isLoading ? (
               <div className="bg-white p-4 sm:p-6 shadow-md rounded-sm">Loading Wribate details...</div>
             ) : data ? (
               <>
-                {/* Header Section */}
-                <Header data={data} setShowSharePopup={setShowSharePopup} />
+                {/* ✅ Header with seen state */}
+                <Header 
+                  data={data} 
+                  setShowSharePopup={setShowSharePopup}
+                  scrollToSection={scrollToSection}
+                  votes={votes || {}}
+                  seenSections={seenSections} // ✅ Pass seen state
+                />
 
-                {/* Progress Bar */}
-                <div className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 mb-4 sm:mb-6 rounded-sm">
+                <div id="progress" className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 mb-4 sm:mb-6 rounded-sm">
                   <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Wribate Progress</h2>
                   <ProgressBar rounds={data?.data?.rounds} />
                 </div>
 
-                {/* Voting Section */}
-                <Voting id={id} setSelectedVote={setSelectedVote} user={user} refetch={refetch} data={data} selectedVote={selectedVote} votes={votes} />
+                <div id="voting">
+                  <Voting 
+                    id={id} 
+                    setSelectedVote={setSelectedVote} 
+                    user={user} 
+                    refetch={handleRefetch}
+                    data={data} 
+                    selectedVote={selectedVote} 
+                    votes={votes || {}}
+                  />
+                </div>
 
-                {/* Arguments Section */}
-                <Arguments refetch={refetch} data={data} user={user} id={id} round={round} value={value} setValue={setValue} />
+                <div id="arguments">
+                  <Arguments 
+                    refetch={handleRefetch}
+                    data={data} 
+                    user={user} 
+                    id={id} 
+                    round={round} 
+                    value={value} 
+                    setValue={setValue} 
+                  />
+                </div>
 
-                {/* Comments Section */}
-                <Comments refetch={refetch} id={id} data={data} user={user} scrollContainerRef={scrollContainerRef} />
+                <div id="comments">
+                  <Comments 
+                    refetch={handleRefetch}
+                    id={id} 
+                    data={data} 
+                    user={user} 
+                    scrollContainerRef={scrollContainerRef} 
+                  />
+                </div>
               </>
             ) : (
               <div className="bg-white p-4 sm:p-6 shadow-md rounded-sm">
@@ -156,12 +307,10 @@ export default function WribateContent() {
             )}
           </div>
 
-          {/* Sidebar - Hidden on mobile, 30% on desktop */}
           <Sidebar/>
         </div>
       </div>
 
-      {/* Share Popup */}
       {showSharePopup && (
         <SharePopup
           onClose={() => setShowSharePopup(false)}
@@ -170,4 +319,4 @@ export default function WribateContent() {
       )}
     </div>
   );
-} 
+}
