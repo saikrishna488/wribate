@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   useGetCategoriesQuery
 } from "./../../app/services/authApi";
@@ -36,7 +36,7 @@ const SingleWribate = () => {
   const [formData, setFormData] = useState({
     title: debate?.title || "",
     coverImage: null,
-    coverImageBase64: null,
+    coverImageBase64: debate?.image || "",
     leadFor: "",
     leadAgainst: "",
     supportingFor: "",
@@ -55,6 +55,12 @@ const SingleWribate = () => {
     prizeAmount: "",
     _id: user?._id || null
   });
+
+  useEffect(()=>{
+    if(formData.coverImageBase64){
+      setImagePreview(formData.coverImageBase64)
+    }
+  },[formData])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -84,12 +84,12 @@ export default function WribateContent() {
 
   useEffect(() => {
     if (round) {
-      const email = user?.email;
+      const id = user?._id;
       let type = null;
-      if (data.data.leadFor.includes(email)) {
+      if (data?.forId.includes(id)) {
         type = "For";
       }
-      if (data.data.leadAgainst.includes(email)) {
+      if (data?.againstId.includes(id)) {
         type = "Against";
       }
 
