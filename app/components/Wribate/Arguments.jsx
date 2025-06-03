@@ -57,12 +57,12 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
         return currentPlan && currentPlan.price > 0;
     };
 
-    // ✅ CHECK IF WRIBATE IS FEATURED/SPONSORED
+    // Check if wribate is featured/sponsored
     const isFeaturedWribate = () => {
         return data?.data?.type === "Sponsored";
     };
 
-    // ✅ DETERMINE IF ROUND SHOULD BE MASKED
+    // Determine if round should be masked
     const shouldMaskRound = (roundNumber) => {
         const isUserPremium = isPremiumUser();
         const isWribateFeatured = isFeaturedWribate();
@@ -104,9 +104,9 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
           return;
         }
     
-        const data = { text: value, roundNumber: round };
+        const dataToSend = { text: value, roundNumber: round };
         try {
-          const response = await addArgument({ id, data });
+          const response = await addArgument({ id, data: dataToSend });
           if (response?.data?.status === "success") {
               toast.success("Added")
               refetch()
@@ -116,65 +116,104 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
         }
     };
 
-    // ✅ CLEAN PREMIUM MASK - NO CONTENT PREVIEW
-    const PremiumMask = ({ roundNumber }) => (
-        <div className="min-h-[400px] bg-gradient-to-b from-gray-50 to-white border border-gray-200 rounded-lg flex items-center justify-center p-8">
-            <div className="text-center max-w-md">
-                {/* Lock Icon */}
-                <div className="mb-6">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                    </div>
-                </div>
+    // PREMIUM MASK: Only first two lines blurred, rest hidden
+    const PremiumMask = ({ roundNumber, forArgument, againstArgument }) => {
+      // Helper to split argument into lines
+      const splitLines = (text) => {
+        if (!text) return [];
+        // Split on <br> or newlines
+        return text.split(/\n|<br\s*\/?>/).filter(line => line.trim() !== '');
+      };
 
-                {/* Premium Content Message */}
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Premium Content</h3>
-                <p className="text-gray-600 text-lg mb-2">
-                    Subscribe to read <strong>{getRoundTitle(roundNumber)}</strong>
-                </p>
-                <p className="text-gray-500 text-base mb-8">
-                    and unlock full access to featured Wribate arguments
-                </p>
+      const forLines = splitLines(he.decode(forArgument || ""));
+      const againstLines = splitLines(he.decode(againstArgument || ""));
 
-                {/* Upgrade Button */}
-                <button
-                    onClick={() => router.push('/subscription')}
-                    className="w-full bg-gradient-to-r from-blue-900 to-blue-800 text-white font-bold py-4 px-8 rounded-xl hover:from-blue-800 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg mb-6"
-                >
-                    Upgrade to Premium
-                </button>
+      const renderBlurredLines = (lines) => {
+        const firstTwo = lines.slice(0, 2).join('<br/>');
+        return <div className="blurred-lines" dangerouslySetInnerHTML={{ __html: firstTwo }} />;
+      };
 
-                {/* Features List */}
-                <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
-                    <div className="flex flex-col items-center">
-                        <span className="text-lg mb-1">🚫</span>
-                        <span>Ad-free</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <span className="text-lg mb-1">🔓</span>
-                        <span>Full access</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <span className="text-lg mb-1">⭐</span>
-                        <span>Premium</span>
-                    </div>
-                </div>
+      return (
+        <div className="relative">
+          {/* Only first two lines blurred/opaqued */}
+          <div className="premium-content-preview">
+            <div className="border-l-4 border-red-300 bg-red-50 rounded-r-sm p-3 mb-4">
+              <div className="flex items-center mb-3">
+                <img src="/user.png" alt="" className="rounded-full w-6 h-6 mr-2" />
+                <span className="font-medium text-red-600">{data.data.leadFor}</span>
+              </div>
+              {forLines.length > 0 ? renderBlurredLines(forLines) : <p className="text-gray-500">No argument submitted.</p>}
             </div>
+            <div className="border-r-4 border-blue-300 bg-blue-50 p-3">
+              <div className="flex items-center justify-end mb-3">
+                <span className="font-medium text-blue-600">{data.data.leadAgainst}</span>
+                <img src="/user.png" alt="" className="rounded-full w-6 h-6 ml-2" />
+              </div>
+              {againstLines.length > 0 ? renderBlurredLines(againstLines) : <p className="text-gray-500">No argument submitted.</p>}
+            </div>
+          </div>
+          {/* Blocked rest of the content */}
+          <div className="blocked-content flex justify-between mt-2">
+            <div className="blocked-for w-1/2 border-l-4 border-red-300 bg-red-100 rounded-r-sm p-3 ml-0 mr-auto">
+              {forLines.length > 2 ? <p>Content hidden. Subscribe to view full argument.</p> : null}
+            </div>
+            <div className="blocked-against w-1/2 border-r-4 border-blue-300 bg-blue-100 rounded-l-sm p-3 ml-auto mr-0">
+              {againstLines.length > 2 ? <p className="text-right">Content hidden. Subscribe to view full argument.</p> : null}
+            </div>
+          </div>
+          {/* Subscription prompt */}
+          <div className="flex flex-col sm:flex-row items-center justify-between bg-blue-50/90 border border-blue-200 rounded-md px-5 py-3 mt-3 gap-2 sm:gap-0 backdrop-blur-sm">
+            <div className="flex items-center text-blue-900 text-base font-medium">
+              <svg className="w-5 h-5 mr-2 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              <span>
+                To access the full content of <b>{getRoundTitle(roundNumber)}</b>, subscribe to <span className="text-blue-700 font-semibold">Premium</span>.
+              </span>
+            </div>
+            <button
+              onClick={() => router.push('/subscription')}
+              className="mt-2 sm:mt-0 bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded transition-all duration-200 text-base shadow"
+            >
+              Upgrade Now
+            </button>
+          </div>
+          <style jsx>{`
+            .premium-content-preview {
+              position: relative;
+              opacity: 0.4;
+              filter: blur(1px);
+              pointer-events: none;
+              -webkit-mask-image: linear-gradient(to bottom, 
+                rgba(0,0,0,1) 0%, 
+                rgba(0,0,0,0.8) 60%, 
+                rgba(0,0,0,0.3) 85%, 
+                rgba(0,0,0,0) 100%);
+              mask-image: linear-gradient(to bottom, 
+                rgba(0,0,0,1) 0%, 
+                rgba(0,0,0,0.8) 60%, 
+                rgba(0,0,0,0.3) 85%, 
+                rgba(0,0,0,0) 100%);
+            }
+            .blocked-content p {
+              font-style: italic;
+              color: #3b82f6; /* blue-500 */
+              font-weight: 600;
+              margin: 0;
+            }
+          `}</style>
         </div>
-    );
+      );
+    };
 
     // Get premium status
     const userIsPremium = isPremiumUser();
     const wribateIsFeatured = isFeaturedWribate();
-    
+
     return (
         <div className="bg-white border border-gray-200 shadow-sm mb-4 sm:mb-6 rounded-sm">
             <div className="p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
                 <h2 className="text-lg sm:text-xl font-bold">Arguments</h2>
-                
-                {/* ✅ FEATURED WRIBATE INDICATOR */}
                 {wribateIsFeatured && (
                     <div className="mt-2 flex items-center flex-wrap gap-2">
                         <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full flex items-center">
@@ -204,7 +243,6 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                     return (
                         <React.Fragment key={roundNumber}>
                             <div className={`${index !== 0 ? 'border-t border-gray-200 pt-6 sm:pt-8' : ''}`}>
-                                {/* ✅ ROUND HEADER - ALWAYS VISIBLE */}
                                 <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 pb-2 border-b border-gray-100 flex items-center flex-wrap gap-2">
                                     <span>Round {roundNumber}: {getRoundTitle(roundNumber)}</span>
                                     {isRoundMasked && (
@@ -219,14 +257,14 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                     )}
                                 </h3>
 
-                                {/* ✅ CONDITIONAL CONTENT RENDERING */}
                                 {isRoundMasked ? (
-                                    /* ✅ CLEAN PREMIUM MASK - NO CONTENT VISIBLE */
-                                    <PremiumMask roundNumber={roundNumber} />
+                                    <PremiumMask 
+                                        roundNumber={roundNumber} 
+                                        forArgument={forArgument}
+                                        againstArgument={againstArgument}
+                                    />
                                 ) : (
-                                    /* Show normal content for accessible rounds */
                                     <div className="space-y-4 sm:space-y-6">
-                                        {/* For Argument - Left Side */}
                                         <div className="border-l-4 border-red-500 bg-red-50 rounded-r-sm p-2 sm:p-3 ml-0 mr-auto w-full sm:w-4/5 md:w-3/4">
                                             <div className="flex items-center mb-2 sm:mb-3">
                                                 <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 mr-2" />
@@ -241,14 +279,11 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                                 <p className="text-gray-500 text-md sm:text-base">No argument submitted.</p>
                                             )}
                                         </div>
-
-                                        {/* Against Argument - Right Side */}
                                         <div className="border-r-4 border-blue-500 bg-blue-50 p-2 sm:p-3 ml-auto mr-0 w-full sm:w-4/5 md:w-3/4">
                                             <div className="flex items-center justify-end mb-2 sm:mb-3">
                                                 <span className="font-medium text-blue-800 text-sm sm:text-base">{data.data.leadAgainst}</span>
                                                 <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 ml-2" />
                                             </div>
-
                                             {againstArgument ? (
                                                 <div
                                                     className="prose max-w-none text-md sm:text-md"
@@ -261,7 +296,6 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                     </div>
                                 )}
 
-                                {/* ✅ AD RENDERING - Only show for non-premium users on accessible content */}
                                 {index < data.data.rounds.length - 1 && !userIsPremium && !isRoundMasked && (
                                     <div className="mt-8">
                                         <div className="text-center mb-2">
@@ -272,13 +306,14 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                         </div>
                                     </div>
                                 )}
+
+                                {/* Removed premium user message for ad-free experience */}
                             </div>
                         </React.Fragment>
                     );
                 })}
             </div>
 
-            {/* Argument Editor for Participants */}
             {user &&
                 (user?._id === data?.forId ||
                     user?._id === data?.againstId) && round && (
@@ -307,7 +342,6 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                     </div>
                 )}
 
-            {/* ✅ CONDITIONAL FINAL AD - Only show for non-premium users */}
             {!userIsPremium && (
                 <div className="mt-8">
                     <div className="text-center mb-2">
@@ -318,8 +352,10 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                     </div>
                 </div>
             )}
+
+            {/* Removed premium user message for ad-free experience */}
         </div>
     )
 }
 
-export default Arguments
+export default Arguments;

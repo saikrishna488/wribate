@@ -31,123 +31,44 @@ import SharePopup from "../../components/SharePopup";
 import ProgressBar from "../../components/Wribate/ProgressBar";
 
 export default function WribateContent() {
-  // State
   const [user] = useAtom(userAtom);
   const [selectedVote, setSelectedVote] = useState(null);
   const [showSharePopup, setShowSharePopup] = useState(false);
   const [filteredArguments, setFilteredArguments] = useState(null);
   const [round, setRound] = useState(null);
   const [value, setValue] = useState("");
-
-  // ✅ SEEN STATE MANAGEMENT
-  const [seenSections, setSeenSections] = useState({
-    voting: false,
-    arguments: false,
-    comments: false,
-    progress: false
-  });
-
-  // Refs
   const scrollContainerRef = useRef(null);
 
-  // Hooks
   const router = useRouter();
   const { id } = useParams();
 
-  // API Hooks
   const [addArgument, { isLoading: addingArgument }] = useAddArgumentMutation();
   const [addComment, { isLoading: addingComment }] = useAddCommentMutation();
   const [addVote, { isLoading: addingVote }] = useAddVoteMutation();
   const { data, isLoading, refetch } = useGetMyWribateByIdQuery(id);
   const { data: votes, isLoading: votesLoading, refetch: refetchVotes } = useGetVotesQuery(id);
 
-  // Enhanced refetch function
   const handleRefetch = async () => {
     try {
       await Promise.all([
         refetch(),
         refetchVotes()
       ]);
-    } catch (error) {
-      // Silent error handling
-    }
+    } catch (error) { }
   };
 
-  // ✅ MARK SECTION AS SEEN
-  const markSectionAsSeen = (sectionName) => {
-    setSeenSections(prev => ({
-      ...prev,
-      [sectionName]: true
-    }));
-    
-    // Store in localStorage for persistence
-    const storageKey = `wribate_${id}_seen`;
-    const currentSeen = JSON.parse(localStorage.getItem(storageKey) || '{}');
-    currentSeen[sectionName] = true;
-    localStorage.setItem(storageKey, JSON.stringify(currentSeen));
-  };
-
-  // ✅ LOAD SEEN STATE FROM LOCALSTORAGE
-  useEffect(() => {
-    if (id) {
-      const storageKey = `wribate_${id}_seen`;
-      const savedSeen = JSON.parse(localStorage.getItem(storageKey) || '{}');
-      setSeenSections(prev => ({
-        ...prev,
-        ...savedSeen
-      }));
-    }
-  }, [id]);
-
-  // ✅ ENHANCED SCROLL TO SECTION WITH MARK AS SEEN
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ 
+      element.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       });
-      
       const newUrl = `${window.location.pathname}#${sectionId}`;
       window.history.pushState(null, null, newUrl);
-      
-      // Mark as seen when clicked
-      markSectionAsSeen(sectionId);
     }
   };
 
-  // ✅ INTERSECTION OBSERVER TO MARK AS SEEN WHEN SCROLLED INTO VIEW
-  useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: '-50% 0px -50% 0px', // Only trigger when section is in center of viewport
-      threshold: 0.1
-    };
-
-    const observerCallback = (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const sectionId = entry.target.id;
-          markSectionAsSeen(sectionId);
-        }
-      });
-    };
-
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-    // Observe all sections
-    const sections = ['progress', 'voting', 'arguments', 'comments'];
-    sections.forEach(sectionId => {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        observer.observe(element);
-      }
-    });
-
-    return () => observer.disconnect();
-  }, [data]); // Re-observe when data loads
-
-  // Handle URL fragment on page load
   useEffect(() => {
     const handleFragmentScroll = () => {
       const hash = window.location.hash.substring(1);
@@ -155,12 +76,10 @@ export default function WribateContent() {
         setTimeout(() => {
           const element = document.getElementById(hash);
           if (element) {
-            element.scrollIntoView({ 
+            element.scrollIntoView({
               behavior: 'smooth',
               block: 'start'
             });
-            // Mark as seen when loaded with fragment
-            markSectionAsSeen(hash);
           }
         }, 500);
       }
@@ -178,7 +97,6 @@ export default function WribateContent() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [data]);
 
-  // Existing effects
   useEffect(() => {
     const newTimeStamp = new Date();
     const istOffset = 5.5 * 60 * 60 * 1000;
@@ -243,6 +161,12 @@ export default function WribateContent() {
     }
   }, [data?.data?.comments]);
 
+  // --- Related Wribates logic ---
+  // This assumes your backend sends all wribates as `allWribates` in the response
+  const allWribates = data?.allWribates || [];
+  const currentWribateId = data?.data?._id || id;
+  const currentCategory = data?.data?.category || "";
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-6">
@@ -252,13 +176,11 @@ export default function WribateContent() {
               <div className="bg-white p-4 sm:p-6 shadow-md rounded-sm">Loading Wribate details...</div>
             ) : data ? (
               <>
-                {/* ✅ Header with seen state */}
-                <Header 
-                  data={data} 
+                <Header
+                  data={data}
                   setShowSharePopup={setShowSharePopup}
                   scrollToSection={scrollToSection}
                   votes={votes || {}}
-                  seenSections={seenSections} // ✅ Pass seen state
                 />
 
                 <div id="progress" className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 mb-4 sm:mb-6 rounded-sm">
@@ -267,36 +189,36 @@ export default function WribateContent() {
                 </div>
 
                 <div id="voting">
-                  <Voting 
-                    id={id} 
-                    setSelectedVote={setSelectedVote} 
-                    user={user} 
+                  <Voting
+                    id={id}
+                    setSelectedVote={setSelectedVote}
+                    user={user}
                     refetch={handleRefetch}
-                    data={data} 
-                    selectedVote={selectedVote} 
+                    data={data}
+                    selectedVote={selectedVote}
                     votes={votes || {}}
                   />
                 </div>
 
                 <div id="arguments">
-                  <Arguments 
+                  <Arguments
                     refetch={handleRefetch}
-                    data={data} 
-                    user={user} 
-                    id={id} 
-                    round={round} 
-                    value={value} 
-                    setValue={setValue} 
+                    data={data}
+                    user={user}
+                    id={id}
+                    round={round}
+                    value={value}
+                    setValue={setValue}
                   />
                 </div>
 
                 <div id="comments">
-                  <Comments 
+                  <Comments
                     refetch={handleRefetch}
-                    id={id} 
-                    data={data} 
-                    user={user} 
-                    scrollContainerRef={scrollContainerRef} 
+                    id={id}
+                    data={data}
+                    user={user}
+                    scrollContainerRef={scrollContainerRef}
                   />
                 </div>
               </>
@@ -306,8 +228,12 @@ export default function WribateContent() {
               </div>
             )}
           </div>
-
-          <Sidebar/>
+          <Sidebar
+            category={currentCategory}
+            country={data?.data?.country || ""}
+            allWribates={allWribates}
+            currentWribateId={currentWribateId}
+          />
         </div>
       </div>
 
