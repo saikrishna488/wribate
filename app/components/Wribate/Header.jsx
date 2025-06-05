@@ -2,6 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
 import { FaShareAlt, FaDownload, FaComments } from "react-icons/fa";
 import { LiaFileAudioSolid } from "react-icons/lia";
+import { MdHowToVote, MdTimeline } from "react-icons/md";
+import { BiMessageSquareDetail } from "react-icons/bi";
 
 const Header = ({data, setShowSharePopup}) => {
     return (
@@ -67,7 +69,7 @@ const Header = ({data, setShowSharePopup}) => {
                 </div>
             </div>
         </div>
-    )
-}
+  );
+};
 
-export default Header
+export default Header;

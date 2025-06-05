@@ -19,11 +19,9 @@ const Comments = ({ data, scrollContainerRef, user, id, refetch }) => {
     const [chatUser, setChatUser] = useAtom(chatAtom);
     const router = useRouter();
 
-
     const handleVote = (vote) => {
         setVoteSelection(vote);
     };
-
 
     const handleAddComment = async (e) => {
         e.preventDefault();
@@ -62,12 +60,16 @@ const Comments = ({ data, scrollContainerRef, user, id, refetch }) => {
         router.push('/login')
     };
 
-
-
     return (
         <div className="bg-white border border-gray-200 shadow-sm mb-4 sm:mb-6 rounded-sm">
+            {/* ✅ SECTION HEADER WITH SCROLL INDICATOR */}
             <div className="p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
-                <h2 className="text-lg sm:text-xl font-bold">Comments</h2>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg sm:text-xl font-bold">Comments</h2>
+                    <div className="text-sm text-gray-500">
+                        <span className="hidden sm:inline">#{window.location.hash === '#comments' ? 'You are here' : 'comments'}</span>
+                    </div>
+                </div>
             </div>
 
             {/* Comment List */}
@@ -113,7 +115,6 @@ const Comments = ({ data, scrollContainerRef, user, id, refetch }) => {
                                             </button>
                                         )
                                     }
-
                                 </div>
                             </div>
                         </div>

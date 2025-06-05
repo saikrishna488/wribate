@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import formatDate from "../utils/dateFormat";
-import { FaEdit, FaBoxOpen, FaSignOutAlt, FaUser, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa";
+import { FaEdit, FaBoxOpen, FaSignOutAlt, FaUser, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt, FaUniversity } from "react-icons/fa";
 
 const ProfileSidebar = ({ user, openProfileModal, handleLogout }) => {
     return (
@@ -37,6 +37,16 @@ const ProfileSidebar = ({ user, openProfileModal, handleLogout }) => {
                     <div className="flex items-center">
                         <FaEnvelope className="text-blue-900 w-5 h-5 mr-3" />
                         <p className="text-gray-700">{user?.email}</p>
+                    </div>
+                    
+                    <div className="flex items-center">
+                        <FaUniversity className="text-blue-900 w-5 h-5 mr-3" />
+                        <p className="text-gray-700">{user?.institution || "Empty"}</p>
+                    </div>
+                    
+                    <div className="flex items-center">
+                        <FaEnvelope className="text-blue-900 w-5 h-5 mr-3" />
+                        <p className="text-gray-700 text-sm">{user?.institution_email || "Empty"}</p>
                     </div>
                     
                     {user?.country && (
