@@ -6,7 +6,7 @@ import { MdHowToVote, MdTimeline } from "react-icons/md";
 import { BiMessageSquareDetail } from "react-icons/bi";
 
 const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
-  // Extract total votes
+  // Vote count extraction
   const getVoteCounts = () => {
     let total = 0, forVotes = 0, againstVotes = 0;
     if (votes?.totalVotes != null) {
@@ -28,13 +28,13 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
 
   // Define each action button
   const actions = [
-    { key: "progress",  icon: MdTimeline,             label: "Progress" },
-    { key: "voting",    icon: MdHowToVote,            label: `Vote (${totalVotes})` },
-    { key: "arguments", icon: BiMessageSquareDetail,  label: `Arguments (${argCount})`, highlight: true },
-    { key: "comments",  icon: FaComments,              label: `Comments (${comCount})` },
-    { key: "download",  icon: FaDownload,              label: "Download" },
-    { key: "audio",     icon: LiaFileAudioSolid,       label: "Audio" },
-    { key: "share",     icon: FaShareAlt,              label: "Share", action: () => setShowSharePopup(true) },
+    { key: "progress",  icon: MdTimeline,             title: "Progress" },
+    { key: "voting",    icon: MdHowToVote,            title: "Vote",      count: totalVotes },
+    { key: "arguments", icon: BiMessageSquareDetail,  title: "Arguments", count: argCount,   highlight: true },
+    { key: "comments",  icon: FaComments,              title: "Comments",  count: comCount },
+    { key: "download",  icon: FaDownload,              title: "Download" },
+    { key: "audio",     icon: LiaFileAudioSolid,       title: "Audio" },
+    { key: "share",     icon: FaShareAlt,              title: "Share",     action: () => setShowSharePopup(true) },
   ];
 
   return (
@@ -75,11 +75,11 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
 
           {/* Buttons */}
           <div className="flex flex-1 min-w-0 space-x-2">
-            {actions.map(({ key, icon: Icon, label, highlight, action }) => (
+            {actions.map(({ key, icon: Icon, title, count, highlight, action }) => (
               <button
                 key={key}
                 onClick={() => (action ? action() : scrollToSection(key))}
-                title={label.replace(/\s*\(.+\)$/, "")}
+                title={count != null ? `${title} (${count})` : title}
                 className={`
                   flex-1 flex items-center justify-center p-2 bg-white rounded-lg
                   ${highlight
@@ -94,7 +94,7 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
                 <Icon
                   size={16}
                   className={`
-                    mr-1
+                    pointer-events-none mr-1
                     ${highlight
                       ? "text-red-600"
                       : key === "progress"
@@ -111,14 +111,11 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
                     }
                   `}
                 />
-                <span
-                  className={`
-                    text-xs font-medium
-                    ${highlight ? "text-red-600" : "text-gray-700"}
-                  `}
-                >
-                  {label}
-                </span>
+                {count != null && (
+                  <span className="pointer-events-none text-xs font-medium text-gray-700">
+                    ({count})
+                  </span>
+                )}
               </button>
             ))}
           </div>
