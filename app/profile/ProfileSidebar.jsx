@@ -44,10 +44,10 @@ const ProfileSidebar = ({ user, openProfileModal, handleLogout }) => {
                         <p className="text-gray-700">{user?.institution || "Empty"}</p>
                     </div>
                     
-                    <div className="flex items-center">
+                    {/* <div className="flex items-center">
                         <FaEnvelope className="text-blue-900 w-5 h-5 mr-3" />
                         <p className="text-gray-700 text-sm">{user?.institution_email || "Empty"}</p>
-                    </div>
+                    </div> */}
                     
                     {user?.country && (
                         <div className="flex items-center">

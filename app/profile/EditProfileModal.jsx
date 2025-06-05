@@ -308,7 +308,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
     try {
       const updatedProfile = { ...profileForm };
 
-      const res = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/user/updateprofile',updatedProfile, {
+      const res = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/user/updateprofile', updatedProfile, {
         headers: authHeader()
       })
 
@@ -454,10 +454,10 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
                     value={profileForm.email}
                     onChange={handleProfileChange}
                     className={`w-full p-3 border-2 ${emailChanged && !emailVerified
-                        ? "border-yellow-500"
-                        : emailVerified
-                          ? "border-green-500"
-                          : "border-gray-300"
+                      ? "border-yellow-500"
+                      : emailVerified
+                        ? "border-green-500"
+                        : "border-gray-300"
                       } focus:border-blue-900 focus:outline-none`}
                     required
                   />
@@ -523,70 +523,74 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
               </div>
 
               {/* Institution Email Field */}
-              <div>
-                <label
-                  className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
-                  htmlFor="institution_email"
-                >
-                  Institution Email {institutionEmailVerified && <span className="text-green-600 text-xs ml-2">✓ Verified</span>}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    id="institution_email"
-                    name="institution_email"
-                    value={profileForm.institution_email}
-                    onChange={handleProfileChange}
-                    className={`w-full p-3 border-2 ${institutionEmailChanged && !institutionEmailVerified
-                        ? "border-yellow-500"
-                        : institutionEmailVerified
-                          ? "border-green-500"
-                          : "border-gray-300"
-                      } focus:border-blue-900 focus:outline-none`}
-                    placeholder="Enter your institution email address"
-                  />
-                  {institutionEmailChanged && !institutionEmailVerified && (
-                    <button
-                      type="button"
-                      onClick={handleRequestInstitutionOtp}
-                      disabled={isRequestingOtp}
-                      className="px-3 py-1 bg-blue-900 text-white font-bold whitespace-nowrap"
+              {
+                (user.userRole != 'user') && (
+                  <div>
+                    <label
+                      className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
+                      htmlFor="institution_email"
                     >
-                      {isRequestingOtp ? "Sending..." : "Get OTP"}
-                    </button>
-                  )}
-                </div>
-
-                {/* Institution Email OTP Verification Section */}
-                {institutionEmailChanged && institutionOtpSent && !institutionEmailVerified && (
-                  <div className="mt-3">
+                      Institution Email {institutionEmailVerified && <span className="text-green-600 text-xs ml-2">✓ Verified</span>}
+                    </label>
                     <div className="flex gap-2">
                       <input
-                        type="text"
-                        placeholder="Enter OTP sent to your institution email"
-                        value={institutionOtp}
-                        onChange={handleInstitutionOtpChange}
-                        className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
+                        type="email"
+                        id="institution_email"
+                        name="institution_email"
+                        value={profileForm.institution_email}
+                        onChange={handleProfileChange}
+                        className={`w-full p-3 border-2 ${institutionEmailChanged && !institutionEmailVerified
+                          ? "border-yellow-500"
+                          : institutionEmailVerified
+                            ? "border-green-500"
+                            : "border-gray-300"
+                          } focus:border-blue-900 focus:outline-none`}
+                        placeholder="Enter your institution email address"
                       />
-                      <button
-                        type="button"
-                        onClick={handleVerifyInsftitutionOtp}
-                        disabled={isVerifyingEmail || !institutionOtp.trim()}
-                        className="px-3 py-1 bg-blue-900 text-white font-bold whitespace-nowrap"
-                      >
-                        {isVerifyingEmail ? "Verifying..." : "Verify"}
-                      </button>
+                      {institutionEmailChanged && !institutionEmailVerified && (
+                        <button
+                          type="button"
+                          onClick={handleRequestInstitutionOtp}
+                          disabled={isRequestingOtp}
+                          className="px-3 py-1 bg-blue-900 text-white font-bold whitespace-nowrap"
+                        >
+                          {isRequestingOtp ? "Sending..." : "Get OTP"}
+                        </button>
+                      )}
                     </div>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Enter the verification code sent to your institution email address to confirm your email.
+
+                    {/* Institution Email OTP Verification Section */}
+                    {institutionEmailChanged && institutionOtpSent && !institutionEmailVerified && (
+                      <div className="mt-3">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Enter OTP sent to your institution email"
+                            value={institutionOtp}
+                            onChange={handleInstitutionOtpChange}
+                            className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleVerifyInsftitutionOtp}
+                            disabled={isVerifyingEmail || !institutionOtp.trim()}
+                            className="px-3 py-1 bg-blue-900 text-white font-bold whitespace-nowrap"
+                          >
+                            {isVerifyingEmail ? "Verifying..." : "Verify"}
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Enter the verification code sent to your institution email address to confirm your email.
+                        </p>
+                      </div>
+                    )}
+
+                    <p className="text-xs text-gray-500 mt-1">
+                      Your official institution email address.
                     </p>
                   </div>
-                )}
-                
-                <p className="text-xs text-gray-500 mt-1">
-                  Your official institution email address.
-                </p>
-              </div>
+                )
+              }
 
               <div>
                 <label
@@ -633,7 +637,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
                   type="date"
                   id="dob"
                   name="dob"
-                   value={profileForm.dob ? profileForm.dob.slice(0, 10) : ""}
+                  value={profileForm.dob ? profileForm.dob.slice(0, 10) : ""}
                   onChange={handleProfileChange}
                   className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
                 />
