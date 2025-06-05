@@ -67,10 +67,10 @@ function DebateCard({ debate, user, setHook, hook }) {
         setVotes((prev) => prev + 1);
         if (vote === "for") {
           debate.votesFor += 1;
-          debate.votesAgainst -= 1;
+          debate.votesAgainst != 0 && (debate.votesAgainst -= 1)
         } else {
           debate.votesAgainst += 1;
-          debate.votesFor -= 1;
+          debate.votesFor != 0 && (debate.votesFor -=1)
         }
         setReadyToWribate(data.ready)
       } else {
@@ -132,7 +132,7 @@ function DebateCard({ debate, user, setHook, hook }) {
   console.log(debate.ready, debate.title)
 
   return (
-    <div onClick={() => setOpen(!open)} className="bg-white border-1 cursor-pointer border-gray-300 hover:shadow-xl shadow-md flex flex-col h-full">
+    <div className="bg-white border-1 cursor-pointer border-gray-300 hover:shadow-xl shadow-md flex flex-col h-full">
       <LaunchDialog
         isOpen={open}
         onClose={setOpen}
@@ -151,12 +151,12 @@ function DebateCard({ debate, user, setHook, hook }) {
 
 
           {/* Title */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0" onClick={() => setOpen(!open)}>
             <h2 className="text-md font-bold text-gray-900 leading-tight line-clamp-2">{debate.title}</h2>
           </div>
 
           {/* Small image rectangle */}
-          <div className="w-18 h-12 flex-shrink-0 rounded overflow-hidden border border-gray-200">
+          <div onClick={() => setOpen(!open)} className="w-18 h-12 flex-shrink-0 rounded overflow-hidden border border-gray-200">
             {debate.image ? (
               <img
                 src={debate.image}
@@ -170,7 +170,7 @@ function DebateCard({ debate, user, setHook, hook }) {
         </div>
 
         {/* Context - fixed height */}
-        <div className="text-sm text-gray-700 border-l-4 border-gray-200 pl-3 min-h-[3rem] mb-2">
+        <div onClick={() => setOpen(!open)} className="text-sm text-gray-700 border-l-4 border-gray-200 pl-3 min-h-[3rem] mb-2">
           <p className="line-clamp-3">{truncatedContext}</p>
         </div>
 

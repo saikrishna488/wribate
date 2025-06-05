@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 const BatchPropose = () => {
   const [file, setFile] = useState(null);
   const [country, setCountry] = useState('');
-  const [institution, setInstitution] = useState('');
   const [submittedBy, setSubmittedBy] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user] = useAtom(userAtom);
@@ -24,11 +23,11 @@ const BatchPropose = () => {
 
   const handleSubmit = async () => {
     if (!file) {
-      alert('Please upload a file');
+      toast.error('Please upload a file');
       return;
     }
-    if (!country || !institution || !submittedBy) {
-      alert('Please fill in all required fields');
+    if (!country || !submittedBy) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -38,7 +37,6 @@ const BatchPropose = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('country', country);
-      formData.append('institution', institution);
       formData.append('submittedBy', submittedBy);
       formData.append('submittedAt', new Date().toISOString());
       formData.append('user_id',user?._id || "")
@@ -113,16 +111,7 @@ const BatchPropose = () => {
               onChange={setCountry}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Institution</label>
-            <input
-              type="text"
-              value={institution}
-              onChange={(e) => setInstitution(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter institution"
-            />
-          </div>
+         
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Submitted By</label>
             <input

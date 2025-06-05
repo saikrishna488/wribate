@@ -213,6 +213,8 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
     const [isLoading, setIsLoading] = useState(false);
     const [isDetectingLocation, setIsDetectingLocation] = useState(false);
     
+
+    
     // Fetch countries from API
     useEffect(() => {
         const fetchCountries = async () => {
@@ -402,15 +404,18 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
                         <HorizontalFieldLabel htmlFor="institution" tooltip={tooltips.institution}>
                             Institution
                         </HorizontalFieldLabel>
-                        <input
+                        <select
                             id="institution"
-                            type="text"
                             name="institution"
                             value={formData.institution || ""}
                             onChange={handleInputChange}
                             className={inputClass}
-                            placeholder="Organization or school name"
-                        />
+                        >
+                            <option value="">Empty</option>
+                            {user?.institution && (
+                                <option value={user.institution}>{user.institution}</option>
+                            )}
+                        </select>
                     </div>
                 )}
             </div>

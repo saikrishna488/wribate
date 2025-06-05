@@ -24,6 +24,8 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
     country: "",
     dob: "",
     bio: "",
+    institution: "",
+    institution_email: "",
   });
 
   const [profileImage, setProfileImage] = useState(null);
@@ -37,6 +39,12 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
   const [otp, setOtp] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
 
+  // Institution email verification states
+  const [institutionEmailChanged, setInstitutionEmailChanged] = useState(false);
+  const [institutionOtpSent, setInstitutionOtpSent] = useState(false);
+  const [institutionOtp, setInstitutionOtp] = useState("");
+  const [institutionEmailVerified, setInstitutionEmailVerified] = useState(false);
+
   // Initialize profile form with user data
   useEffect(() => {
     if (user) {
@@ -47,6 +55,8 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
         username: user.userName || "",
         email: user.email || "",
         country: user.country || "",
+        institution: user.institution || "",
+        institution_email: user.institution_email || "",
         dob: user.dob || "",
         bio: user.bio || "", // Include the bio field
       });
@@ -60,6 +70,12 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
       setOtpSent(false);
       setOtp("");
       setEmailVerified(user?.emailVerified || false);
+
+      // Reset institution email verification states
+      setInstitutionEmailChanged(false);
+      setInstitutionOtpSent(false);
+      setInstitutionOtp("");
+      setInstitutionEmailVerified(user?.institutionEmailVerified || false);
     }
   }, [user, isOpen]);
 
@@ -99,6 +115,15 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
     } else if (name === "email" && value === user.email) {
       setEmailChanged(false);
       setEmailVerified(user?.emailVerified || false);
+    }
+
+    // Check if institution email was changed
+    if (name === "institution_email" && value !== user.institution_email) {
+      setInstitutionEmailChanged(true);
+      setInstitutionEmailVerified(false);
+    } else if (name === "institution_email" && value === user.institution_email) {
+      setInstitutionEmailChanged(false);
+      setInstitutionEmailVerified(user?.institutionEmailVerified || false);
     }
 
     setProfileForm({
@@ -181,9 +206,64 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
     }
   };
 
+  // Handle Institution Email OTP request
+  const handleRequestInstitutionOtp = async () => {
+    setIsRequestingOtp(true);
+    try {
+      const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + "/user/sendOTP", {
+        email: profileForm.institution_email
+      });
+
+      const data = response.data;
+
+      if (data.res) {
+        setInstitutionOtpSent(true);
+        toast.success("OTP sent to institution email!")
+      }
+      else {
+        setInstitutionEmailVerified(true)
+        toast.error(data.msg)
+      }
+    } catch (error) {
+      toast.error("error occured")
+    } finally {
+      setIsRequestingOtp(false);
+    }
+  };
+
+  // Handle Institution Email OTP verification
+  const handleVerifyInsftitutionOtp = async () => {
+    setIsVerifyingEmail(true);
+    try {
+      const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + "/user/verifyOTP", {
+        email: profileForm.institution_email,
+        otp: institutionOtp
+      });
+
+      const data = response.data;
+
+      if (data.res) {
+        setInstitutionEmailVerified(true);
+        toast.success("Institution email verified!");
+      }
+      else {
+        toast.error(data.msg)
+      }
+    } catch (error) {
+      toast.error("Error Occured")
+    } finally {
+      setIsVerifyingEmail(false);
+    }
+  };
+
   // Handle OTP input change
   const handleOtpChange = (e) => {
     setOtp(e.target.value);
+  };
+
+  // Handle Institution OTP input change
+  const handleInstitutionOtpChange = (e) => {
+    setInstitutionOtp(e.target.value);
   };
 
   // Upload profile image
@@ -215,6 +295,12 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
     // Prevent submission if email changed but not verified
     if (emailChanged && !emailVerified) {
       toast.error("Verify Email to continue")
+      return;
+    }
+
+    // Prevent submission if institution email changed but not verified
+    if (institutionEmailChanged && !institutionEmailVerified) {
+      toast.error("Verify Institution Email to continue")
       return;
     }
 
@@ -311,7 +397,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
                 />
               </div>
 
-              {/* Username Field - New Addition */}
+              {/* Username Field */}
               <div>
                 <label
                   className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
@@ -330,7 +416,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
                 />
               </div>
 
-              {/* Bio Field - New Addition */}
+              {/* Bio Field */}
               <div>
                 <label
                   className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
@@ -414,6 +500,94 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
                 )}
               </div>
 
+              {/* Institution Field - Disabled */}
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
+                  htmlFor="institution"
+                >
+                  Institution
+                </label>
+                <input
+                  type="text"
+                  id="institution"
+                  name="institution"
+                  value={profileForm.institution}
+                  className="w-full p-3 border-2 border-gray-300 bg-gray-100 text-gray-600 cursor-not-allowed"
+                  disabled
+                  placeholder="Institution cannot be changed"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Institution information is managed by your administrator and cannot be modified.
+                </p>
+              </div>
+
+              {/* Institution Email Field */}
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
+                  htmlFor="institution_email"
+                >
+                  Institution Email {institutionEmailVerified && <span className="text-green-600 text-xs ml-2">✓ Verified</span>}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    id="institution_email"
+                    name="institution_email"
+                    value={profileForm.institution_email}
+                    onChange={handleProfileChange}
+                    className={`w-full p-3 border-2 ${institutionEmailChanged && !institutionEmailVerified
+                        ? "border-yellow-500"
+                        : institutionEmailVerified
+                          ? "border-green-500"
+                          : "border-gray-300"
+                      } focus:border-blue-900 focus:outline-none`}
+                    placeholder="Enter your institution email address"
+                  />
+                  {institutionEmailChanged && !institutionEmailVerified && (
+                    <button
+                      type="button"
+                      onClick={handleRequestInstitutionOtp}
+                      disabled={isRequestingOtp}
+                      className="px-3 py-1 bg-blue-900 text-white font-bold whitespace-nowrap"
+                    >
+                      {isRequestingOtp ? "Sending..." : "Get OTP"}
+                    </button>
+                  )}
+                </div>
+
+                {/* Institution Email OTP Verification Section */}
+                {institutionEmailChanged && institutionOtpSent && !institutionEmailVerified && (
+                  <div className="mt-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Enter OTP sent to your institution email"
+                        value={institutionOtp}
+                        onChange={handleInstitutionOtpChange}
+                        className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleVerifyInsftitutionOtp}
+                        disabled={isVerifyingEmail || !institutionOtp.trim()}
+                        className="px-3 py-1 bg-blue-900 text-white font-bold whitespace-nowrap"
+                      >
+                        {isVerifyingEmail ? "Verifying..." : "Verify"}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Enter the verification code sent to your institution email address to confirm your email.
+                    </p>
+                  </div>
+                )}
+                
+                <p className="text-xs text-gray-500 mt-1">
+                  Your official institution email address.
+                </p>
+              </div>
+
               <div>
                 <label
                   className="block text-gray-700 font-bold mb-2 uppercase text-xs tracking-wide"
@@ -459,7 +633,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
                   type="date"
                   id="dob"
                   name="dob"
-                  value={profileForm.dob}
+                   value={profileForm.dob ? profileForm.dob.slice(0, 10) : ""}
                   onChange={handleProfileChange}
                   className="w-full p-3 border-2 border-gray-300 focus:border-blue-900 focus:outline-none"
                 />
@@ -478,7 +652,7 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
               <button
                 type="submit"
                 className="px-6 py-3 bg-blue-900 text-white font-bold shadow-md hover:bg-blue-800 transition-colors"
-                disabled={isUpdatingProfile || (emailChanged && !emailVerified)}
+                disabled={isUpdatingProfile || (emailChanged && !emailVerified) || (institutionEmailChanged && !institutionEmailVerified)}
               >
                 {isUpdatingProfile ? (
                   <div className="flex items-center">

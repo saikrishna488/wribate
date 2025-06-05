@@ -7,21 +7,21 @@ import Link from 'next/link';
 // Define advertisement data with actual sponsor links
 const advertisements = {
   sponsor1: {
-    image: '/ads/01.png', // You'll need to add these images to your public/ads directory
+    image: '/Ads/01.png', // You'll need to add these images to your public/ads directory
     alt: 'Sponsor 1',
     link: 'https://sponsor1.com',
     width: 400,
     height: 200,
   },
   sponsor2: {
-    image: '/ads/02.png',
+    image: '/Ads/02.png',
     alt: 'Sponsor 2',
     link: 'https://sponsor2.com',
     width: 400,
     height: 200,
   },
   sponsor3: {
-    image: '/ads/03.png',
+    image: '/Ads/03.png',
     alt: 'Sponsor 3',
     link: 'https://sponsor3.com',
     width: 400,

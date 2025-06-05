@@ -86,10 +86,10 @@ export default function WribateContent() {
     if (round) {
       const id = user?._id;
       let type = null;
-      if (data?.forId.includes(id)) {
+      if (data?.forId?.includes(id)) {
         type = "For";
       }
-      if (data?.againstId.includes(id)) {
+      if (data?.againstId?.includes(id)) {
         type = "Against";
       }
 
@@ -110,13 +110,16 @@ export default function WribateContent() {
     }
   }, [id, refetch]);
 
+  const prevCommentsLength = useRef(0);
+
   useEffect(() => {
-    if (scrollContainerRef.current) {
+    const currentLength = data?.data?.comments?.length || 0;
+    if (currentLength > prevCommentsLength.current && scrollContainerRef.current) {
       requestAnimationFrame(() => {
-        const container = scrollContainerRef.current;
-        container.scrollTop = container.scrollHeight;
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
       });
     }
+    prevCommentsLength.current = currentLength;
   }, [data?.data?.comments]);
 
   return (
@@ -157,7 +160,7 @@ export default function WribateContent() {
           </div>
 
           {/* Sidebar - Hidden on mobile, 30% on desktop */}
-          <Sidebar/>
+          <Sidebar />
         </div>
       </div>
 
