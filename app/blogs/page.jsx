@@ -114,7 +114,7 @@ export default function BlogPage() {
           {blogs.map((blog) => (
             <Card
               key={blog._id}
-              className="overflow-hidden border border-gray-200 bg-white cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
+              className="overflow-hidden border py-0 border-gray-200 bg-white cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
               onClick={() => handleCardClick(blog._id)}
             >
               <div className="flex flex-col h-full">
@@ -122,7 +122,7 @@ export default function BlogPage() {
                   <img
                     src={blog.image}
                     alt={blog.title}
-                    className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-64 object-fill transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>

@@ -133,7 +133,7 @@ export default function BlogContent() {
             <img
               src={blog.image}
               alt={blog.title}
-              className="w-full h-full object-cover object-center"
+              className="w-full h-full object-fill object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
           </div>
