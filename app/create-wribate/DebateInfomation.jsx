@@ -411,7 +411,7 @@ const DebateInformation = ({ formData, handleInputChange, handleFileUpload, data
                             onChange={handleInputChange}
                             className={inputClass}
                         >
-                            <option value="">Empty</option>
+                            <option value="">None</option>
                             {user?.institution && (
                                 <option value={user.institution}>{user.institution}</option>
                             )}

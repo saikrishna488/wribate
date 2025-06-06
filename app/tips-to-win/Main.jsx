@@ -11,8 +11,8 @@ const TipsHeader = () => {
       <p className="text-sm md:text-base text-gray-700 mb-6">
         Wribating is a powerful skill that sharpens your ability to think
         critically, argue persuasively, and communicate effectively. Whether for
-        formal competitions or everyday communication, mastering Wribate
-        <sup>®</sup> can set you apart as a clear, thoughtful communicator.
+        formal competitions or everyday communication, mastering Wribate™
+         can set you apart as a clear, thoughtful communicator.
       </p>
 
       <div className="relative h-48 md:h-64 lg:h-80 w-full overflow-hidden rounded-lg mb-4">

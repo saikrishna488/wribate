@@ -2,23 +2,22 @@
 import React from "react";
 import Link from "next/link";
 import formatDate from "../../../utils/dateFormat";
-import { FaUser, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt, FaComment } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt, FaComment, FaUniversity } from "react-icons/fa";
 import { useAtom } from "jotai";
 import { chatAtom } from "@/app/states/GlobalStates";
 import { useRouter } from "next/navigation";
 
 const ProfileSidebar = ({ user }) => {
-
+    
     const router = useRouter();
-
-
+    
     const [,setChatUser] = useAtom(chatAtom);
-
+    
     const handleMessage = ()=>{
         setChatUser({_id:user._id})
         router.push('/messages');
     }
-
+    
     return (
         <div className="bg-white shadow-md p-6 border-t-4 border-blue-900">
             <div className="flex items-center mb-6">
@@ -52,6 +51,13 @@ const ProfileSidebar = ({ user }) => {
                         <div className="flex items-center">
                             <FaMapMarkerAlt className="text-blue-900 w-5 h-5 mr-3" />
                             <p className="text-gray-700">{user?.country}</p>
+                        </div>
+                    )}
+                    
+                    {user?.institution && (
+                        <div className="flex items-center">
+                            <FaUniversity className="text-blue-900 w-5 h-5 mr-3" />
+                            <p className="text-gray-700">{user?.institution}</p>
                         </div>
                     )}
                     

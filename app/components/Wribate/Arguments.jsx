@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import he from "he";
-import dynamic from 'next/dynamic';
-import "react-quill-new/dist/quill.snow.css";
 import {
     useAddArgumentMutation,
 } from "../../../app/services/authApi";
@@ -12,17 +10,227 @@ import { AdSpaceContent, StaticAdvertisement } from '../Advertisements/Advertise
 import axios from "axios";
 import authHeader from "../../utils/authHeader";
 import { useRouter } from "next/navigation";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
+import TextAlign from '@tiptap/extension-text-align';
+import ListItem from '@tiptap/extension-list-item';
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
+import { Bold, Italic, List, ListOrdered, Quote, Undo, Redo, Image as ImageIcon } from 'lucide-react';
 
-const ReactQuill = dynamic(() => import('react-quill-new'), {
-    ssr: false, // Disable server-side rendering for this component
-    loading: () => <p>Loading editor...</p>
-});
+// Toolbar component for Tiptap editor
+const MenuBar = ({ editor, onImageUpload }) => {
+    if (!editor) {
+        return null;
+    }
+
+    return (
+        <div className="border-b p-2 flex flex-wrap gap-1 bg-gray-50">
+            <Button
+                type="button"
+                variant={editor.isActive('bold') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => editor.chain().focus().toggleBold().run()}
+                disabled={!editor.can().chain().focus().toggleBold().run()}
+            >
+                <Bold size={16} />
+            </Button>
+            <Button
+                type="button"
+                variant={editor.isActive('italic') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => editor.chain().focus().toggleItalic().run()}
+                disabled={!editor.can().chain().focus().toggleItalic().run()}
+            >
+                <Italic size={16} />
+            </Button>
+            <Button
+                type="button"
+                variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => editor.chain().focus().toggleBulletList().run()}
+            >
+                <List size={16} />
+            </Button>
+            <Button
+                type="button"
+                variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            >
+                <ListOrdered size={16} />
+            </Button>
+            <Button
+                type="button"
+                variant={editor.isActive('blockquote') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            >
+                <Quote size={16} />
+            </Button>
+            <div className="w-px h-6 bg-gray-200 mx-1" />
+            <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().undo().run()}
+                disabled={!editor.can().chain().focus().undo().run()}
+            >
+                <Undo size={16} />
+            </Button>
+            <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().redo().run()}
+                disabled={!editor.can().chain().focus().redo().run()}
+            >
+                <Redo size={16} />
+            </Button>
+            <div className="w-px h-6 bg-gray-200 mx-1" />
+            <Button
+                type="button"
+                variant={editor.isActive({ textAlign: 'left' }) ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => editor.chain().focus().setTextAlign('left').run()}
+            >
+                Left
+            </Button>
+            <Button
+                type="button"
+                variant={editor.isActive({ textAlign: 'center' }) ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => editor.chain().focus().setTextAlign('center').run()}
+            >
+                Center
+            </Button>
+            <Button
+                type="button"
+                variant={editor.isActive({ textAlign: 'right' }) ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => editor.chain().focus().setTextAlign('right').run()}
+            >
+                Right
+            </Button>
+            <div className="w-px h-6 bg-gray-200 mx-1" />
+            <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onImageUpload}
+            >
+                <ImageIcon size={16} />
+            </Button>
+        </div>
+    );
+};
 
 const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
     const [addArgument] = useAddArgumentMutation();
     const [plans, setPlans] = useState([]);
     const [isLoadingPlans, setIsLoadingPlans] = useState(true);
     const router = useRouter();
+
+    // Initialize Tiptap editor with proper list configuration
+    const editor = useEditor({
+        extensions: [
+            StarterKit.configure({
+                // Configure lists properly
+                bulletList: {
+                    keepMarks: true,
+                    keepAttributes: false,
+                },
+                orderedList: {
+                    keepMarks: true,
+                    keepAttributes: false,
+                },
+                listItem: {
+                    keepMarks: true,
+                    keepAttributes: false,
+                },
+            }),
+            // Add individual extensions for better control
+            BulletList.configure({
+                itemTypeName: 'listItem',
+                HTMLAttributes: {
+                    class: 'my-bullet-list',
+                },
+            }),
+            OrderedList.configure({
+                itemTypeName: 'listItem',
+                HTMLAttributes: {
+                    class: 'my-ordered-list',
+                },
+            }),
+            ListItem.configure({
+                HTMLAttributes: {
+                    class: 'my-list-item',
+                },
+            }),
+            Image.configure({
+                HTMLAttributes: {
+                    class: 'max-w-full h-auto rounded-lg mx-auto block my-4',
+                },
+                allowBase64: true,
+            }),
+            Link.configure({
+                openOnClick: false,
+            }),
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+            }),
+        ],
+        content: value ? he.decode(value) : '<p>Enter your argument here...</p>',
+        editorProps: {
+            attributes: {
+                class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none min-h-[200px] p-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1',
+            },
+        },
+        onUpdate: ({ editor }) => {
+            setValue(editor.getHTML());
+        },
+    });
+
+    // Handle image upload to editor
+    const handleImageUploadToEditor = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result;
+                    editor.chain().focus().setImage({ src: base64 }).run();
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        input.click();
+    };
+
+    // Add link to editor
+    const addLinkToEditor = () => {
+        const previousUrl = editor.getAttributes('link').href;
+        const url = prompt('URL', previousUrl);
+
+        // cancelled
+        if (url === null) {
+            return;
+        }
+
+        // empty
+        if (url === '') {
+            editor.chain().focus().extendMarkRange('link').unsetLink().run();
+            return;
+        }
+
+        // update link
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    };
 
     // Fetch subscription plans
     useEffect(() => {
@@ -157,14 +365,14 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
             <div className="relative">
                 {/* Only first two lines blurred/opaqued */}
                 <div className="premium-content-preview">
-                    <div className="border-l-4 border-red-300 bg-red-50 rounded-r-sm p-3 mb-4">
+                    <div className="border-l-4 border-red-300 bg-red-50 rounded-r-sm p-3 mb-4 ml-0 mr-auto w-full lg:w-4/5">
                         <div className="flex items-center mb-3">
                             <img src="/user.png" alt="" className="rounded-full w-6 h-6 mr-2" />
                             <span className="font-medium text-red-600">{data.data.leadFor}</span>
                         </div>
                         {forLines.length > 0 ? renderBlurredLines(forLines) : <p className="text-gray-500">No argument submitted.</p>}
                     </div>
-                    <div className="border-r-4 border-blue-300 bg-blue-50 p-3">
+                    <div className="border-r-4 border-blue-300 bg-blue-50 p-3 ml-auto mr-0 w-full lg:w-4/5">
                         <div className="flex items-center justify-end mb-3">
                             <span className="font-medium text-blue-600">{data.data.leadAgainst}</span>
                             <img src="/user.png" alt="" className="rounded-full w-6 h-6 ml-2" />
@@ -173,12 +381,12 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                     </div>
                 </div>
                 {/* Blocked rest of the content */}
-                <div className="blocked-content flex justify-between mt-2">
-                    <div className="blocked-for w-1/2 border-l-4 border-red-300 bg-red-100 rounded-r-sm p-3 ml-0 mr-auto">
+                <div className="blocked-content flex flex-col lg:flex-row justify-between mt-2 gap-4 lg:gap-0">
+                    <div className="blocked-for w-full lg:w-2/5 border-l-4 border-red-300 bg-red-100 rounded-r-sm p-3">
                         {forLines.length > 2 ? <p>Content hidden. Subscribe to view full argument.</p> : null}
                     </div>
-                    <div className="blocked-against w-1/2 border-r-4 border-blue-300 bg-blue-100 rounded-l-sm p-3 ml-auto mr-0">
-                        {againstLines.length > 2 ? <p className="text-right">Content hidden. Subscribe to view full argument.</p> : null}
+                    <div className="blocked-against w-full lg:w-2/5 border-r-4 border-blue-300 bg-blue-100 rounded-l-sm p-3 lg:ml-auto">
+                        {againstLines.length > 2 ? <p className="lg:text-right">Content hidden. Subscribe to view full argument.</p> : null}
                     </div>
                 </div>
                 {/* Subscription prompt */}
@@ -285,7 +493,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                     />
                                 ) : (
                                     <div className="space-y-4 sm:space-y-6">
-                                        <div className="border-l-4 border-red-500 bg-red-50 rounded-r-sm p-2 sm:p-3 ml-0 mr-auto w-full sm:w-4/5 md:w-3/4">
+                                        <div className="border-l-4 border-red-500 bg-red-50 rounded-r-sm p-2 sm:p-3 ml-0 mr-auto w-full lg:w-4/5">
                                             <div className="flex items-center mb-2 sm:mb-3">
                                                 <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 mr-2" />
                                                 <span className="font-medium text-red-800 text-sm sm:text-base">{data.data.leadFor}</span>
@@ -299,7 +507,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                                 <p className="text-gray-500 text-md sm:text-base">No argument submitted.</p>
                                             )}
                                         </div>
-                                        <div className="border-r-4 border-blue-500 bg-blue-50 p-2 sm:p-3 ml-auto mr-0 w-full sm:w-4/5 md:w-3/4">
+                                        <div className="border-r-4 border-blue-500 bg-blue-50 p-2 sm:p-3 ml-auto mr-0 w-full lg:w-4/5">
                                             <div className="flex items-center justify-end mb-2 sm:mb-3">
                                                 <span className="font-medium text-blue-800 text-sm sm:text-base">{data.data.leadAgainst}</span>
                                                 <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 ml-2" />
@@ -341,25 +549,32 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                 hasRoundStarted(round) && (
                     <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
                         <h3 className="font-bold text-base sm:text-lg mb-3 sm:mb-4">Enter Your Arguments - Round {round}</h3>
-                        <div className="bg-white border border-gray-200">
-                            <ReactQuill
-                                theme="snow"
-                                value={value && he.decode(value)}
-                                onChange={setValue}
-                                style={{
-                                    height: '250px',
-                                    backgroundColor: "white",
-                                    overflowY: "auto"
-                                }}
-                            />
-                        </div>
-                        <div className="mt-3 sm:mt-4">
-                            <Button
-                                onClick={handleSendMessage}
-                                className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-                            >
-                                Save Argument
-                            </Button>
+                        <div className="w-full mx-auto">
+                            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                <MenuBar editor={editor} onImageUpload={handleImageUploadToEditor} />
+                                <div className="flex gap-2 p-2 border-b bg-gray-50">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={addLinkToEditor}
+                                    >
+                                        Add Link
+                                    </Button>
+                                </div>
+                                <EditorContent 
+                                    editor={editor} 
+                                    className="min-h-[400px] max-h-[400px] overflow-y-auto"
+                                />
+                            </div>
+                            <div className="mt-3 sm:mt-4">
+                                <Button
+                                    onClick={handleSendMessage}
+                                    className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+                                >
+                                    Save Argument
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -372,7 +587,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                 !hasRoundStarted(round) && (
                     <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
                         <div className="text-center py-8">
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 w-full lg:w-4/5 mx-auto">
                                 <div className="flex items-center justify-center mb-2">
                                     <svg className="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
