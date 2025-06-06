@@ -163,3 +163,18 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+.blog-content h1 {
+  font-size: 2rem; /* or 32px */
+  font-weight: 700;
+}
+
+.blog-content h2 {
+  font-size: 1.75rem; /* or 28px */
+  font-weight: 600;
+}
+
+.blog-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}

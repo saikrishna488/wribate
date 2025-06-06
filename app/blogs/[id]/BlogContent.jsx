@@ -16,31 +16,31 @@ const formatRelativeTime = (dateString) => {
   const now = new Date();
   const date = new Date(dateString);
   const diffInSeconds = Math.floor((now - date) / 1000);
-  
+
   if (diffInSeconds < 60) {
     return 'just now';
   }
-  
+
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
     return `${diffInMinutes} min${diffInMinutes === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
     return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 30) {
     return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInMonths = Math.floor(diffInDays / 30);
   if (diffInMonths < 12) {
     return `${diffInMonths} month${diffInMonths === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInYears = Math.floor(diffInMonths / 12);
   return `${diffInYears} year${diffInYears === 1 ? '' : 's'} ago`;
 };
@@ -145,7 +145,7 @@ export default function BlogContent() {
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
                 {blog.title}
               </h1>
-              
+
               {/* Author and Meta Info */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -182,34 +182,34 @@ export default function BlogContent() {
                       Share this article
                     </DialogTitle>
                     <div className="space-y-4">
-                      <Button 
-                        onClick={handleCopy} 
-                        variant="outline" 
+                      <Button
+                        onClick={handleCopy}
+                        variant="outline"
                         className="w-full border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white"
                       >
                         {copied ? 'Link Copied!' : 'Copy Link'}
                       </Button>
-                      
+
                       <div className="flex items-center justify-center gap-6 pt-4 border-t border-gray-200">
-                        <a 
-                          href={`https://wa.me/?text=${encodeURIComponent(`Check out this article: ${blog.title} ${shareUrl}`)}`} 
-                          target="_blank" 
+                        <a
+                          href={`https://wa.me/?text=${encodeURIComponent(`Check out this article: ${blog.title} ${shareUrl}`)}`}
+                          target="_blank"
                           rel="noreferrer"
                           className="p-3 hover:bg-green-50 transition-colors duration-200"
                         >
                           <FaWhatsapp className="text-green-600 text-2xl" />
                         </a>
-                        <a 
-                          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} 
-                          target="_blank" 
+                        <a
+                          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                          target="_blank"
                           rel="noreferrer"
                           className="p-3 hover:bg-blue-50 transition-colors duration-200"
                         >
                           <FaFacebookF className="text-blue-700 text-2xl" />
                         </a>
-                        <a 
-                          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(blog.title)}`} 
-                          target="_blank" 
+                        <a
+                          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(blog.title)}`}
+                          target="_blank"
                           rel="noreferrer"
                           className="p-3 hover:bg-gray-50 transition-colors duration-200"
                         >
@@ -223,17 +223,18 @@ export default function BlogContent() {
             </header>
 
             {/* Blog Content */}
-            <div 
-              className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+            <div
+              className="blog-content max-w-none text-gray-700 leading-relaxed"
               style={{
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 lineHeight: '1.8',
-                fontSize: '1.1rem'
+                // Removed: fontSize: '1.1rem'
               }}
-              dangerouslySetInnerHTML={{ 
-                __html: he.decode(blog.content || '') 
+              dangerouslySetInnerHTML={{
+                __html: he.decode(blog.content || '')
               }}
             />
+
 
             {/* Footer */}
             <footer className="mt-12 pt-8 border-t border-gray-200">

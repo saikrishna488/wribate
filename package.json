@@ -21,6 +21,7 @@
     "@radix-ui/react-switch": "^1.2.2",
     "@radix-ui/react-tabs": "^1.1.9",
     "@reduxjs/toolkit": "^2.7.0",
+    "@tailwindcss/typography": "^0.5.16",
     "@tiptap/extension-image": "^2.13.0",
     "@tiptap/extension-link": "^2.13.0",
     "@tiptap/extension-text-align": "^2.13.0",
