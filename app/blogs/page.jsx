@@ -122,7 +122,7 @@ export default function BlogPage() {
                   <img
                     src={blog.image}
                     alt={blog.title}
-                    className="w-full h-64 object-fill transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-64 object-contain transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
