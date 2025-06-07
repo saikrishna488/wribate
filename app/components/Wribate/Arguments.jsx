@@ -285,7 +285,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                     />
                                 ) : (
                                     <div className="space-y-4 sm:space-y-6">
-                                        <div className="border-l-4 border-red-500 bg-red-50 rounded-r-sm p-2 sm:p-3 ml-0 mr-auto w-full sm:w-[90%]">
+                                        <div className="argument border-l-4 border-red-500 bg-red-50 rounded-r-sm p-2 sm:p-3 ml-0 mr-auto w-full sm:w-[90%]">
                                             <div className="flex items-center mb-2 sm:mb-3">
                                                 <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 mr-2" />
                                                 <span className="font-medium text-red-800 text-sm sm:text-base">{data.data.leadFor}</span>
@@ -299,7 +299,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                                 <p className="text-gray-500 text-md sm:text-base">No argument submitted.</p>
                                             )}
                                         </div>
-                                        <div className="border-r-4 border-blue-500 bg-blue-50 p-2 sm:p-3 ml-auto mr-0 w-full sm:w-[90%]">
+                                        <div className="argument border-r-4 border-blue-500 bg-blue-50 p-2 sm:p-3 ml-auto mr-0 w-full sm:w-[90%]">
                                             <div className="flex items-center justify-end mb-2 sm:mb-3">
                                                 <span className="font-medium text-blue-800 text-sm sm:text-base">{data.data.leadAgainst}</span>
                                                 <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 ml-2" />
@@ -355,7 +355,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                         <div className="mt-3 sm:mt-4">
                             <Button
                                 onClick={handleSendMessage}
-                                className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+                                className="bg-blue-900 rounded-none hover:bg-blue-700 w-full sm:w-auto"
                             >
                                 Save Argument
                             </Button>

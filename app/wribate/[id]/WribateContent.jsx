@@ -98,19 +98,40 @@ export default function WribateContent() {
   }, [data]);
 
   useEffect(() => {
-    const newTimeStamp = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    const currentTime = new Date(
-      newTimeStamp.getTime() + istOffset
-    ).toISOString();
+    if (data && data.data.rounds) {
+      // Use UTC time directly since dates are stored in UTC
+      const currentTime = new Date();
 
-    if (data && user) {
-      const currentRound = data.data.rounds.find((round) => {
-        return currentTime >= round.startDate && currentTime <= round.endDate;
+      console.log('Current time (UTC):', currentTime.toISOString());
+      console.log('Available rounds:', data.data.rounds);
+
+      // Strategy 1: Find currently active round
+      let selectedRound = data.data.rounds.find(round => {
+        const startDate = new Date(round.startDate);
+        const endDate = new Date(round.endDate);
+        return currentTime >= startDate && currentTime <= endDate;
       });
 
-      if (currentRound) {
-        setRound(currentRound.roundNumber);
+      // Strategy 2: If no active round, find the most recent started round
+      if (!selectedRound) {
+        const startedRounds = data.data.rounds
+          .filter(round => currentTime >= new Date(round.startDate))
+          .sort((a, b) => b.roundNumber - a.roundNumber);
+        selectedRound = startedRounds[0];
+      }
+
+      // Strategy 3: If user is a participant and no round is active, show the next upcoming round
+      if (!selectedRound && user && (user._id === data.forId || user._id === data.againstId)) {
+        const upcomingRounds = data.data.rounds
+          .filter(round => currentTime < new Date(round.startDate))
+          .sort((a, b) => a.roundNumber - b.roundNumber);
+        selectedRound = upcomingRounds[0];
+      }
+
+      if (selectedRound) {
+        setRound(selectedRound.roundNumber);
+      } else {
+        setRound(null);
       }
     }
 
