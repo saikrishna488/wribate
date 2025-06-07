@@ -85,12 +85,14 @@ function DebateCard({ debate, user, setHook, hook }) {
   const handleReadyToWribate = async () => {
     try {
 
-      const res = axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/readytowribate', {
+      const res = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/readytowribate', {
         userId: user?._id,
         proposeId: debate._id
       })
 
-      if (res.data) {
+      const data = res.data;
+
+      if (data.res) {
         toast.success("Find Users Here!")
         setOpen(true)
       }
@@ -152,7 +154,7 @@ function DebateCard({ debate, user, setHook, hook }) {
 
           {/* Title */}
           <div className="flex-1 min-w-0" onClick={() => setOpen(!open)}>
-            <h2 className="text-md font-bold text-gray-900 leading-tight line-clamp-2">{debate.title}</h2>
+            <h2 className="text-md font-bold text-gray-900 leading-tight hover:text-blue-900 line-clamp-2">{debate.title}</h2>
           </div>
 
           {/* Small image rectangle */}
