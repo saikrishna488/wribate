@@ -142,16 +142,16 @@ export default function Navbar() {
               onClick={() => router.push('/')}
               className="cursor-pointer flex items-center space-x-2 text-lg sm:text-xl font-semibold text-gray-800"
             >
-              <div className="relative w-10 h-10 sm:w-10 sm:h-10">
+              <div className="relative w-12 h-12 sm:w-12 sm:h-10">
                 <Image
-                  src="/logo/logo.png"
+                  src="/logo.svg"
                   alt="Wribate Logo"
                   fill
                   className="object-contain"
                   priority
                 />
               </div>
-              <span className="hidden sm:inline bg-blue-900 bg-clip-text text-transparent font-bold">
+              <span className="hidden sm:inline bg-blue-900 font-sans bg-clip-text text-2xl text-transparent font-semibold">
                 Wribate
               </span>
             </div>

@@ -117,7 +117,7 @@ export default function Sidebar() {
                 <div className={`w-full flex flex-row items-center mb-10 px-4 ${expand ? 'justify-start' : 'justify-center'}`}
                     onClick={() => setExpand(!expand)}
                 >
-                    <MdOutlineMenu size={30} /> {expand && <span className='font-bold px-2 text-lg'>Wribate</span>}
+                    <MdOutlineMenu size={30} /> {expand && <span className='font-semibold px-2 text-blue-900 text-2xl'>Wribate</span>}
 
                 </div>
 

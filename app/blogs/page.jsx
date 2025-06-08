@@ -129,7 +129,7 @@ export default function BlogPage() {
                 
                 <CardContent className="p-6 flex-grow flex flex-col">
                   <div className="flex-1">
-                    <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-900 transition-colors duration-200">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-900 transition-colors duration-200">
                       {blog.title}
                     </h2>
                     

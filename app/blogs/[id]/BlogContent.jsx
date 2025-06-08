@@ -142,7 +142,7 @@ export default function BlogContent() {
           <div className="p-8 md:p-12">
             {/* Header */}
             <header className="mb-8 border-b border-gray-200 pb-8">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+              <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4 leading-tight">
                 {blog.title}
               </h1>
 

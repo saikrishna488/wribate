@@ -4,26 +4,43 @@ import React from 'react';
 import Link from 'next/link';
 import { AdSpaceContent } from '../Advertisements/Advertisement';
 
-const Sidebar = ({ category, country, allWribates = [], currentWribateId }) => {
-  // First 5: same category & country
+const Sidebar = ({
+  category = '',       // comma-separated string of current wribate’s categories
+  country = '',
+  allWribates = [],
+  currentWribateId
+}) => {
+  // Helper: split a comma-separated category string into trimmed array
+  const splitCats = str => str.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+
+  const currentCats = splitCats(category);
+
+  // Filter: same country & any overlapping category
   const sameCatAndCountry = allWribates
-    .filter(w =>
-      w._id !== currentWribateId &&
-      w.category === category &&
-      w.country === country
-    )
-    .slice(0, 5);
+    .filter(w => {
+      if (w._id === currentWribateId || w.country !== country) return false;
+      const wCats = splitCats(w.category || '');
+      return wCats.some(cat => currentCats.includes(cat));
+    })
+    .slice(0, 10);
 
-  // Next 5: different category, same country
+  // Filter: same country & no overlapping category
   const otherCatSameCountry = allWribates
-    .filter(w =>
-      w._id !== currentWribateId &&
-      w.category !== category &&
-      w.country === country
-    )
-    .slice(0, 5);
+    .filter(w => {
+      if (w._id === currentWribateId || w.country !== country) return false;
+      const wCats = splitCats(w.category || '');
+      return !wCats.some(cat => currentCats.includes(cat));
+    })
+    .slice(0, 10);
 
-  const renderList = items =>
+  // Card wrapper classes
+  const cardClasses = `
+    bg-white border border-gray-200 shadow-sm p-3 sm:p-4 rounded-lg
+    hover:border-blue-200 hover:shadow-md transition-all duration-200
+  `;
+
+  // Render a list of wribate links with dividers
+  const renderList = items => (
     <div className="divide-y divide-gray-200">
       {items.map(w => (
         <Link
@@ -40,16 +57,12 @@ const Sidebar = ({ category, country, allWribates = [], currentWribateId }) => {
           </div>
         </Link>
       ))}
-    </div>;
-
-  const cardClasses = `
-    bg-white border border-gray-200 shadow-sm p-3 sm:p-4 rounded-lg
-    hover:border-blue-200 hover:shadow-md transition-all duration-200
-  `;
+    </div>
+  );
 
   return (
     <div className="w-full lg:w-[30%] space-y-4 sm:space-y-6 mt-4 lg:mt-0">
-      {/* Advertisement Slots */}
+      {/* Advertisement Slots (unchanged) */}
       <div className={cardClasses}>
         <div className="mb-2 font-bold uppercase text-[10px] sm:text-xs tracking-wider text-gray-600">
           Advertisement
@@ -64,10 +77,10 @@ const Sidebar = ({ category, country, allWribates = [], currentWribateId }) => {
         <AdSpaceContent startingAd={2} />
       </div>
 
-      {/* Related: same category & country */}
+      {/* First card: Similar Wribates */}
       <div className={cardClasses}>
         <h3 className="font-bold text-base sm:text-lg mb-3 sm:mb-4">
-          More in {category}
+          Similar Wribates
         </h3>
         {sameCatAndCountry.length > 0
           ? renderList(sameCatAndCountry)
@@ -75,7 +88,7 @@ const Sidebar = ({ category, country, allWribates = [], currentWribateId }) => {
         }
       </div>
 
-      {/* Related: other categories, same country */}
+      {/* Second card: Same country, other categories */}
       <div className={cardClasses}>
         <h3 className="font-bold text-base sm:text-lg mb-3 sm:mb-4">
           More topics

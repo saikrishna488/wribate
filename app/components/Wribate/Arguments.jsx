@@ -93,6 +93,25 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
         return currentDate >= startDate;
     };
 
+    // Helper function to check if all rounds are completed
+    const areAllRoundsCompleted = () => {
+        if (!data?.data?.rounds) return false;
+        
+        const currentDate = new Date();
+        
+        // Check if all rounds have passed their end date
+        return data.data.rounds.every(roundData => {
+            if (!roundData.endDate) return false;
+            const endDate = new Date(roundData.endDate);
+            return currentDate > endDate;
+        });
+    };
+
+    // Helper function to check if first round has started
+    const hasFirstRoundStarted = () => {
+        return hasRoundStarted(1);
+    };
+
     // Helper function to get round title
     const getRoundTitle = (roundNumber) => {
         switch (roundNumber) {
@@ -230,6 +249,30 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
     const userIsPremium = isPremiumUser();
     const wribateIsFeatured = isFeaturedWribate();
 
+    // Check conditions for showing argument input
+    const shouldShowArgumentInput = () => {
+        return (
+            user &&
+            (user?._id === data?.forId || user?._id === data?.againstId) &&
+            round &&
+            hasRoundStarted(round) &&
+            !areAllRoundsCompleted() &&
+            hasFirstRoundStarted()
+        );
+    };
+
+    // Check conditions for showing "round not started" message
+    const shouldShowRoundNotStartedMessage = () => {
+        return (
+            user &&
+            (user?._id === data?.forId || user?._id === data?.againstId) &&
+            round &&
+            !hasRoundStarted(round) &&
+            hasFirstRoundStarted() &&
+            !areAllRoundsCompleted()
+        );
+    };
+
     return (
         <div className="bg-white border border-gray-200 shadow-sm mb-4 sm:mb-6 rounded-sm">
             <div className="p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
@@ -319,10 +362,10 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                 {/* Show advertisements between rounds for non-premium users */}
                                 {index < data.data.rounds.length - 1 && !userIsPremium && !isRoundMasked && (
                                     <div className="mt-8">
-                                        <div className="text-center mb-2">
+                                        <div className="text-left mb-2">
                                             <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
                                         </div>
-                                        <div className="transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                                        <div className="transform  transition-transform duration-300">
                                             <StaticAdvertisement type={`sponsor${index + 1}`} />
                                         </div>
                                     </div>
@@ -334,65 +377,99 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
             </div>
 
             {/* Argument input section for participants */}
-            {user &&
-                (user?._id === data?.forId ||
-                    user?._id === data?.againstId) &&
-                round &&
-                hasRoundStarted(round) && (
-                    <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
-                        <h3 className="font-bold text-base sm:text-lg mb-3 sm:mb-4">Enter Your Arguments - Round {round}</h3>
-                        <div className="bg-white border border-gray-200">
-                            <ReactQuill
-                                theme="snow"
-                                value={value && he.decode(value)}
-                                onChange={setValue}
-                                style={{
-                                    minHeight: '400px'
-                                }}
-                                className="min-h-[400px]"
-                            />
-                        </div>
-                        <div className="mt-3 sm:mt-4">
-                            <Button
-                                onClick={handleSendMessage}
-                                className="bg-blue-900 rounded-none hover:bg-blue-700 w-full sm:w-auto"
-                            >
-                                Save Argument
-                            </Button>
-                        </div>
+            {shouldShowArgumentInput() && (
+                <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
+                    <h3 className="font-bold text-base sm:text-lg mb-3 sm:mb-4">Enter Your Arguments - Round {round}</h3>
+                    <div className="bg-white border border-gray-200">
+                        <ReactQuill
+                            theme="snow"
+                            value={value && he.decode(value)}
+                            onChange={setValue}
+                            style={{
+                                minHeight: '400px'
+                            }}
+                            className="min-h-[400px]"
+                        />
                     </div>
-                )}
+                    <div className="mt-3 sm:mt-4">
+                        <Button
+                            onClick={handleSendMessage}
+                            className="bg-blue-900 rounded-none hover:bg-blue-700 w-full sm:w-auto"
+                        >
+                            Save Argument
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* Show message if user is participant but round hasn't started */}
-            {user &&
-                (user?._id === data?.forId ||
-                    user?._id === data?.againstId) &&
-                round &&
-                !hasRoundStarted(round) && (
-                    <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
-                        <div className="text-center py-8">
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                                <div className="flex items-center justify-center mb-2">
-                                    <svg className="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                    </svg>
-                                    <h4 className="text-lg font-medium text-yellow-800">Round {round} Not Started</h4>
-                                </div>
-                                <p className="text-yellow-700">
-                                    This round hasn't started yet. Please wait for the round to begin before submitting your arguments.
-                                </p>
+            {shouldShowRoundNotStartedMessage() && (
+                <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
+                    <div className="text-center py-8">
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                            <div className="flex items-center justify-center mb-2">
+                                <svg className="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                                <h4 className="text-lg font-medium text-yellow-800">Round {round} Not Started</h4>
                             </div>
+                            <p className="text-yellow-700">
+                                This round hasn't started yet. Please wait for the round to begin before submitting your arguments.
+                            </p>
                         </div>
                     </div>
-                )}
+                </div>
+            )}
+
+            {/* Show message if all rounds are completed */}
+            {user && 
+                (user?._id === data?.forId || user?._id === data?.againstId) && 
+                areAllRoundsCompleted() && (
+                <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
+                    <div className="text-center py-8">
+                        <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                            <div className="flex items-center justify-center mb-2">
+                                <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                <h4 className="text-lg font-medium text-green-800">All Rounds Completed</h4>
+                            </div>
+                            <p className="text-green-700">
+                                All debate rounds have been completed. Thank you for your participation!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Show message if first round hasn't started */}
+            {user && 
+                (user?._id === data?.forId || user?._id === data?.againstId) && 
+                !hasFirstRoundStarted() && (
+                <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
+                    <div className="text-center py-8">
+                        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                            <div className="flex items-center justify-center mb-2">
+                                <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                </svg>
+                                <h4 className="text-lg font-medium text-blue-800">Debate Not Started</h4>
+                            </div>
+                            <p className="text-blue-700">
+                                The debate hasn't started yet. Please wait for the first round to begin.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Final advertisement for non-premium users */}
             {!userIsPremium && (
-                <div className="mt-8">
-                    <div className="text-center mb-2">
+                <div className="mt-8 p-2">
+                    <div className=" mb-2">
                         <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
                     </div>
-                    <div className="transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                    <div className=" duration-300 shadow-lg">
                         <StaticAdvertisement type="sponsor3" />
                     </div>
                 </div>

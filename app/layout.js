@@ -21,7 +21,7 @@ export const metadata = {
   title: "Wribate",
   description: "Where Ideas Meet Words.",
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon.svg",
   },
 };
 

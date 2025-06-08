@@ -156,6 +156,9 @@ export default function WribateContent() {
         type = "Against";
       }
 
+
+      
+
       if (type) {
         const requiredRound = data.data.arguments.find(
           (argument) =>
@@ -208,7 +211,6 @@ export default function WribateContent() {
                 />
 
                 <div id="progress" className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 mb-4 sm:mb-6 rounded-sm">
-                  <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Wribate Progress</h2>
                   <ProgressBar rounds={data?.data?.rounds} />
                 </div>
 

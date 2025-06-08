@@ -40,19 +40,19 @@ export function StaticAdvertisement({ type = 'sponsor1', className = '' }) {
       href={ad.link}
       target="_blank"
       rel="noopener noreferrer" 
-      className={`group block transition-all duration-300 ${className}`}
+      className={`${className}`}
     >
-      <div className="relative">
+      <div className="relative sm:w-[400px]">
         <img
           src={ad.image}
           alt={ad.alt}
-          className="w-full h-auto transition-all duration-300 group-hover:brightness-105"
+          className="w-full h-auto "
         />
         {/* Modern overlay effect on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0" />
         
         {/* Sponsor label */}
-        <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 text-xs font-medium text-gray-700 rounded-full opacity-0 group-hover:opacity-100 transform -translate-y-1 group-hover:translate-y-0 transition-all duration-300">
+        <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 text-xs font-medium text-gray-700 rounded-full opacity-0">
           Sponsor
         </div>
       </div>
@@ -76,7 +76,7 @@ export function Advertisement({ type, className = '' }) {
         <img
           src={ad.image}
           alt={ad.alt}
-          className="w-full h-auto transition-all duration-300 group-hover:scale-105 group-hover:brightness-105"
+          className="w-full h-auto group-hover:brightness-105"
         />
         {/* Modern overlay effect on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
