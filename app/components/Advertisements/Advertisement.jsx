@@ -42,7 +42,7 @@ export function StaticAdvertisement({ type = 'sponsor1', className = '' }) {
       rel="noopener noreferrer" 
       className={`${className}`}
     >
-      <div className="relative sm:w-[400px]">
+      <div className="relative mx-auto sm:w-[400px]">
         <img
           src={ad.image}
           alt={ad.alt}

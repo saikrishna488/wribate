@@ -362,7 +362,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                 {/* Show advertisements between rounds for non-premium users */}
                                 {index < data.data.rounds.length - 1 && !userIsPremium && !isRoundMasked && (
                                     <div className="mt-8">
-                                        <div className="text-left mb-2">
+                                        <div className="text-center mb-2">
                                             <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
                                         </div>
                                         <div className="transform  transition-transform duration-300">
@@ -466,7 +466,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
             {/* Final advertisement for non-premium users */}
             {!userIsPremium && (
                 <div className="mt-8 p-2">
-                    <div className=" mb-2">
+                    <div className="text-center mb-2">
                         <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
                     </div>
                     <div className=" duration-300 shadow-lg">

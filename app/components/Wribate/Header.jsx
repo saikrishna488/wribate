@@ -5,71 +5,6 @@ import { LiaFileAudioSolid } from "react-icons/lia";
 import { MdHowToVote, MdTimeline } from "react-icons/md";
 import { BiMessageSquareDetail } from "react-icons/bi";
 
-<<<<<<< HEAD
-const Header = ({data, setShowSharePopup}) => {
-    return (
-        <div className="bg-white border border-gray-200 shadow-sm mb-4 sm:mb-6 rounded-sm overflow-hidden">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
-                {data?.data?.title}
-            </h1>
-            
-            <div className="flex flex-row justify-between sm:justify-center bg-gradient-to-r from-red-600 to-blue-900 border-b border-gray-200 text-sm sm:text-lg font-semibold">
-                <div className="p-2 sm:p-3 text-center w-[33.33%] text-white break-words truncate sm:truncate-0">
-                    {data?.data?.leadFor || "@Test 1"}
-                </div>
-                <div className="flex items-center  text-white justify-center font-bold text-lg">
-                    VS
-                </div>
-                <div className="p-2 sm:p-3 text-center w-[33.33%] text-white break-words truncate sm:truncate-0">
-                    {data?.data?.leadAgainst}
-                </div>
-            </div>
-            
-            <div className="p-3 sm:p-4">
-                <div className="relative h-56 sm:h-80 w-full mx-auto sm:w-[80%]">
-                    <img
-                        src={data?.data?.coverImage}
-                        alt="Debate Cover Image"
-                        className="absolute top-0 left-0 w-full h-full object-fill"
-                    />
-                </div>
-            </div>
-            
-            <div className="p-3 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap sm:justify-between items-start sm:items-center border-t border-gray-200 bg-gray-50">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm mb-3 sm:mb-2 md:mb-0 w-full sm:w-auto">
-                    <Badge className="font-semibold mb-1 sm:mb-0">{data?.data?.category}</Badge>
-                    {data?.data?.institution && (
-                        <Badge className="font-semibold">{data.data.institution}</Badge>
-                    )}
-                </div>
-                
-                <div className="flex flex-wrap gap-3 sm:gap-4">
-                    <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
-                        <Eye size={14} className="mr-1" />
-                        <span>{data?.data?.views}</span>
-                    </button>
-                    <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
-                        <FaComments size={14} className="mr-1" />
-                        <span>{data?.data?.comments?.length}</span>
-                    </button>
-                    <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
-                        <FaDownload size={14} className="mr-1" />
-                        <span>Download</span>
-                    </button>
-                    <button className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
-                        <LiaFileAudioSolid size={16} className="mr-1" />
-                        <span>Audio</span>
-                    </button>
-                    <button
-                        className="flex items-center text-gray-600 hover:text-gray-900 text-sm"
-                        onClick={() => setShowSharePopup(true)}
-                    >
-                        <FaShareAlt size={14} className="mr-1" />
-                        <span>Share</span>
-                    </button>
-                </div>
-            </div>
-=======
 const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
   // Vote count extraction
   const getVoteCounts = () => {
@@ -93,105 +28,117 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
 
   // Define each action button
   const actions = [
-    { key: "progress",  icon: MdTimeline,             title: "Progress" },
-    { key: "voting",    icon: MdHowToVote,            title: "Vote",      count: totalVotes },
-    { key: "arguments", icon: BiMessageSquareDetail,  title: "Arguments", count: argCount,   highlight: true },
-    { key: "comments",  icon: FaComments,              title: "Comments",  count: comCount },
-    { key: "download",  icon: FaDownload,              title: "Download" },
-    { key: "audio",     icon: LiaFileAudioSolid,       title: "Audio" },
-    { key: "share",     icon: FaShareAlt,              title: "Share",     action: () => setShowSharePopup(true) },
+    { key: "progress",  icon: MdTimeline,             title: "Progress", shortTitle: "Progress" },
+    { key: "voting",    icon: MdHowToVote,            title: "Vote",      count: totalVotes, shortTitle: "Vote" },
+    { key: "arguments", icon: BiMessageSquareDetail,  title: "Arguments", count: argCount,   highlight: true, shortTitle: "Args" },
+    { key: "comments",  icon: FaComments,              title: "Comments",  count: comCount, shortTitle: "Comments" },
+    { key: "download",  icon: FaDownload,              title: "Download", shortTitle: "Download" },
+    { key: "audio",     icon: LiaFileAudioSolid,       title: "Audio", shortTitle: "Audio" },
+    { key: "share",     icon: FaShareAlt,              title: "Share",     action: () => setShowSharePopup(true), shortTitle: "Share" },
   ];
 
   return (
     <div className="bg-white border border-gray-200 shadow-sm mb-4 rounded-sm overflow-hidden">
       {/* Title */}
-      <h1 className="text-2xl font-bold p-3 border-b bg-gray-50">
+      <h1 className="text-lg sm:text-2xl font-bold p-3 sm:p-4 border-b bg-gray-50 leading-tight">
         {data?.data?.title}
       </h1>
 
       {/* VS Banner */}
-      <div className="flex items-center justify-center bg-gradient-to-r from-red-600 to-blue-900 text-white text-sm font-semibold">
-        <div className="w-1/3 p-2 text-center truncate">{data?.data?.leadFor}</div>
-        <div className="font-bold">VS</div>
-        <div className="w-1/3 p-2 text-center truncate">{data?.data?.leadAgainst}</div>
+      <div className="flex items-center justify-center bg-gradient-to-r from-red-600 to-blue-900 text-white text-xs sm:text-sm font-semibold">
+        <div className="flex-1 p-2 sm:p-3 text-center truncate min-w-0">
+          <span className="block">{data?.data?.leadFor}</span>
+        </div>
+        <div className="font-bold px-2 text-sm sm:text-base">VS</div>
+        <div className="flex-1 p-2 sm:p-3 text-center truncate min-w-0">
+          <span className="block">{data?.data?.leadAgainst}</span>
+        </div>
       </div>
 
       {/* Cover Image */}
-      <div className="p-3 border-t">
+      <div className="p-2 sm:p-3 h-48 sm:h-44 md:h-80 border-t">
         <img
           src={data?.data?.coverImage}
           alt="Cover"
-          className="w-full h-48 object-cover rounded"
+          className="w-full h-full object-contain rounded"
         />
       </div>
 
-      {/* Single‐line nav */}
-      <div className="p-3 border-t border-gray-200 bg-gray-50">
-        <div className="flex items-center flex-wrap space-x-2">
-          {/* Category badge */}
-          <Badge className="px-2 py-1 text-xs flex-shrink-0 transition hover:opacity-80">
-            {data?.data?.category}
-          </Badge>
-          {data?.data?.institution && (
+      {/* Navigation Section */}
+      <div className="p-2 sm:p-3 border-t border-gray-200 bg-gray-50">
+        {/* Categories Row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center flex-wrap gap-1.5">
             <Badge className="px-2 py-1 text-xs flex-shrink-0 transition hover:opacity-80">
-              {data.data.institution}
+              {data?.data?.category}
             </Badge>
-          )}
-
-          {/* Buttons */}
-          <div className="flex flex-1 min-w-0 space-x-2">
-            {actions.map(({ key, icon: Icon, title, count, highlight, action }) => (
-              <button
-                key={key}
-                onClick={() => (action ? action() : scrollToSection(key))}
-                title={count != null ? `${title} (${count})` : title}
-                className={`
-                  flex-1 flex items-center justify-center p-2 bg-white rounded-lg
-                  ${highlight
-                    ? "border-2 border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)]"
-                    : "border border-gray-200 hover:shadow-sm hover:border-gray-300"
-                  }
-                  transition-transform duration-200 ease-out
-                  hover:scale-105
-                  relative
-                `}
-              >
-                <Icon
-                  size={16}
-                  className={`
-                    pointer-events-none mr-1
-                    ${highlight
-                      ? "text-red-600"
-                      : key === "progress"
-                        ? "text-blue-600"
-                        : key === "voting"
-                          ? "text-purple-600"
-                          : key === "comments"
-                            ? "text-orange-600"
-                            : key === "download"
-                              ? "text-indigo-600"
-                              : key === "audio"
-                                ? "text-teal-600"
-                                : "text-gray-600"
-                    }
-                  `}
-                />
-                {count != null && (
-                  <span className="pointer-events-none text-xs font-medium text-gray-700">
-                    ({count})
-                  </span>
-                )}
-              </button>
-            ))}
+            {data?.data?.institution && (
+              <Badge className="px-2 py-1 text-xs flex-shrink-0 transition hover:opacity-80">
+                {data.data.institution}
+              </Badge>
+            )}
           </div>
-
-          {/* Views */}
-          <div className="flex-shrink-0 flex items-center text-gray-600 text-xs space-x-1">
-            <Eye size={14} className="mr-1" />
-            <span>{viewsCount.toLocaleString()} views</span>
+          
+          {/* Views - Mobile positioned top right */}
+          <div className="flex-shrink-0 flex items-center text-gray-600 text-xs">
+            <Eye size={12} className="mr-1" />
+            <span className="hidden xs:inline">{viewsCount.toLocaleString()} views</span>
+            <span className="xs:hidden">{viewsCount > 999 ? `${Math.floor(viewsCount/1000)}k` : viewsCount}</span>
           </div>
->>>>>>> 6402724e6778581c6cebe42528c43b30c760b9fd
         </div>
+
+        {/* Action Buttons Grid */}
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2">
+          {actions.map(({ key, icon: Icon, title, count, highlight, action }) => (
+            <button
+              key={key}
+              onClick={() => (action ? action() : scrollToSection(key))}
+              title={count != null ? `${title} (${count})` : title}
+              className={`
+                flex flex-col items-center justify-center p-2 sm:p-3 bg-white rounded-lg
+                min-h-[60px] sm:min-h-[70px]
+                ${highlight
+                  ? "border-2 border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)]"
+                  : "border border-gray-200 hover:shadow-sm hover:border-gray-300"
+                }
+                transition-all duration-200 ease-out
+                active:scale-95 sm:hover:scale-105
+                touch-manipulation
+                relative
+              `}
+            >
+              <Icon
+                size={18}
+                className={`
+                  pointer-events-none
+                  ${highlight
+                    ? "text-red-600"
+                    : key === "progress"
+                      ? "text-blue-600"
+                      : key === "voting"
+                        ? "text-purple-600"
+                        : key === "comments"
+                          ? "text-orange-600"
+                          : key === "download"
+                            ? "text-indigo-600"
+                            : key === "audio"
+                              ? "text-teal-600"
+                              : "text-gray-600"
+                  }
+                `}
+              />
+              
+              {/* Count - only show if exists */}
+              {count != null && (
+                <span className="text-xs font-medium text-gray-600 mt-1">
+                  {count > 999 ? `${Math.floor(count/1000)}k+` : count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
