@@ -33,7 +33,7 @@ const Comments = ({id}) => {
         setIsSubmitting(true);
         try {
             // Replace with your actual API endpoint for posting comments
-            await httpRequest(axios.post(process.env.NEXT_PUBLIC_BACKEND_URL+'/blog/comments', {
+            await httpRequest(axios.post(process.env.NEXT_PUBLIC_BACKEND_URL+'/blog/comment', {
                 blog_id: id,
                 user_id: user?._id,
                 text: newComment
