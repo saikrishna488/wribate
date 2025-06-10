@@ -95,7 +95,7 @@ export default function WribateDashboard() {
   }
 
   return (
-    <div ref={wribatesRef} className="h-[90vh] overflow-y-auto bg-white">
+    <div ref={wribatesRef} className="h-[90vh] overflow-y-auto bg-[#F3F2EF]">
       <Header
         setActiveCategory={setActiveCategory}
         wribatesRef={wribatesRef}

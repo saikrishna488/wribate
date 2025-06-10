@@ -4,13 +4,16 @@ import { BsThreeDots } from "react-icons/bs";
 import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { Button } from '../../../components/ui/button';
+import { useRouter } from 'next/navigation';
 
 const Header = ({ wribatesRef, setWribates, activeCategory, setIsLoading, setActiveCategory, topCategories, categories, setCategories, setTopCategories }) => {
 
     const categoriesRef = useRef(null);
+    const router = useRouter();
 
 
-    
+
 
 
     useEffect(() => {
@@ -42,11 +45,21 @@ const Header = ({ wribatesRef, setWribates, activeCategory, setIsLoading, setAct
 
     return (
         <header className="mb-6 py-2 bg-gray-50 sticky w-full px-2 top-0 z-20">
-            <div className="border-b border-gray-200 relative flex items-center w-full">
+            <div className="border-b border-gray-200 relative flex items-center justify-center w-full">
                 <div
                     ref={categoriesRef}
                     className="overflow-x-auto scrollbar-hide flex px-2 relative"
                 >
+
+                    <button
+                        className={`px-3 py-2 mr-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${activeCategory === "My Wribates"
+                            ? "border-blue-700 text-blue-700 scroll-smooth"
+                            : "border-transparent text-gray-600 hover:text-gray-900"
+                            }`}
+                        onClick={() => router.push('/my-wribates')}
+                    >
+                        {"My Wribates"}
+                    </button>
                     {/* All + Top Categories */}
                     <button
                         className={`px-3 py-2 mr-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${activeCategory === "All"

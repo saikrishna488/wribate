@@ -10,6 +10,7 @@ import { FaXTwitter } from "react-icons/fa6";
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import he from 'he';
+import Comments from '../../components/blogs/comments/Comments'
 
 // Utility function to format relative time
 const formatRelativeTime = (dateString) => {
@@ -226,7 +227,7 @@ export default function BlogContent() {
             <div
               className="blog-content max-w-none text-gray-700 leading-relaxed"
               style={{
-                fontFamily: 'system-ui, -apple-system, sans-serif',
+                // fontFamily: 'system-ui, -apple-system, sans-serif',
                 lineHeight: '1.8',
                 // Removed: fontSize: '1.1rem'
               }}
@@ -251,6 +252,7 @@ export default function BlogContent() {
             </footer>
           </div>
         </article>
+        <Comments id={id}/>
 
         {/* Back to Blog CTA */}
         {/* <div className="mt-12 text-center">

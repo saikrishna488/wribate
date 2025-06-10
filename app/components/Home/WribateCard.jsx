@@ -4,7 +4,7 @@ const WribateCard = ({ wribate, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="bg-white shadow-2xl cursor-pointer border px-2 border-gray-400 hover:shadow-lg transition-shadow w-full h-28"
+      className="bg-white shadow-md cursor-pointer border border-gray-300 px-2 rounded-md  hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group w-full h-28"
     >
       <div className="flex flex-row h-full">
         <div className="flex-grow p-3 flex flex-col justify-between min-w-0">
