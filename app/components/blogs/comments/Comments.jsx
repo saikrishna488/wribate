@@ -146,7 +146,7 @@ const Comments = ({id}) => {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center space-x-2 mb-1">
                                         <h4 className="font-semibold text-gray-900 text-sm">
-                                            {comment.user_id?.username || 'Anonymous'}
+                                            @{comment.user_id?.userName || 'Anonymous'}
                                         </h4>
                                         <span className="text-xs text-gray-500">
                                             {getTimeAgo(comment.timestamp)}
