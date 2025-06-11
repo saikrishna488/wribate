@@ -32,8 +32,8 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
     { key: "voting",    icon: MdHowToVote,            title: "Vote",      count: totalVotes, shortTitle: "Vote" },
     { key: "arguments", icon: BiMessageSquareDetail,  title: "Arguments", count: argCount,   highlight: true, shortTitle: "Args" },
     { key: "comments",  icon: FaComments,              title: "Comments",  count: comCount, shortTitle: "Comments" },
-    { key: "download",  icon: FaDownload,              title: "Download", shortTitle: "Download" },
-    { key: "audio",     icon: LiaFileAudioSolid,       title: "Audio", shortTitle: "Audio" },
+    { key: "download",  icon: FaDownload,              title: "Coming soon Download", shortTitle: "Download" },
+    { key: "audio",     icon: LiaFileAudioSolid,       title: "Coming soon Audio Mode", shortTitle: "Audio" },
     { key: "share",     icon: FaShareAlt,              title: "Share",     action: () => setShowSharePopup(true), shortTitle: "Share" },
   ];
 
@@ -95,7 +95,7 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
               onClick={() => (action ? action() : scrollToSection(key))}
               title={count != null ? `${title} (${count})` : title}
               className={`
-                flex flex-col items-center justify-center p-2 sm:p-3 bg-white rounded-lg
+                flex flex-col items-center justify-center p-1 sm:p-2 bg-white rounded-lg
                 min-h-[60px] sm:min-h-[70px]
                 ${highlight
                   ? "border-2 border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)]"
@@ -108,7 +108,7 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
               `}
             >
               <Icon
-                size={18}
+                size={24}
                 className={`
                   pointer-events-none
                   ${highlight

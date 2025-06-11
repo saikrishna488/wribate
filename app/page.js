@@ -71,20 +71,10 @@ export default function WribateDashboard() {
     return "Active";
   };
 
-
-
-
-
   const upcomingWribates = wribates.filter(wribate =>
     (activeCategory === 'All' || wribate.category === activeCategory) &&
     getWribateStatus(wribate.startDate, wribate.durationDays) === "Upcoming"
   );
-
-
-
-
-
-
 
   if (categories.length == 0) {
     return (
@@ -115,28 +105,30 @@ export default function WribateDashboard() {
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
+          ) : wribates.length === 0 ? (
+            <div className="flex flex-col justify-center items-center h-64 text-gray-500">
+              <svg className="w-16 h-16 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.034 0-3.9.785-5.291 2.067M6.343 6.343A8 8 0 1017.657 17.657 8 8 0 006.343 6.343z" />
+              </svg>
+              <h3 className="text-xl font-semibold mb-2">No Wribates Found</h3>
+              <p className="text-gray-400 text-center">There are no wribates available at the moment. Check back later!</p>
+            </div>
           ) : (
             <>
               {/* Hero Wribate */}
               <HeroWribate wribates={wribates} handleCardClick={handleCardClick} />
 
-
-
               {/* Sponsored Wribates */}
               <SponsoredWribates wribates={wribates} activeCategory={activeCategory} handleViewMore={handleViewMore} handleCardClick={handleCardClick} />
 
-
-
               {/* Completed Wribates */}
               <CompletedWribates wribates={wribates} activeCategory={activeCategory} handleViewMore={handleViewMore} handleCardClick={handleCardClick} getWribateStatus={getWribateStatus} />
-
 
               {/* Free Wribates */}
               <FreeWribates wribates={wribates} activeCategory={activeCategory} handleViewMore={handleViewMore} handleCardClick={handleCardClick} />
 
               {/* Active Wribates */}
               <ActiveWribates wribates={wribates} activeCategory={activeCategory} handleViewMore={handleViewMore} handleCardClick={handleCardClick} getWribateStatus={getWribateStatus} />
-
             </>
           )}
         </div>

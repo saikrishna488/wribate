@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useAtom } from 'jotai';
 import { userAtom } from '@/app/states/GlobalStates';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 const Comments = ({id}) => {
     const [comments, setComments] = useState([]);

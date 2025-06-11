@@ -52,10 +52,7 @@ const Header = ({ wribatesRef, setWribates, activeCategory, setIsLoading, setAct
                 >
 
                     <button
-                        className={`px-3 py-2 mr-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${activeCategory === "My Wribates"
-                            ? "border-blue-700 text-blue-700 scroll-smooth"
-                            : "border-transparent text-gray-600 hover:text-gray-900"
-                            }`}
+                        className={`px-3 py-2 mr-4 text-sm font-medium whitespace-nowrap transition-colors  text-gray-600 hover:text-gray-900 `}
                         onClick={() => router.push('/my-wribates')}
                     >
                         {"My Wribates"}
