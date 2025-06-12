@@ -1,9 +1,10 @@
-"use client"
+"use client";
 import React, { useState, useRef } from "react";
+import { navItems } from "./data";
 
-const Navigation = () => {
+const Navigation = ({ selectedCategory, setSelectedCategory }) => {
   const scrollContainerRef = useRef(null);
-  const [selectedCategory, setSelectedCategory] = useState(1);
+  // const [selectedCategory, setSelectedCategory] = useState(1);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -16,14 +17,6 @@ const Navigation = () => {
       scrollContainerRef.current.scrollBy({ left: 200, behavior: "smooth" });
     }
   };
-
-  const navItems = [
-    { id: 1, category: "Created By Me" },
-
-    { id: 2, category: "Bookmarked" },
-    { id: 3, category: "Commented" },
-    { id: 4, category: "Lead Panel Ship" },
-  ];
 
   return (
     <div className="relative flex items-center border-b border-gray-200">

@@ -13,8 +13,6 @@ import { navItems } from "./data";
 
 import MyAssignedTopics from "./components/MyAssignedTopics/MyAssignedTopics";
 
-import CreatedByMe from "./components/CreatedByMe";
-
 const Home = () => {
   // const {
   //   data: wribates,
@@ -63,9 +61,6 @@ const Home = () => {
 
   const renderBasedOnTabJSX = () => {
     switch (selectedCategory) {
-      case navItems[0].id:
-        return <CreatedByMe />;
-
       case navItems[4].id:
         return <MyAssignedTopics />;
 
@@ -76,11 +71,11 @@ const Home = () => {
 
   return (
     <div className="bg-gray-100 px-4">
-      <Categories
+      {/* <Categories
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
-      />
-      {/* {isLoading && <p>Wribates Loading</p>}
+      /> */}
+      {isLoading && <p>Wribates Loading</p>}
       {!isError && wribates && (
         <Articles
           mainWribate={
@@ -95,9 +90,9 @@ const Home = () => {
           sponsoredWribates={wribates?.data?.sponsoredWribates}
         />
       )}
-      {isError && <h4>No wribates Found</h4>} */}
+      {isError && <h4>No wribates Found</h4>}
 
-      {renderBasedOnTabJSX()}
+      {/* {renderBasedOnTabJSX()} */}
     </div>
   );
 };

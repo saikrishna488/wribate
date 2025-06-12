@@ -1,31 +1,25 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Categories from "./Categories";
-import Articles from "./Articles";
-import { useGetMyWribatesQuery } from "../services/authApi";
+import Categories from "../Categories";
+import Articles from "../Articles";
+// import { useGetMyWribatesQuery } from "../../services/authApi";
+// import { useGetMyWribatesQuery } from "../../services";
 import axios from "axios";
 import { useAtom } from "jotai";
-import { userAtom } from "../states/GlobalStates";
+import { userAtom } from "../../states/GlobalStates";
 import { linkWithCredential } from "firebase/auth";
-import getAuthHeader from "../utils/authHeader";
-
-import { navItems } from "./data";
-
-import MyAssignedTopics from "./components/MyAssignedTopics/MyAssignedTopics";
-
-import CreatedByMe from "./components/CreatedByMe";
+import getAuthHeader from "../../utils/authHeader";
 
 const Home = () => {
-  // const {
-  //   data: wribates,
-  //   isLoading: wribatesLoading,
-  //   error: wribatesError,
-  // } = useGetMyWribatesQuery();
+  //   const {
+  //     data: wribates,
+  //     isLoading: wribatesLoading,
+  //     error: wribatesError,
+  //   } = useGetMyWribatesQuery();
   const [user] = useAtom(userAtom);
   const [wribates, setWribates] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(navItems[0].id);
 
   useEffect(() => {
     const fetchWribates = async () => {
@@ -61,26 +55,9 @@ const Home = () => {
     fetchWribates();
   }, []);
 
-  const renderBasedOnTabJSX = () => {
-    switch (selectedCategory) {
-      case navItems[0].id:
-        return <CreatedByMe />;
-
-      case navItems[4].id:
-        return <MyAssignedTopics />;
-
-      default:
-        return null;
-    }
-  };
-
   return (
-    <div className="bg-gray-100 px-4">
-      <Categories
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
-      {/* {isLoading && <p>Wribates Loading</p>}
+    <div className="bg-gray-100">
+      {isLoading && <p>Wribates Loading</p>}
       {!isError && wribates && (
         <Articles
           mainWribate={
@@ -95,9 +72,7 @@ const Home = () => {
           sponsoredWribates={wribates?.data?.sponsoredWribates}
         />
       )}
-      {isError && <h4>No wribates Found</h4>} */}
-
-      {renderBasedOnTabJSX()}
+      {isError && <h4>No wribates Found</h4>}
     </div>
   );
 };
