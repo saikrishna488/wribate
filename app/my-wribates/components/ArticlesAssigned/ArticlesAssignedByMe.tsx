@@ -16,7 +16,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-import ArticleDetailsModal from "../MyAssignedTopics/ArticleDetailsModal";
 import EditArticle from "./CreateEditArticle";
 import CreateEditArticle from "./CreateEditArticle";
 import ArticleContent from "./ArticleContent";
@@ -154,7 +153,7 @@ function App() {
   const [activeTab, setActiveTab] = useState("Customers");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [selectedArticle, setSelectedArticle] = useState({});
+  const [selectedArticle, setSelectedArticle] = useState(null);
 
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
@@ -182,10 +181,6 @@ function App() {
 
   return (
     <div className="h-screen bg-gray-50 w-full overflow-x-hidden">
-
-    {/* <CreateEditArticle/> */}
-    <ArticleContent/>
-
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
@@ -473,15 +468,16 @@ function App() {
         </div>
       </div>
 
-      {/* {selectedArticle && (
-        <ArticleDetailsModal
+      {selectedArticle && (
+        <ArticleContent
           open={selectedArticle ? true : false}
+          // open={true}
           onClose={() => {
             setSelectedArticle(null);
           }}
           selectedArticle={selectedArticle}
         />
-      )} */}
+      )}
 
       {/* <EditArticle
         open={selectedArticle ? true : false}

@@ -11,7 +11,8 @@ import getAuthHeader from "../utils/authHeader";
 
 import { navItems } from "./data";
 
-import MyAssignedTopics from "./components/MyAssignedTopics/MyAssignedTopics";
+import ArticlesAssignedByMe from "./components/ArticlesAssigned/ArticlesAssignedByMe";
+import ArticleAssignedToMe from "./components/ArticlesAssigned/ArticleAssignedToMe";
 
 import CreatedByMe from "./components/CreatedByMe";
 
@@ -67,7 +68,9 @@ const Home = () => {
         return <CreatedByMe />;
 
       case navItems[4].id:
-        return <MyAssignedTopics />;
+        return <ArticlesAssignedByMe />;
+      case navItems[5].id:
+        return <ArticleAssignedToMe />;
 
       default:
         return null;
