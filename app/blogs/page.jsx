@@ -99,9 +99,9 @@ export default function BlogPage() {
   }
 
   return (
-    <main className="w-full mx-auto px-6 py-12 bg-gray-100 min-h-screen">
+    <main className="w-full mx-auto px-6 bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-12 border-b border-gray-200 pb-8">
+        <header className="border-b border-gray-200 pb-8 py-4">
           <div className="border-l-4 border-blue-900 pl-6">
             <h1 className="text-4xl font-bold text-gray-900 mb-3">Wribate Blog</h1>
             <p className="text-lg text-gray-600 leading-relaxed">

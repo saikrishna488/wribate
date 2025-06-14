@@ -12,7 +12,7 @@ import { useAtom } from 'jotai';
 import { chatAtom } from '@/app/states/GlobalStates';
 import { useRouter } from 'next/navigation';
 
-const Comments = ({ data, scrollContainerRef, user, id, refetch }) => {
+const Comments = ({ wribate, scrollContainerRef, user, id, refetch }) => {
     const [message, setMessage] = useState("");
     const [voteSelection, setVoteSelection] = useState(null);
     const [addComment, { isLoading: addingComment }] = useAddCommentMutation();
@@ -49,7 +49,7 @@ const Comments = ({ data, scrollContainerRef, user, id, refetch }) => {
         }
         setChatUser({
             _id: userId,
-            title: data?.data?.title
+            title: wribate?.title
         });
         router.push(`/messages`);
     };
@@ -77,8 +77,8 @@ const Comments = ({ data, scrollContainerRef, user, id, refetch }) => {
                 className="max-h-80 sm:max-h-96 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4"
                 ref={scrollContainerRef}
             >
-                {data?.data?.comments && data?.data?.comments.length > 0 ? (
-                    data.data.comments.map((comment, index) => (
+                {wribate?.comments && wribate?.comments.length > 0 ? (
+                    wribate.comments.map((comment, index) => (
                         <div key={index} className={`flex ${comment.type === "For" ? "justify-start" : "justify-end"}`}>
                             <div className={`max-w-full sm:max-w-md`}>
                                 <div className={`flex items-center mb-1 ${comment.type === "For" ? "justify-start" : "justify-end"}`}>
@@ -101,9 +101,9 @@ const Comments = ({ data, scrollContainerRef, user, id, refetch }) => {
                                 </div>
 
                                 <div className={`flex mt-1 sm:mt-2 gap-3 sm:gap-4 text-xs ${comment.type === "For" ? "justify-start" : "justify-end"}`}>
-                                    <button className="flex items-center text-gray-500 hover:text-gray-700">
+                                    {/* <button className="flex items-center text-gray-500 hover:text-gray-700">
                                         <FaThumbsUp size={10} className="mr-1" /> Like
-                                    </button>
+                                    </button> */}
                                     {
                                         user?._id != comment?.userId?._id &&
                                         (

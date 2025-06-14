@@ -5,7 +5,7 @@ import { LiaFileAudioSolid } from "react-icons/lia";
 import { MdHowToVote, MdTimeline } from "react-icons/md";
 import { BiMessageSquareDetail } from "react-icons/bi";
 
-const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
+const Header = ({ wribate, setShowSharePopup, scrollToSection, votes }) => {
   // Vote count extraction
   const getVoteCounts = () => {
     let total = 0, forVotes = 0, againstVotes = 0;
@@ -22,9 +22,9 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
   };
 
   const totalVotes = getVoteCounts();
-  const argCount    = data?.data?.arguments?.length || 0;
-  const comCount    = data?.data?.comments?.length  || 0;
-  const viewsCount  = data?.data?.views             || 0;
+  const argCount    = wribate?.arguments?.length || 0;
+  const comCount    = wribate?.comments?.length  || 0;
+  const viewsCount  = wribate?.views             || 0;
 
   // Define each action button
   const actions = [
@@ -41,24 +41,24 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
     <div className="bg-white border border-gray-200 shadow-sm mb-4 rounded-sm overflow-hidden">
       {/* Title */}
       <h1 className="text-lg sm:text-2xl font-bold p-3 sm:p-4 border-b bg-gray-50 leading-tight">
-        {data?.data?.title}
+        {wribate?.title}
       </h1>
 
       {/* VS Banner */}
       <div className="flex items-center justify-center bg-gradient-to-r from-red-600 to-blue-900 text-white text-xs sm:text-sm font-semibold">
         <div className="flex-1 p-2 sm:p-3 text-center truncate min-w-0">
-          <span className="block">{data?.data?.leadFor}</span>
+          <span className="block">{wribate?.leadFor}</span>
         </div>
         <div className="font-bold px-2 text-sm sm:text-base">VS</div>
         <div className="flex-1 p-2 sm:p-3 text-center truncate min-w-0">
-          <span className="block">{data?.data?.leadAgainst}</span>
+          <span className="block">{wribate?.leadAgainst}</span>
         </div>
       </div>
 
       {/* Cover Image */}
       <div className="p-2 sm:p-3 h-48 sm:h-44 md:h-80 border-t">
         <img
-          src={data?.data?.coverImage}
+          src={wribate?.coverImage}
           alt="Cover"
           className="w-full h-full object-contain rounded"
         />
@@ -70,11 +70,11 @@ const Header = ({ data, setShowSharePopup, scrollToSection, votes }) => {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center flex-wrap gap-1.5">
             <Badge className="px-2 py-1 text-xs flex-shrink-0 transition hover:opacity-80">
-              {data?.data?.category}
+              {wribate?.category}
             </Badge>
-            {data?.data?.institution && (
+            {wribate?.institution && (
               <Badge className="px-2 py-1 text-xs flex-shrink-0 transition hover:opacity-80">
-                {data.data.institution}
+                {wribate?.institution}
               </Badge>
             )}
           </div>

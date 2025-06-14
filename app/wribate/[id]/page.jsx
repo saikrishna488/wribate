@@ -29,7 +29,7 @@ export async function generateMetadata({ params }){
     }
 
     const data = await response.json();
-    const wribate = data.data;
+    const wribate = data.wribate;
 
     if (!wribate?.title) {
       throw new Error('Invalid wribate data');

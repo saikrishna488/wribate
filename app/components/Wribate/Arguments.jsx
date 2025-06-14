@@ -12,23 +12,37 @@ import { AdSpaceContent, StaticAdvertisement } from '../Advertisements/Advertise
 import axios from "axios";
 import authHeader from "../../utils/authHeader";
 import { useRouter } from "next/navigation";
+import httpRequest from '@/app/utils/httpRequest';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), {
     ssr: false, // Disable server-side rendering for this component
     loading: () => <p>Loading editor...</p>
 });
 
-const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
-    const [addArgument] = useAddArgumentMutation();
+const Arguments = ({ wribate, user, id, round, value, setValue, refetch, data }) => {
     const [plans, setPlans] = useState([]);
-    const [isLoadingPlans, setIsLoadingPlans] = useState(true);
     const router = useRouter();
+
+
+
+    // get argument
+    const getValue = () => {
+        if (user?._id === data.forId) {
+            setValue(he.decode(wribate?.draft?.forDraft?.argument || ""));
+        } else {
+            setValue(he.decode(wribate?.draft?.againstDraft?.argument || ""));
+        }
+    };
+
+
+    useEffect(() => {
+        getValue()
+    }, [])
 
     // Fetch subscription plans
     useEffect(() => {
         const fetchSubscriptionPlans = async () => {
             try {
-                setIsLoadingPlans(true);
                 const response = await axios.get(
                     `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/getSubscriptionPlans`
                 );
@@ -38,12 +52,12 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                 }
             } catch (error) {
                 console.error("Error fetching subscription plans:", error);
-            } finally {
-                setIsLoadingPlans(false);
             }
         };
 
         fetchSubscriptionPlans();
+
+        console.log(wribate);
     }, []);
 
     // Check if user is premium
@@ -59,7 +73,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
 
     // Check if wribate is featured/sponsored
     const isFeaturedWribate = () => {
-        return data?.data?.type === "Sponsored";
+        return wribate?.type === "Sponsored";
     };
 
     // Determine if round should be masked
@@ -71,9 +85,9 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
     };
 
     const getArgumentForRound = (roundNumber, side) => {
-        if (!data || !data.data || !data.data.arguments) return null;
+        if (!wribate || !wribate.arguments) return null;
 
-        const argument = data.data.arguments.find(
+        const argument = wribate.arguments.find(
             arg => arg.roundNumber == roundNumber && arg.panelSide === side
         );
 
@@ -82,9 +96,9 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
 
     // Helper function to check if a round has started
     const hasRoundStarted = (roundNumber) => {
-        if (!data?.data?.rounds) return false;
+        if (!wribate?.rounds) return false;
 
-        const roundData = data.data.rounds.find(r => r.roundNumber === roundNumber);
+        const roundData = wribate.rounds.find(r => r.roundNumber === roundNumber);
         if (!roundData) return false;
 
         const currentDate = new Date();
@@ -95,12 +109,12 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
 
     // Helper function to check if all rounds are completed
     const areAllRoundsCompleted = () => {
-        if (!data?.data?.rounds) return false;
-        
+        if (!wribate?.rounds) return false;
+
         const currentDate = new Date();
-        
+
         // Check if all rounds have passed their end date
-        return data.data.rounds.every(roundData => {
+        return wribate.rounds.every(roundData => {
             if (!roundData.endDate) return false;
             const endDate = new Date(roundData.endDate);
             return currentDate > endDate;
@@ -140,15 +154,19 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
         }
 
         const dataToSend = { text: value, roundNumber: round };
-        try {
-            const response = await addArgument({ id, data: dataToSend });
-            if (response?.data?.status === "success") {
-                toast.success("Added");
-                refetch();
-            }
-        } catch (err) {
-            console.error(err);
-        }
+        // try {
+        //     const response = await addArgument({ id, data: dataToSend });
+        //     if (response?.data?.status === "success") {
+        //         toast.success("Added");
+        //         refetch();
+        //     }
+        // } catch (err) {
+        //     console.error(err);
+        // }
+
+        const data = await httpRequest(axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/user/arguments/' + id, dataToSend, {
+            headers: authHeader()
+        }), null, "Will be Saved after Round " + round)
     };
 
     useEffect(() => {
@@ -179,13 +197,13 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                     <div className="border-l-4 border-red-300 bg-red-50 rounded-r-sm p-3 mb-4">
                         <div className="flex items-center mb-3">
                             <img src="/user.png" alt="" className="rounded-full w-6 h-6 mr-2" />
-                            <span className="font-medium text-red-600">{data.data.leadFor}</span>
+                            <span className="font-medium text-red-600">{wribate.leadFor}</span>
                         </div>
                         {forLines.length > 0 ? renderBlurredLines(forLines) : <p className="text-gray-500">No argument submitted.</p>}
                     </div>
                     <div className="border-r-4 border-blue-300 bg-blue-50 p-3">
                         <div className="flex items-center justify-end mb-3">
-                            <span className="font-medium text-blue-600">{data.data.leadAgainst}</span>
+                            <span className="font-medium text-blue-600">{wribate.leadAgainst}</span>
                             <img src="/user.png" alt="" className="rounded-full w-6 h-6 ml-2" />
                         </div>
                         {againstLines.length > 0 ? renderBlurredLines(againstLines) : <p className="text-gray-500">No argument submitted.</p>}
@@ -297,7 +315,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
             </div>
 
             <div className="p-3 sm:p-6 space-y-6 sm:space-y-8">
-                {data?.data?.rounds && data.data.rounds.map((roundData, index) => {
+                {wribate?.rounds && wribate.rounds.map((roundData, index) => {
                     const roundNumber = roundData.roundNumber;
                     const forArgument = getArgumentForRound(roundNumber, "For");
                     const againstArgument = getArgumentForRound(roundNumber, "Against");
@@ -331,7 +349,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                         <div className="argument border-l-4 border-red-500 bg-red-50 rounded-r-sm p-2 sm:p-3 ml-0 mr-auto w-full sm:w-[90%]">
                                             <div className="flex items-center mb-2 sm:mb-3">
                                                 <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-                                                <span className="font-medium text-red-800 text-sm sm:text-base">{data.data.leadFor}</span>
+                                                <span className="font-medium text-red-800 text-sm sm:text-base">{wribate.leadFor}</span>
                                             </div>
                                             {forArgument ? (
                                                 <div
@@ -344,7 +362,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                         </div>
                                         <div className="argument border-r-4 border-blue-500 bg-blue-50 p-2 sm:p-3 ml-auto mr-0 w-full sm:w-[90%]">
                                             <div className="flex items-center justify-end mb-2 sm:mb-3">
-                                                <span className="font-medium text-blue-800 text-sm sm:text-base">{data.data.leadAgainst}</span>
+                                                <span className="font-medium text-blue-800 text-sm sm:text-base">{wribate.leadAgainst}</span>
                                                 <img src="/user.png" alt="" className="rounded-full w-5 h-5 sm:w-6 sm:h-6 ml-2" />
                                             </div>
                                             {againstArgument ? (
@@ -360,7 +378,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                                 )}
 
                                 {/* Show advertisements between rounds for non-premium users */}
-                                {index < data.data.rounds.length - 1 && !userIsPremium && !isRoundMasked && (
+                                {index < wribate.rounds.length - 1 && !userIsPremium && !isRoundMasked && (
                                     <div className="mt-8">
                                         <div className="text-center mb-2">
                                             <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
@@ -383,7 +401,7 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
                     <div className="bg-white border border-gray-200">
                         <ReactQuill
                             theme="snow"
-                            value={value && he.decode(value)}
+                            value={value && value}
                             onChange={setValue}
                             style={{
                                 minHeight: '400px'
@@ -422,46 +440,46 @@ const Arguments = ({ data, user, id, round, value, setValue, refetch }) => {
             )}
 
             {/* Show message if all rounds are completed */}
-            {user && 
-                (user?._id === data?.forId || user?._id === data?.againstId) && 
+            {user &&
+                (user?._id === data?.forId || user?._id === data?.againstId) &&
                 areAllRoundsCompleted() && (
-                <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
-                    <div className="text-center py-8">
-                        <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                            <div className="flex items-center justify-center mb-2">
-                                <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                <h4 className="text-lg font-medium text-green-800">All Rounds Completed</h4>
+                    <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
+                        <div className="text-center py-8">
+                            <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                                <div className="flex items-center justify-center mb-2">
+                                    <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    <h4 className="text-lg font-medium text-green-800">All Rounds Completed</h4>
+                                </div>
+                                <p className="text-green-700">
+                                    All debate rounds have been completed. Thank you for your participation!
+                                </p>
                             </div>
-                            <p className="text-green-700">
-                                All debate rounds have been completed. Thank you for your participation!
-                            </p>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
             {/* Show message if first round hasn't started */}
-            {user && 
-                (user?._id === data?.forId || user?._id === data?.againstId) && 
+            {user &&
+                (user?._id === data?.forId || user?._id === data?.againstId) &&
                 !hasFirstRoundStarted() && (
-                <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
-                    <div className="text-center py-8">
-                        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                            <div className="flex items-center justify-center mb-2">
-                                <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                                </svg>
-                                <h4 className="text-lg font-medium text-blue-800">Debate Not Started</h4>
+                    <div className="border-t border-gray-200 p-3 sm:p-6 bg-gray-50">
+                        <div className="text-center py-8">
+                            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                                <div className="flex items-center justify-center mb-2">
+                                    <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                    </svg>
+                                    <h4 className="text-lg font-medium text-blue-800">Debate Not Started</h4>
+                                </div>
+                                <p className="text-blue-700">
+                                    The debate hasn't started yet. Please wait for the first round to begin.
+                                </p>
                             </div>
-                            <p className="text-blue-700">
-                                The debate hasn't started yet. Please wait for the first round to begin.
-                            </p>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
             {/* Final advertisement for non-premium users */}
             {!userIsPremium && (

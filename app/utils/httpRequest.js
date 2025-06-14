@@ -6,7 +6,7 @@ import { default as toast } from 'react-hot-toast';
  * @param {Function|null} errorHandler - Optional custom error handler.
  * @returns {Promise<any|null>}
  */
-const httpRequest = async (requestFn, errorHandler = null) => {
+const httpRequest = async (requestFn, errorHandler = null,msg) => {
   try {
     const res = await requestFn;
 
@@ -14,6 +14,7 @@ const httpRequest = async (requestFn, errorHandler = null) => {
     const data = res?.data;
 
     if (data?.res) {
+      msg && toast.success(msg)
       return data;
     } else {
       toast.error(data?.msg || 'Unexpected response structure.');

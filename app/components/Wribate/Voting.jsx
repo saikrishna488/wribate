@@ -5,7 +5,7 @@ import {
 } from "../../../app/services/authApi";
 import toast from 'react-hot-toast';
 
-const Voting = ({ data, selectedVote, votes, user, refetch, setSelectedVote, id }) => {
+const Voting = ({ wribate, selectedVote, votes, user, refetch, setSelectedVote, id }) => {
     
     const [addVote] = useAddVoteMutation();
     
@@ -96,7 +96,7 @@ const Voting = ({ data, selectedVote, votes, user, refetch, setSelectedVote, id 
                     </div>
                 </div>
                 <div className="my-3 sm:my-4">
-                    <p className="mb-2 sm:mb-3 font-medium text-sm sm:text-base">{data?.data?.title}</p>
+                    <p className="mb-2 sm:mb-3 font-medium text-sm sm:text-base">{wribate?.title}</p>
                     <div className="space-y-2 sm:space-y-3">
                         <button
                             className={`w-full p-2 sm:p-3 border text-left font-medium transition text-sm sm:text-base ${selectedVote === "For"
@@ -130,7 +130,7 @@ const Voting = ({ data, selectedVote, votes, user, refetch, setSelectedVote, id 
                 {votes?.roundVoteCounts && (
                     <VotesChart
                         data={votes?.roundVoteCounts}
-                        title={data?.data?.title}
+                        title={wribate?.title}
                     />
                 )}
                 
