@@ -26,7 +26,7 @@ const OngoingWribate = ({ wribates, activeCategory, handleViewMore, handleCardCl
                   <div
                     key={wribate._id}
                     onClick={() => handleCardClick(wribate._id)}
-                    className="bg-white cursor-pointer border w-full rounded-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
+                    className="bg-white cursor-pointer border w-full rounded-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
                   >
                     <div className="flex flex-col">
                       <div className="w-full h-40 relative">

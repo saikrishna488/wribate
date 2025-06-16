@@ -12,7 +12,7 @@ const HeroWribate = ({ wribates,handleCardClick }) => {
     return (
         <>
             {heroWribate && (
-                <div id='hero' className="mb-8 border-b">
+                <div id='hero' className="mb-8 border-b hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
                     {/* <div className="flex justify-between items-center mb-3">
                     <h2 className={`text-xl font-bold text-gray-900 border-l-4 pl-3`}>
                       Featured
@@ -20,7 +20,7 @@ const HeroWribate = ({ wribates,handleCardClick }) => {
                   </div> */}
                     <div
                         onClick={() => handleCardClick(heroWribate._id)}
-                        className="bg-white cursor-pointer hover:shadow-lg border transition-shadow duration-300 w-full"
+                        className="bg-white cursor-pointer hover:shadow-lg border ghtransition-shadow duration-300 w-full"
                     >
                         <div className="flex flex-col">
                             <div className="w-full h-40 md:h-80 relative">
