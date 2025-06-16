@@ -3,6 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { AdSpaceContent } from '../Advertisements/Advertisement';
+import { useAtom } from 'jotai';
+import { adsAtom } from '@/app/states/GlobalStates';
 
 const Sidebar = ({
   category = '',       // comma-separated string of current wribate’s categories
@@ -12,6 +14,7 @@ const Sidebar = ({
 }) => {
   // Helper: split a comma-separated category string into trimmed array
   const splitCats = str => str.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  const [visibility, setVisibility] = useAtom(adsAtom);
 
   const currentCats = splitCats(category);
 
@@ -63,19 +66,25 @@ const Sidebar = ({
   return (
     <div className="w-full lg:w-[30%] space-y-4 sm:space-y-6 mt-4 lg:mt-0">
       {/* Advertisement Slots (unchanged) */}
-      <div className={cardClasses}>
-        <div className="mb-2 font-bold uppercase text-[10px] sm:text-xs tracking-wider text-gray-600">
-          Advertisement
-        </div>
-        <AdSpaceContent startingAd={0} />
-      </div>
+      {
+        visibility && (
+          <>
+            <div className={cardClasses}>
+              <div className="mb-2 font-bold uppercase text-[10px] sm:text-xs tracking-wider text-gray-600">
+                Advertisement
+              </div>
+              <AdSpaceContent startingAd={0} />
+            </div>
 
-      <div className={cardClasses}>
-        <div className="mb-2 font-bold uppercase text-[10px] sm:text-xs tracking-wider text-gray-600">
-          Advertisement
-        </div>
-        <AdSpaceContent startingAd={2} />
-      </div>
+            <div className={cardClasses}>
+              <div className="mb-2 font-bold uppercase text-[10px] sm:text-xs tracking-wider text-gray-600">
+                Advertisement
+              </div>
+              <AdSpaceContent startingAd={2} />
+            </div>
+          </>
+        )
+      }
 
       {/* First card: Similar Wribates */}
       <div className={cardClasses}>

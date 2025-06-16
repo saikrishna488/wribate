@@ -13,6 +13,8 @@ import axios from "axios";
 import authHeader from "../../utils/authHeader";
 import { useRouter } from "next/navigation";
 import httpRequest from '@/app/utils/httpRequest';
+import { useAtom } from 'jotai';
+import { adsAtom } from '@/app/states/GlobalStates';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), {
     ssr: false, // Disable server-side rendering for this component
@@ -22,6 +24,7 @@ const ReactQuill = dynamic(() => import('react-quill-new'), {
 const Arguments = ({ wribate, user, id, round, value, setValue, refetch, data }) => {
     const [plans, setPlans] = useState([]);
     const router = useRouter();
+    const [visibility, setVisibility] = useAtom(adsAtom);
 
 
 
@@ -378,7 +381,7 @@ const Arguments = ({ wribate, user, id, round, value, setValue, refetch, data })
                                 )}
 
                                 {/* Show advertisements between rounds for non-premium users */}
-                                {index < wribate.rounds.length - 1 && !userIsPremium && !isRoundMasked && (
+                                {index < wribate.rounds.length - 1 && !userIsPremium && !isRoundMasked && visibility && (
                                     <div className="mt-8">
                                         <div className="text-center mb-2">
                                             <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>
@@ -482,7 +485,7 @@ const Arguments = ({ wribate, user, id, round, value, setValue, refetch, data })
                 )}
 
             {/* Final advertisement for non-premium users */}
-            {!userIsPremium && (
+            {!userIsPremium && visibility && (
                 <div className="mt-8 p-2">
                     <div className="text-center mb-2">
                         <span className="text-xs font-semibold text-gray-600 tracking-wider uppercase">Advertisement</span>

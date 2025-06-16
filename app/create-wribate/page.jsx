@@ -92,7 +92,7 @@ const CreateWribateForm = () => {
           </div>
 
           {/* Sidebar - Advertisements */}
-          <div className="lg:w-1/4">
+          {/* <div className="lg:w-1/4">
             <div className="bg-white shadow-sm border border-gray-200">
               <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
                 <h2 className="text-sm font-medium text-gray-900 uppercase tracking-wide">
@@ -119,7 +119,7 @@ const CreateWribateForm = () => {
                 ))}
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
