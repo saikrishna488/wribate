@@ -14,12 +14,12 @@ const CountryDropdown = ({ formData,handleFormChange }) => {
     useEffect(() => {
         const fetchCountries = async () => {
             try {
-                const res = await axios.get('https://restcountries.com/v3.1/all?fields=name');
-                const data = res.data;
-                // Sort countries alphabetically by common name
-                const sortedCountries = data
-                    .map(country => country.name.common)
-                    .sort((a, b) => a.localeCompare(b));
+                // const res = await axios.get('https://restcountries.com/v3.1/all?fields=name');
+                const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/user/getCountries')
+                // Sort countries alphabetically by name
+                const sortedCountries = response.data.data?.
+                map(country => country.countryName)
+                .sort((a, b) => a.localeCompare(b));
                 setCountries(sortedCountries);
             } catch (err) {
                 console.log(err);

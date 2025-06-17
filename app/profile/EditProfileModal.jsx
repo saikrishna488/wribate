@@ -84,13 +84,13 @@ const EditProfileModal = ({ isOpen, onClose, onProfileUpdate }) => {
     const fetchCountries = async () => {
       setLoading(true);
       try {
-        const response = await fetch("https://restcountries.com/v3.1/all");
-        const data = await response.json();
+        // const response = await axios.get("https://restcountries.com/v3.1/all");
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/user/getCountries')
         // Sort countries alphabetically by name
-        const sortedCountries = data
-          .map((country) => ({
-            name: country.name.common,
-            code: country.cca2,
+        const sortedCountries = response.data.data?.
+          map((country) => ({
+            name: country.countryName,
+            code: country.codeAlpha2 || country.countryName,
           }))
           .sort((a, b) => a.name.localeCompare(b.name));
         setCountries(sortedCountries);
