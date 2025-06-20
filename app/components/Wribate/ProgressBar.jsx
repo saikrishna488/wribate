@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-const ProgressBar = ({ rounds }) => {
+const ProgressBar = ({ rounds, code }) => {
   const [progress, setProgress] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -11,11 +11,12 @@ const ProgressBar = ({ rounds }) => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
 
   // Get event status function
   const getEventStatus = (startDate, endDate) => {
@@ -80,7 +81,7 @@ const ProgressBar = ({ rounds }) => {
   const startTime = new Date(rounds[0].startDate).getTime();
   const endTime = new Date(rounds[2].endDate).getTime();
   const totalDuration = endTime - startTime;
-  
+
   const roundPositions = rounds.map((round) => {
     const roundTime = new Date(round.startDate).getTime();
     const elapsed = roundTime - startTime;
@@ -99,14 +100,14 @@ const ProgressBar = ({ rounds }) => {
   // Format date and time for local timezone
   const formatDateAndTime = (dateString) => {
     const date = new Date(dateString);
-    const options = { 
-      month: 'short', 
-      day: 'numeric', 
-      hour: 'numeric', 
+    const options = {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     };
-    
+
     return {
       datePart: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       timePart: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
@@ -123,7 +124,7 @@ const ProgressBar = ({ rounds }) => {
         {/* Mobile Header */}
         <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-gray-900">Wribate Timeline</h2>
+            <h2 className="font-bold text-gray-900">Wribate Timeline {" "+ (code || "")}</h2>
             <div className={`px-2 py-1 text-xs font-medium rounded border ${getStatusColor()}`}>
               {getEventStatus(rounds[0]?.startDate, rounds[2]?.endDate)}
             </div>
@@ -138,7 +139,7 @@ const ProgressBar = ({ rounds }) => {
               className="h-full bg-blue-600 transition-all duration-500 ease-out rounded-full"
               style={{ width: `${progress}%` }}
             />
-            
+
             {/* Round Markers */}
             {roundPositions.map((pos, index) => (
               <div
@@ -154,25 +155,23 @@ const ProgressBar = ({ rounds }) => {
             {rounds.map((round, index) => {
               const isActive = progress >= roundPositions[index] && (index === rounds.length - 1 || progress < roundPositions[index + 1]);
               const isCompleted = progress > roundPositions[index];
-              
+
               return (
                 <div
                   key={`round-${index}`}
-                  className={`flex items-center p-3 rounded-lg border-2 transition-all ${
-                    isActive 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : isCompleted 
-                        ? 'border-green-200 bg-green-50' 
+                  className={`flex items-center p-3 rounded-lg border-2 transition-all ${isActive
+                      ? 'border-blue-500 bg-blue-50'
+                      : isCompleted
+                        ? 'border-green-200 bg-green-50'
                         : 'border-gray-200 bg-white'
-                  }`}
+                    }`}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mr-3 ${
-                    isActive 
-                      ? 'bg-blue-600 text-white' 
-                      : isCompleted 
-                        ? 'bg-green-600 text-white' 
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mr-3 ${isActive
+                      ? 'bg-blue-600 text-white'
+                      : isCompleted
+                        ? 'bg-green-600 text-white'
                         : 'bg-gray-300 text-gray-600'
-                  }`}>
+                    }`}>
                     R{index + 1}
                   </div>
                   <div className="flex-1">
@@ -208,7 +207,7 @@ const ProgressBar = ({ rounds }) => {
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Wribate Timeline</h2>
+          <h2 className="text-lg font-bold text-gray-900">Wribate Timeline {" "+ (code || "")}</h2>
           <div className={`px-3 py-1 text-sm font-medium rounded border ${getStatusColor()}`}>
             {getEventStatus(rounds[0]?.startDate, rounds[2]?.endDate)}
           </div>
@@ -299,7 +298,7 @@ const ProgressBar = ({ rounds }) => {
 };
 
 // Demo with sample data
-const App = ({rounds}) => {
+const App = ({ rounds, code }) => {
   const sampleRounds = [
     {
       startDate: "2025-05-26T14:00:00.000Z",
@@ -318,7 +317,7 @@ const App = ({rounds}) => {
   return (
     <div className=" bg-gray-100">
       <div className="w-full">
-        <ProgressBar rounds={rounds} />
+        <ProgressBar rounds={rounds} code ={code}/>
       </div>
     </div>
   );

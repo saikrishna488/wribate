@@ -160,7 +160,7 @@ export default function WribateContent() {
                 />
 
                 <div id="progress" className="bg-white border border-gray-200 shadow-sm p-3 sm:p-4 mb-4 sm:mb-6 rounded-sm">
-                  <ProgressBar rounds={wribate?.rounds} />
+                  <ProgressBar rounds={wribate?.rounds} wribate={wribate} code={wribate?.code} />
                 </div>
 
                 <div id="voting">

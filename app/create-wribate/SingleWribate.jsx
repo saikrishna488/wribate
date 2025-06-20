@@ -98,7 +98,6 @@ const SingleWribate = () => {
     setIsLoading(true);
     try {
       let wribateData = { ...formData };
-      wribateData.judges = [formData.judge1, formData.judge2, formData.judge3];
       delete wribateData.coverImage;
 
       // const istOffset = 5.5 * 60 * 60 * 1000;
