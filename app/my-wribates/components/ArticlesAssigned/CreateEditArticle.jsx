@@ -4,6 +4,7 @@ import { Button } from "../../../../components/ui/button";
 
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
+import { Eye, Clock, Share2, CircleX } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -27,10 +28,12 @@ const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 export default function SimpleBlogPost({ open, onClose, selectedArticle }) {
   const editBlog = useSelector((state) => state?.blog?.currentBlog);
-  const [title, setTitle] = useState(editBlog?.title || "");
+  const [title, setTitle] = useState(selectedArticle?.title || "");
   const { userId } = useSelector((state) => state?.auth);
-  const [content, setContent] = useState(editBlog?.content || "");
-  const [imagePreview, setImagePreview] = useState(editBlog?.image || null);
+  const [content, setContent] = useState(selectedArticle?.content || "");
+  const [imagePreview, setImagePreview] = useState(
+    selectedArticle?.image || null
+  );
   const [editorImage, setEditorImage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -88,14 +91,19 @@ export default function SimpleBlogPost({ open, onClose, selectedArticle }) {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const URL  =  process.env.NEXT_PUBLIC_BACKEND_URL + "/user/articles/update"
+      
+      console.log(URL, "iurl here")
       const res = await axios.post(
-        process.env.NEXT_PUBLIC_APP_BASE_URL + "/admin/addBlog",
+        URL
+        ,
         {
           title,
           content,
-          author_id: userId,
-          image: imagePreview,
-          id: editBlog?._id || null,
+          // author_id: userId,
+          coverBaseImage64: imagePreview || null,
+          // image: imagePreview,
+          id: selectedArticle?._id || null,
         },
         {
           headers: {
@@ -108,8 +116,8 @@ export default function SimpleBlogPost({ open, onClose, selectedArticle }) {
       const data = res.data;
 
       if (data.res) {
-        toast.success("Post published successfully!");
-        router.push("/blogs");
+        toast.success("Article updated successfully!");
+        // router.push("/blogs");
       }
     } catch (err) {
       console.error(err);
@@ -120,32 +128,38 @@ export default function SimpleBlogPost({ open, onClose, selectedArticle }) {
     }
   };
 
-  if (!!userId) {
-    return (
-      <ModalLayout open={open} onClose={onClose}>
-        <div className="flex items-center justify-center h-screen">
-          <Card className="w-full max-w-md p-6">
-            <CardHeader className="text-center">
-              <CardTitle>Authentication Required</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="mb-4">Please log in to create a blog post.</p>
-              <Button onClick={() => router.push("/signin")}>
-                Go to Signin
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </ModalLayout>
-    );
-  }
+  // if (!!userId) {
+  //   return (
+  //     <ModalLayout open={open} onClose={onClose}>
+  //       <div className="flex items-center justify-center h-screen">
+  //         <Card className="w-full max-w-md p-6">
+  //           <CardHeader className="text-center">
+  //             <CardTitle>Authentication Required</CardTitle>
+  //           </CardHeader>
+  //           <CardContent className="text-center">
+  //             <p className="mb-4">Please log in to create a blog post.</p>
+  //             <Button onClick={() => router.push("/signin")}>
+  //               Go to Signin
+  //             </Button>
+  //           </CardContent>
+  //         </Card>
+  //       </div>
+  //     </ModalLayout>
+  //   );
+  // }
+
+  console.log(selectedArticle, "selected article");
 
   return (
     <ModalLayout open={open} onClose={onClose}>
       <div className="min-h-screen bg-gray-50">
         <header className="sticky top-0 bg-white border-b h-16 z-10">
+          <CircleX
+            className="top-0  cursor-pointer right-0 absolute"
+            onClick={onClose}
+          />
           <div className="max-w-5xl mx-auto px-4 py-3 flex items-center">
-            <Button
+            {/* <Button
               onClick={() => router.back()}
               variant="ghost"
               size="sm"
@@ -153,9 +167,10 @@ export default function SimpleBlogPost({ open, onClose, selectedArticle }) {
             >
               <ArrowLeft size={16} />
               <span>Back</span>
-            </Button>
+            </Button> */}
+
             <h1 className="font-medium ml-auto mr-auto text-lg">
-              {editBlog?.title ? "Edit" : "Create"} New Post
+              {editBlog?.title ? "Edit" : "Create"} Article
             </h1>
           </div>
         </header>
@@ -163,7 +178,9 @@ export default function SimpleBlogPost({ open, onClose, selectedArticle }) {
         <main className="max-w-4xl mx-auto px-4 py-6">
           <Card className="border shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xl">Blog Post Details</CardTitle>
+              <CardTitle className="text-xl">
+                Topic: {selectedArticle?.topic}
+              </CardTitle>
             </CardHeader>
 
             <form onSubmit={handleSubmit}>
@@ -264,7 +281,7 @@ export default function SimpleBlogPost({ open, onClose, selectedArticle }) {
                     className="w-full sm:w-auto bg-blue-800 hover:bg-blue-700 text-white"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Publishing..." : "Publish Post"}
+                    {isSubmitting ? "Publishing..." : "Publish Article"}
                   </Button>
                 </div>
               </CardContent>

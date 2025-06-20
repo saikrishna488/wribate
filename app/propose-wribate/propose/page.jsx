@@ -53,7 +53,7 @@ const ProposePage = () => {
                     }`}
                   >
                     {/* Propose Multiple Topics */}
-                    Topics Assingment
+                    Articles Assingment
                   </button>
                 </div>
               </div>

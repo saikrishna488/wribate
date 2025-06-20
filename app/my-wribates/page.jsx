@@ -4,10 +4,14 @@ import MyWribates from './components/MyWribates'
 import { useAtom } from 'jotai';
 import { userAtom } from '../states/GlobalStates';
 import { useRouter } from 'next/navigation';
-import MyTopics from './components/MyTopics';
+import MyTopics from './components/MyTopics'
+import ArticlesAssignedByMe from './components/ArticlesAssigned/ArticlesAssignedByMe';
 
 const page = () => {
-  const [selectedPage, setSelectedPage] = useState('My Wribates');
+  // const [selectedPage, setSelectedPage] = useState('My Wribates');
+   const [selectedPage, setSelectedPage] = useState('Article Assigned by me');
+
+ 
   const [user, setUser] = useAtom(userAtom);
   const router = useRouter();
 
@@ -54,6 +58,16 @@ const page = () => {
             >
               Articles Dashboard
             </button>
+
+            <button
+              onClick={() => setSelectedPage('Article Assigned by me')}
+              className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 ${selectedPage === 'Article Assigned by me'
+                  ? 'text-gray-900 border-blue-500'
+                  : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+                }`}
+            >
+              Article Assigned by Me
+            </button>
           </div>
         </div>
       </nav>
@@ -63,6 +77,8 @@ const page = () => {
         {selectedPage === 'My Wribates' && <MyWribates />}
         {selectedPage === 'My Proposed Topics' && <MyTopics/>}
         {selectedPage === 'Articles Dashboard' && <div>Articles Dashboard Content</div>}
+
+        {selectedPage === 'Article Assigned by me' && <ArticlesAssignedByMe/>}
       </div>
     </div>
   )

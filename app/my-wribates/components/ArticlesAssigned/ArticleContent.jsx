@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { Eye, Clock, ArrowLeft, Share2 } from "lucide-react";
+import { Eye, Clock, ArrowLeft, Share2, CircleX } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -51,9 +51,26 @@ const formatRelativeTime = (dateString) => {
   return `${diffInYears} year${diffInYears === 1 ? "" : "s"} ago`;
 };
 
+const dupData = {
+  image: "src/",
+  title: "Topic",
+  author_name: "Author name",
+  created_at: "20-10-2022",
+  views: 10,
+  content: "This is the content of main",
+};
+
+const formatDate = (isoString) => {
+  const date = new Date(isoString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
 export default function ArticleContent({ open, onClose, selectedArticle }) {
   const { id } = useParams();
-  const [blog, setBlog] = useState(null);
+  const [blog, setBlog] = useState(dupData);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -106,41 +123,47 @@ export default function ArticleContent({ open, onClose, selectedArticle }) {
     );
   }
 
-  if (!blog) {
-    return (
-      <ModalLayout open={open} onClose={onClose}>
-        <main className="max-w-4xl mx-auto px-6 py-12 bg-gray-50 min-h-screen">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Blog post not found
-            </h1>
-            <Button
-              onClick={() => router.back()}
-              className="bg-blue-900 hover:bg-blue-800 text-white"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Go Back
-            </Button>
-          </div>
-        </main>
-      </ModalLayout>
-    );
+  if (!selectedArticle) {
+    return null;
+    // return (
+    //   <ModalLayout open={open} onClose={onClose}>
+    //     <main className="max-w-4xl mx-auto px-6 py-12 bg-gray-50 min-h-screen">
+    //       <div className="text-center">
+    //         <h1 className="text-2xl font-bold text-gray-900 mb-4">
+    //           Blog post not found
+    //         </h1>
+    //         <Button
+    //           onClick={() => router.back()}
+    //           className="bg-blue-900 hover:bg-blue-800 text-white"
+    //         >
+    //           <ArrowLeft className="w-4 h-4 mr-2" />
+    //           Go Back
+    //         </Button>
+    //       </div>
+    //     </main>
+    //   </ModalLayout>
+    // );
   }
 
   return (
     <ModalLayout open={open} onClose={onClose}>
-      <main className="bg-gray-50 min-h-screen bg-red-500">
-        <div className="max-w-4xl mx-auto px-6 py-12 bg-red-500">
+      <main className="bg-gray-50 min-h-screen">
+        <div className="max-w-4xl mx-auto px-6 py-12 ">
           {/* Navigation */}
-          <div className="mb-8">
-            <Button
-              onClick={() => router.back()}
+
+          <div className="">
+            <CircleX
+              className="top-5 cursor-pointer right-5 absolute"
+              onClick={onClose}
+            />
+            {/* <Button
+             
               variant="outline"
               className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white transition-colors duration-200"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Blog
-            </Button>
+              Back to Articles
+            </Button> */}
           </div>
 
           {/* Article Container */}
@@ -148,8 +171,8 @@ export default function ArticleContent({ open, onClose, selectedArticle }) {
             {/* Hero Image */}
             <div className="w-full h-64 md:h-96 overflow-hidden relative">
               <img
-                src={blog.image}
-                alt={blog.title}
+                src={selectedArticle.image}
+                alt={selectedArticle.title}
                 className="w-full h-full object-contain object-center"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
@@ -160,27 +183,29 @@ export default function ArticleContent({ open, onClose, selectedArticle }) {
               {/* Header */}
               <header className="mb-8 border-b border-gray-200 pb-8">
                 <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4 leading-tight">
-                  {blog.title}
+                  {selectedArticle.title}
                 </h1>
 
                 {/* Author and Meta Info */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-blue-900 text-white font-bold text-lg flex items-center justify-center">
-                      {blog.author_name?.charAt(0).toUpperCase()}
+                      {selectedArticle.assigned_to_name
+                        ?.charAt(0)
+                        .toUpperCase()}
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">
-                        {blog.author_name}
+                        {selectedArticle.assigned_to_name}
                       </p>
                       <div className="flex items-center gap-3 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {formatRelativeTime(blog.created_at)}
+                          {formatRelativeTime(selectedArticle.createdAt)}
                         </span>
                         <span className="flex items-center gap-1">
                           <Eye className="w-3 h-3" />
-                          {blog.views?.toLocaleString()} views
+                          {selectedArticle?.views?.toLocaleString()} views
                         </span>
                       </div>
                     </div>
@@ -210,7 +235,7 @@ export default function ArticleContent({ open, onClose, selectedArticle }) {
                         <div className="flex items-center justify-center gap-6 pt-4 border-t border-gray-200">
                           <a
                             href={`https://wa.me/?text=${encodeURIComponent(
-                              `Check out this article: ${blog.title} ${shareUrl}`
+                              `Check out this article: ${selectedArticle.title} ${shareUrl}`
                             )}`}
                             target="_blank"
                             rel="noreferrer"
@@ -231,7 +256,9 @@ export default function ArticleContent({ open, onClose, selectedArticle }) {
                           <a
                             href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
                               shareUrl
-                            )}&text=${encodeURIComponent(blog.title)}`}
+                            )}&text=${encodeURIComponent(
+                              selectedArticle.title
+                            )}`}
                             target="_blank"
                             rel="noreferrer"
                             className="p-3 hover:bg-gray-50 transition-colors duration-200"
@@ -243,31 +270,72 @@ export default function ArticleContent({ open, onClose, selectedArticle }) {
                     </DialogContent>
                   </Dialog>
                 </div>
+
+                <div className=" my-4 flex justify-between items-center">
+                  <div>
+                    <p className="text-sm">Assigned by</p>
+                    <p className="font-semibold text-gray-600">
+                      {selectedArticle.assigned_to_name}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-sm">Due date</p>
+                    <p className="flex items-center gap-1">
+                      {formatDate(selectedArticle.due_date)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className=" my-4 flex justify-between items-center">
+                  <div>
+                    <p className="text-sm">Reviwer</p>
+                    <p className="font-semibold text-gray-600">
+                      {selectedArticle.reviewer_id}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-sm">Plagarism score</p>
+                    <p className="font-semibold text-gray-600">
+                      {selectedArticle.plagarism_score}
+                    </p>
+                  </div>
+                </div>
               </header>
 
               {/* Blog Content */}
-              <div
-                className="blog-content max-w-none text-gray-700 leading-relaxed"
-                style={{
-                  // fontFamily: 'system-ui, -apple-system, sans-serif',
-                  lineHeight: "1.8",
-                  // Removed: fontSize: '1.1rem'
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: he.decode(blog.content || ""),
-                }}
-              />
+
+              {selectedArticle.content && (
+                <div
+                  className="blog-content max-w-none text-gray-700 leading-relaxed"
+                  style={{
+                    // fontFamily: 'system-ui, -apple-system, sans-serif',
+                    lineHeight: "1.8",
+                    // Removed: fontSize: '1.1rem'
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: he.decode(selectedArticle.content || ""),
+                  }}
+                />
+              )}
+
+              {!selectedArticle.content && (
+                <p className="text-sm  mb-0text-gray-500 text-center">
+                  Content not available yet
+                </p>
+              )}
 
               {/* Footer */}
               <footer className="mt-12 pt-8 border-t border-gray-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <div className="w-2 h-2 bg-blue-900"></div>
-                    Published {formatRelativeTime(blog.created_at)}
+                    Published {formatRelativeTime(selectedArticle.createdAt)}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Eye className="w-4 h-4" />
-                    {blog?.views} views
+                    {selectedArticle?.views} views
                   </div>
                 </div>
               </footer>
