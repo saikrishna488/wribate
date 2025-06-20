@@ -6,11 +6,12 @@ import toast from "react-hot-toast";
 import { useAtom } from "jotai";
 import { userAtom } from "../../states/GlobalStates";
 import { useRouter } from "next/navigation";
+import { PATHNAMES } from "../../config/pathNames";
 
 const BatchPropose = () => {
   const [file, setFile] = useState(null);
   const [country, setCountry] = useState("");
-  const [submittedBy, setSubmittedBy] = useState("");
+  const [institution, setInstitution] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user] = useAtom(userAtom);
   const router = useRouter();
@@ -27,22 +28,18 @@ const BatchPropose = () => {
       return;
     }
 
-    // if (!country || !submittedBy) {
+    // if (!country || !institution) {
     //   toast.error('Please fill in all required fields');
     //   return;
     // }
 
     setIsSubmitting(true);
 
-    console.log(user, "user")
-
     try {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("country", country || "IND");
-      formData.append("assigned_by_name", submittedBy);
-   
-    
+      formData.append("institution", institution);
 
       // Replace with your actual API endpoint
       const URL =
@@ -53,13 +50,11 @@ const BatchPropose = () => {
         headers: authHeader(),
       });
 
-      console.log(response, "this is reaspose");
-
       const data = response.data;
 
       if (data.res) {
         toast.success("Batch proposal submitted successfully!");
-        // router.push('/propose-wribate')
+        router.push(PATHNAMES.MY_WRIBATES);
       } else {
         throw new Error("Failed to submit batch proposal");
       }
@@ -71,11 +66,111 @@ const BatchPropose = () => {
     }
   };
 
+  const sampleData = [
+    {
+      id: 1,
+      topic: "Topic 1",
+      email: "abc@gmail.com",
+      date: "DD-MM-YYYY",
+      reviewer: "cdef@gmail.com"
+    },
+    { id: 2, topic: "Topic 2", email: "xyz@gmail.com", date: "DD-MM-YYYY" ,reviewer: "lmn@gmail.com"},
+    { id: 3, topic: "Topic 3", email: "ravi@ravi.com", date: "DD-MM-YYYY", reviewer: "vuw@gmail.com" },
+  ];
+
+  const renderXLFormateInstruction = () => {
+    return (
+      <div className="mb-10">
+        <div className="bg-blue-50 border-l-4 border-blue-900 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-blue-900 mb-3">
+            Required File Format
+          </h2>
+          <p className="text-blue-800 mb-4">
+            Please ensure your file follows the exact format shown in the table
+            below:
+          </p>
+
+          {/* Sample Table */}
+          <div className="overflow-x-auto bg-white border border-gray-200">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-blue-900 text-white">
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold">
+                    Article Topic
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold">
+                    Student Email
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold">
+                    Due Date
+                  </th>
+                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold">
+                    Reviewer
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sampleData.map((row, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                
+                    <td className="border border-gray-300 px-4 py-3 text-gray-900 font-medium">
+                      {row.topic}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-3 text-blue-600">
+                      {row.email}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-3 text-gray-700">
+                      {row.date}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-3 text-gray-900">
+                      {row.reviewer}
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Template Download */}
+        <div className="flex items-center justify-between bg-gray-50 px-6 py-4 border border-gray-200">
+          <div className="flex items-center">
+            <svg
+              className="w-5 h-5 text-blue-900 mr-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <span className="text-gray-900 font-medium">
+              Need the template file?
+            </span>
+          </div>
+          <a
+            href="#"
+            className="bg-blue-900 text-white px-4 py-2 text-sm font-medium hover:bg-blue-800 transition-colors duration-200"
+          >
+            Download Excel Template
+          </a>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
       <h3 className="text-xl font-semibold text-gray-800 mb-6">
         Batch Article Assignment
       </h3>
+
+      {renderXLFormateInstruction()}
 
       <div className="space-y-6">
         {/* File Upload Section */}
@@ -142,14 +237,14 @@ const BatchPropose = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Submitted By
+              Institution / University
             </label>
             <input
               type="text"
-              value={submittedBy}
-              onChange={(e) => setSubmittedBy(e.target.value)}
+              value={institution}
+              onChange={(e) => setInstitution(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your name"
+              placeholder="Enter Institution or University"
             />
           </div>
         </div>

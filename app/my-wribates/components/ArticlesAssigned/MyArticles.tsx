@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Users,
   Search,
@@ -13,122 +13,54 @@ import {
   LogOut,
   Menu,
   X,
+  Eye,
+  Pencil,
   ChevronDown,
 } from "lucide-react";
+import axios from "axios";
+import toast from "react-hot-toast";
+import getAuthHeader from "../../../utils/authHeader";
+import { PATHNAMES } from "../../../config/pathNames";
 
-import EditArticle from "./CreateEditArticle";
-import CreateEditArticle from "./CreateEditArticle";
-import ArticleContent from "./ArticleContent";
+import NoItemsCard from "./NoItemsCard";
+
+import { useRouter } from "next/navigation";
 
 interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  status: "Active" | "Inactive" | "Pending";
-  location: string;
-  orders: number;
+  _id: string;
+  topic: string;
+  student_id: string;
+  student_name: "Active" | "Inactive" | "Pending";
+  batch: string;
+  due_date: number;
   spent: string;
   lastSeen: string;
   avatar: string;
   year: number;
 }
 
-const customers: Customer[] = [
+const customers: any[] = [
   {
-    id: 1,
-    name: "Alex Johnson",
-    email: "alex@company.com",
-    status: "Active",
-    location: "New York, USA",
-    orders: 12,
-    spent: "$2,456",
-    lastSeen: "2 hours ago",
-    avatar: "🧑‍💼",
-    year: 2024,
-  },
-  {
-    id: 2,
-    name: "Sarah Wilson",
-    email: "sarah@example.com",
-    status: "Active",
-    location: "London, UK",
-    orders: 8,
-    spent: "$1,890",
-    lastSeen: "1 day ago",
-    avatar: "👩‍💼",
-    year: 2024,
-  },
-  {
-    id: 3,
-    name: "Mike Chen",
-    email: "mike@startup.io",
-    status: "Pending",
-    location: "San Francisco, USA",
-    orders: 5,
-    spent: "$945",
-    lastSeen: "3 days ago",
-    avatar: "👨‍💻",
-    year: 2023,
-  },
-  {
-    id: 4,
-    name: "Emma Davis",
-    email: "emma@design.co",
-    status: "Active",
-    location: "Toronto, Canada",
-    orders: 15,
-    spent: "$3,210",
-    lastSeen: "5 hours ago",
-    avatar: "👩‍🎨",
-    year: 2024,
-  },
-  {
-    id: 5,
-    name: "James Brown",
-    email: "james@tech.com",
-    status: "Inactive",
-    location: "Sydney, Australia",
-    orders: 3,
-    spent: "$567",
-    lastSeen: "1 week ago",
-    avatar: "👨‍🔬",
-    year: 2023,
-  },
-  {
-    id: 6,
-    name: "Lisa Martinez",
-    email: "lisa@marketing.pro",
-    status: "Active",
-    location: "Barcelona, Spain",
-    orders: 9,
-    spent: "$1,678",
-    lastSeen: "1 hour ago",
-    avatar: "👩‍💼",
-    year: 2024,
-  },
-  {
-    id: 7,
-    name: "David Kim",
-    email: "david@ecommerce.shop",
-    status: "Pending",
-    location: "Seoul, South Korea",
-    orders: 7,
-    spent: "$1,234",
-    lastSeen: "2 days ago",
-    avatar: "👨‍💼",
-    year: 2023,
-  },
-  {
-    id: 8,
-    name: "Anna Rodriguez",
-    email: "anna@consulting.biz",
-    status: "Active",
-    location: "Mexico City, Mexico",
-    orders: 11,
-    spent: "$2,089",
-    lastSeen: "4 hours ago",
-    avatar: "👩‍⚕️",
-    year: 2024,
+    _id: "68550400cbc984d66be07304",
+    image: "https://via.placeholder.com/800x600.png?text=Sample+Image+3",
+    topic: "Topic here",
+    title: "Sample Article Title 3",
+    content:
+      "This is the content for sample article number 3. Lorem ipsum dolor sit amet.",
+    assigned_by_name: "sulthan babu chirathala",
+    assigned_by_id: "684511250a0181f8d45ea5a1",
+    assigned_to_name: "Writer 3",
+    assigned_to_id: "68550400cbc984d66be072fa",
+    submitted_on_time: false,
+    status: "pending",
+    views: 61,
+    plagarism_score: 14,
+    due_date: "2025-06-25T03:54:15.536Z",
+    created_at: "2025-06-20T06:47:28.108Z",
+    updated_at: "2025-06-20T06:47:28.108Z",
+    __v: 0,
+    createdAt: "2025-06-20T06:47:28.114Z",
+    updatedAt: "2025-06-20T06:47:28.114Z",
   },
 ];
 
@@ -138,6 +70,13 @@ const navigationItems = [
   { icon: ShoppingBag, label: "March", active: false },
   { icon: BarChart3, label: "April", active: false },
   { icon: Settings, label: "May", active: false },
+  { icon: Settings, label: "June", active: false },
+  { icon: Settings, label: "July", active: false },
+  { icon: Settings, label: "August", active: false },
+  { icon: Settings, label: "September", active: false },
+  { icon: Settings, label: "October", active: false },
+  { icon: Settings, label: "November", active: false },
+  { icon: Settings, label: "December", active: false },
 ];
 
 // Generate years from 2020 to current year
@@ -150,19 +89,97 @@ const years = Array.from(
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState<number | "all">("all");
-  const [activeTab, setActiveTab] = useState("Customers");
+  const [activeTab, setActiveTab] = useState(navigationItems[0].label);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const [selectedArticle, setSelectedArticle] = useState(null);
 
-  const filteredCustomers = customers.filter((customer) => {
-    const matchesSearch =
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesYear =
-      selectedYear === "all" || customer.year === selectedYear;
-    return matchesSearch && matchesYear;
-  });
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const formData = {
+          ...(selectedYear !== "all"
+            ? {
+                startDate: getDates()?.startDate || "",
+                endDate: getDates()?.endDate || "",
+              }
+            : {}),
+        };
+
+        const res = await axios.post(
+          process.env.NEXT_PUBLIC_BACKEND_URL + "/user/articles",
+          formData,
+          {
+            headers: getAuthHeader(),
+          }
+        );
+        const data = res.data;
+        if (data.res) {
+          setArticles(data.articles);
+        }
+      } catch (err) {
+        console.log(err);
+        toast.error("Failed to load blog post");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchArticles();
+  }, [selectedYear, activeTab]);
+
+  const getDates = () => {
+    // If year is not selected (or is "all"), fallback to current year
+    const year = selectedYear === "all" ? currentYear : selectedYear;
+
+    // Find index of activeTab (month name)
+    const monthIndex = navigationItems.findIndex(
+      (item) => item.label === activeTab
+    );
+
+    // If month not found, return entire year range
+    if (monthIndex === -1) {
+      return {
+        startDate: new Date(`${year}-01-01T00:00:00.000Z`),
+        endDate: new Date(`${year}-12-31T23:59:59.999Z`),
+      };
+    }
+
+    // JS months are 0-indexed (0 = Jan, 11 = Dec)
+    const startDate = new Date(Date.UTC(year, monthIndex, 1, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, monthIndex + 1, 0, 23, 59, 59));
+
+    return { startDate, endDate };
+  };
+
+  const filteredCustomers = () => {
+    let filtList = articles || [];
+
+    return filtList?.filter((customer: any) => {
+      const matchesSearch =
+        customer.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.assigned_to_name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        customer.due_date.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.plagarism_score.toString().includes(searchTerm.toLowerCase());
+      const matchesYear =
+        selectedYear === "all" || customer.year === selectedYear;
+
+      return matchesSearch && matchesYear;
+    });
+  };
+
+  const slicedText = (text: string, maxLength: number = 20) => {
+    if (!text) return "";
+
+    if (text.length > maxLength) {
+      return text.slice(0, maxLength) + " ...";
+    }
+    return text;
+  };
 
   const getStatusBadge = (status: string) => {
     const baseClasses =
@@ -178,6 +195,8 @@ function App() {
         return `${baseClasses} bg-gray-100 text-gray-800 border border-gray-200`;
     }
   };
+
+ 
 
   return (
     <div className="h-screen bg-gray-50 w-full overflow-x-hidden">
@@ -202,12 +221,12 @@ function App() {
           </button>
 
           <h1 className="text-xl sm:text-2xl text-center font-bold text-gray-900 ">
-          My Assigned Articles
+            My Articles
           </h1>
         </div>
       </div>
 
-      <div className="flex bg-red-500">
+      <div className="flex ">
         {/* Left Navigation Sidebar */}
         <div
           className={`
@@ -235,7 +254,7 @@ function App() {
                   setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  item.active || activeTab === item.label
+                  activeTab === item.label
                     ? "bg-blue-50 text-blue-700 border border-blue-200"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
@@ -289,29 +308,23 @@ function App() {
           </div>
 
           {/* Table Container */}
-          <div className="flex-1 overflow-auto bg-white">
+          <div className="flex-1 overflow-auto bg-white bg-red-500">
             {/* Mobile Card View */}
             <div className="block sm:hidden">
               <div className="px-4 py-2 space-y-3">
-                {filteredCustomers.map((customer) => (
+                {filteredCustomers().map((customer) => (
                   <div
                     onClick={() => {
-                      setSelectedArticle(customer);
+                      router.push(`${PATHNAMES.EDIT_ARTICLES}/${customer._id}`);
                     }}
-                    key={customer.id}
+                    key={customer._id}
                     className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
-                        <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-lg">
-                          {customer.avatar}
-                        </div>
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {customer.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {customer.email}
+                            {slicedText(customer.topic, 100)}
                           </div>
                         </div>
                       </div>
@@ -321,27 +334,28 @@ function App() {
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div>
-                        <span className="text-gray-500">Location:</span>
-                        <div className="font-medium text-gray-900">
-                          {customer.location}
+                        <span className="text-gray-500">Student</span>
+                        <div className="font-medium text-gray-900 mt-1">
+                          {customer.assigned_to_name}
                         </div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Orders:</span>
+                        <span className="text-gray-500">Sumitted on Time:</span>
                         <div className="font-medium text-gray-900">
-                          {customer.orders}
+                          {customer.submitted_on_time}
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-gray-500">Plagarism score:</span>
+                        <div className="font-medium text-gray-900">
+                          {customer.plagarism_score}
                         </div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Spent:</span>
+                        <span className="text-gray-500">Due date:</span>
                         <div className="font-medium text-gray-900">
-                          {customer.spent}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Year:</span>
-                        <div className="font-medium text-gray-900">
-                          {customer.year}
+                          {customer.due_date}
                         </div>
                       </div>
                     </div>
@@ -351,87 +365,74 @@ function App() {
             </div>
 
             {/* Desktop/Tablet Table View */}
-            <div className="hidden sm:block min-w-full">
-              <table className="min-w-full divide-y divide-gray-200">
+            <div className="hidden sm:block min-w-full flex-1 bg-red-500">
+              <table className="min-w-full bg-red-500 divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
+                      Topic
                     </th>
                     <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
+                      Student
                     </th>
-                    <th className="hidden md:table-cell px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Location
-                    </th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Orders
+                    <th className=" px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Year/Batch
                     </th>
                     <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount Spent
+                      Submitted on time
                     </th>
-                    <th className="hidden lg:table-cell px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Year
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Plagarism score
                     </th>
-                    <th className="hidden lg:table-cell px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Last Seen
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
                     </th>
-                    <th className="relative px-4 lg:px-6 py-3">
+
+                    {/* <th className="relative px-4 lg:px-6 py-3">
                       <span className="sr-only">Actions</span>
-                    </th>
+                    </th> */}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredCustomers.map((customer) => (
+                  {filteredCustomers()?.map((customer) => (
                     <tr
                       onClick={() => {
-                        setSelectedArticle(customer);
+                        router.push(
+                          `${PATHNAMES.EDIT_ARTICLES}/${customer._id}`
+                        );
                       }}
-                      key={customer.id}
+                      key={customer._id}
                       className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
                     >
                       <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 lg:h-10 lg:w-10 flex-shrink-0">
-                            <div className="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-gray-100 flex items-center justify-center text-sm lg:text-lg">
-                              {customer.avatar}
-                            </div>
-                          </div>
-                          <div className="ml-3 lg:ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {customer.name}
-                            </div>
-                            <div className="text-xs lg:text-sm text-gray-500 hidden sm:block">
-                              {customer.email}
-                            </div>
-                          </div>
-                        </div>
+                        {slicedText(customer.topic)}
                       </td>
                       <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <span className={getStatusBadge(customer.status)}>
-                          {customer.status}
-                        </span>
+                        {customer.assigned_to_name}
                       </td>
-                      <td className="hidden md:table-cell px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {customer.location}
+                      <td className=" px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {customer.due_date}
                       </td>
                       <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {customer.orders}
+                        {customer.submitted_on_time}
                       </td>
                       <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {customer.spent}
+                        {customer.plagarism_score}
                       </td>
-                      <td className="hidden lg:table-cell px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {customer.year}
+                      <td className=" px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <Pencil
+                          className="opacity-50"
+                          onClick={() => {
+                            router.push(
+                              `${PATHNAMES.EDIT_ARTICLES}/${customer._id}`
+                            );
+                          }}
+                        />
                       </td>
-                      <td className="hidden lg:table-cell px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {customer.lastSeen}
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button className="text-gray-400 hover:text-gray-600 transition-colors duration-200">
-                          <MoreHorizontal className="h-4 w-4 lg:h-5 lg:w-5" />
-                        </button>
-                      </td>
+
+                      {/* <td className="hidden lg:table-cell px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {customer.status}
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -443,7 +444,7 @@ function App() {
           <div className="bg-white border-t border-gray-200 px-4 sm:px-6 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-xs sm:text-sm text-gray-500">
-                Showing {filteredCustomers.length} of {customers.length}{" "}
+                Showing {filteredCustomers()?.length} of {articles?.length}{" "}
                 customers
                 {selectedYear !== "all" && (
                   <span className="ml-1">for {selectedYear}</span>
@@ -467,24 +468,6 @@ function App() {
           </div>
         </div>
       </div>
-
-      {selectedArticle && (
-        <CreateEditArticle
-          open={selectedArticle ? true : false}
-          // open={true}
-          onClose={() => {
-            setSelectedArticle(null);
-          }}
-          selectedArticle={selectedArticle}
-        />
-      )}
-
-      {/* <EditArticle
-        open={selectedArticle ? true : false}
-        onClose={() => {
-          setSelectedArticle(null);
-        }}
-      /> */}
     </div>
   );
 }

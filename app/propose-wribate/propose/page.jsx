@@ -6,12 +6,12 @@ import { useAtom } from "jotai";
 import { userAtom } from "../../states/GlobalStates";
 
 const ProposePage = () => {
-  // const [selected, setSelected] = useState("single");
-  const [selected, setSelected] = useState("batch");
+  const [selected, setSelected] = useState("single");
+  // const [selected, setSelected] = useState("batch");
 
   const [user] = useAtom(userAtom);
 
-  const isUser = user?.userRole == "user";
+  const isUser = user?.userRole !== "user";
 
   return (
     <section className="min-h-screen bg-gray-50 py-4 sm:py-8 px-3 sm:px-4">
