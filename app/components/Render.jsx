@@ -35,9 +35,7 @@ const Render = () => {
     };
 
     const fetchAdVisibility = async()=>{
-      const data = await httpRequest(axios.get(process.env.NEXT_PUBLIC_BACKEND_URL+'/admin/getadsvisibility',{
-        headers: authHeader()
-      }))
+      const data = await httpRequest(axios.get(process.env.NEXT_PUBLIC_BACKEND_URL+'/admin/getadsvisibility'))
 
       setVisibility(data.visibility);
     }

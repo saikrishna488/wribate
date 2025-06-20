@@ -12,6 +12,7 @@ import { signInWithPopup, TwitterAuthProvider } from "firebase/auth";
 // Import icons from react-icons
 import { FcGoogle } from "react-icons/fc";
 import { FaXTwitter, FaFacebook, FaYahoo, FaApple, FaGithub } from "react-icons/fa6";
+import httpRequest from "../utils/httpRequest";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,7 @@ const LoginPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [shimmerPosition, setShimmerPosition] = useState(-100);
   const [user, setUser] = useAtom(userAtom);
+  const [country, setCountry] = useState(null);
 
 
   const carouselImages = [
@@ -30,6 +32,27 @@ const LoginPage = () => {
     '/login/Slide3.PNG',
     '/login/Slide4.PNG',
   ];
+
+
+  //fetch country
+  const fetchCountry = async()=>{
+    try{
+
+      const res = await axios.get('https://ipapi.co/json/')
+      const data = res.data;
+
+      setCountry(data.country_name)
+    }
+    catch(err){
+      console.log(err);
+      toast.error("Error Occured")
+    }
+  }
+
+
+  useEffect(()=>{
+    fetchCountry()
+  },[])
 
   // Handle image carousel animation
   useEffect(() => {
@@ -99,7 +122,8 @@ const LoginPage = () => {
 
       // Now, send the token to your backend using Axios
       const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/firebase', {
-        token: token, // Send the Firebase token in the request body
+        token: token,
+        country
       }, {
         withCredentials: true
       });

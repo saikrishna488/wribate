@@ -15,7 +15,7 @@ import { signInWithPopup } from "firebase/auth";
 import { useAtom } from "jotai";
 import { userAtom } from "../states/GlobalStates";
 // Import react-icons
-import {FcGoogle} from 'react-icons/fc'
+import { FcGoogle } from 'react-icons/fc'
 import { FaFacebook, FaGithub, FaXTwitter, FaYahoo, FaApple } from "react-icons/fa6";
 
 const SignupForm = () => {
@@ -40,12 +40,13 @@ const SignupForm = () => {
   const [userNameAvailable, setUserNameAvailable] = useState(null); // null, true, false
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [debouncedUserName, setDebouncedUserName] = useState("");
-  const [user,setUser] = useAtom(userAtom)
+  const [user, setUser] = useAtom(userAtom)
 
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [shimmerPosition, setShimmerPosition] = useState(-100);
+  const [country, setCountry] = useState(null)
 
   const carouselImages = [
     '/login/Slide1.PNG',
@@ -53,6 +54,26 @@ const SignupForm = () => {
     '/login/Slide3.PNG',
     '/login/Slide4.PNG',
   ];
+
+  //fetch country
+  const fetchCountry = async () => {
+    try {
+
+      const res = await axios.get('https://ipapi.co/json/')
+      const data = res.data;
+
+      setCountry(data.country_name)
+    }
+    catch (err) {
+      console.log(err);
+      toast.error("Error Occured")
+    }
+  }
+
+
+  useEffect(() => {
+    fetchCountry()
+  }, [])
 
   // Handle image carousel animation
   useEffect(() => {
@@ -185,7 +206,7 @@ const SignupForm = () => {
         password: formData.password,
         name: formData.name,
         userName: formData.userName,
-        country: formData.country,
+        country,
         dob: formData.dob,
       }, {
         withCredentials: true
@@ -228,17 +249,18 @@ const SignupForm = () => {
       // Sign in with the selected provider
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-  
+
       // Get the Firebase ID token
       const token = await user.getIdToken();  // This gives the Firebase ID token
-  
+
       // Now, send the token to your backend using Axios
-      const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL+ '/firebase', {
-        token: token, // Send the Firebase token in the request body
-      },{
-        withCredentials:true
+      const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/firebase', {
+        token: token,
+        country
+      }, {
+        withCredentials: true
       });
-  
+
       if (response.data.res) {
         toast.success("Login Success");
         setUser(response.data.user)
@@ -350,20 +372,20 @@ const SignupForm = () => {
 
           {/* Social Login Icons */}
           <div className="flex justify-center gap-4 mb-6">
-            <button 
-              onClick={() => handleProviderLogin(googleProvider)} 
+            <button
+              onClick={() => handleProviderLogin(googleProvider)}
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
-              <FcGoogle size={40}  className="text-xl text-red-500" />
+              <FcGoogle size={40} className="text-xl text-red-500" />
             </button>
-            <button 
-              onClick={() => handleProviderLogin(facebookProvider)} 
+            <button
+              onClick={() => handleProviderLogin(facebookProvider)}
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
               <FaFacebook size={40} className="text-xl text-blue-600" />
             </button>
-            <button 
-              onClick={() => handleProviderLogin(twitterProvider)} 
+            <button
+              onClick={() => handleProviderLogin(twitterProvider)}
               className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
               <FaXTwitter size={40} className="text-xl text-blue-400" />

@@ -1,7 +1,7 @@
 "use client"
 import axios from 'axios';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import WribateCard from './WribateCard';
 
 const Page = () => {
@@ -17,6 +17,8 @@ const Page = () => {
   const router = useRouter();
 
   const fetchWribates = async () => {
+    if (loading || !hasMore) return;
+    
     try {
       setLoading(true);
       const res = await axios.get(
@@ -57,13 +59,28 @@ const Page = () => {
     }
   };
 
+  // Infinite scroll handler
+  const handleScroll = useCallback(() => {
+    if (loading || !hasMore) return;
+
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+    
+    // Trigger fetch when user is within 200px from bottom
+    if (scrollTop + clientHeight >= scrollHeight - 200) {
+      fetchWribates();
+    }
+  }, [loading, hasMore, lastCreatedAt]);
+
   useEffect(() => {
     fetchWribates();
   }, []);
 
-  const handleLoadMore = () => {
-    fetchWribates();
-  };
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   const handleCardClick = (wribate) => {
     // Navigate to wribate details page
@@ -132,35 +149,25 @@ const Page = () => {
           </div>
         )}
 
-        {/* Load More Section */}
-        {wribates.length > 0 && (
+        {/* Loading indicator for infinite scroll */}
+        {loading && wribates.length > 0 && (
+          <div className="mt-8 flex justify-center items-center py-8">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+              <p className="text-blue-600 text-sm font-medium">Loading more wribates...</p>
+            </div>
+          </div>
+        )}
+
+        {/* End of content indicator */}
+        {!hasMore && wribates.length > 0 && (
           <div className="mt-12 text-center">
-            {hasMore ? (
-              <button
-                onClick={handleLoadMore}
-                disabled={loading}
-                className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium disabled:bg-blue-300 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
-              >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Loading More...
-                  </>
-                ) : (
-                  'Load More Wribates'
-                )}
-              </button>
-            ) : (
-              <div className="border-t border-gray-200 pt-8">
-                <div className="inline-flex items-center text-gray-500">
-                  <div className="w-2 h-2 bg-gray-300 rounded-full mr-2"></div>
-                  <span className="font-medium">You've reached the end</span>
-                </div>
+            <div className="border-t border-gray-200 pt-8">
+              <div className="inline-flex items-center text-gray-500">
+                <div className="w-2 h-2 bg-gray-300 rounded-full mr-2"></div>
+                <span className="font-medium">You've reached the end</span>
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>

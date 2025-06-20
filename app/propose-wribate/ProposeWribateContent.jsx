@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SearchX, MoreHorizontal, Loader, Search, ChevronDown } from "lucide-react";
@@ -50,6 +50,8 @@ export default function ProposeWribateContent() {
 
   // Function to fetch wribates
   const fetchWribates = async (reset = false) => {
+    if (isLoading || (!hasMore && !reset)) return;
+    
     try {
       setIsLoading(true);
       // If reset is true, we're changing categories, so we need to reset debates and lastId
@@ -59,36 +61,64 @@ export default function ProposeWribateContent() {
       const data = res.data;
 
       if (data.res) {
+        const newDebates = data?.propose || [];
+        
         // If we're resetting, replace the debates array, otherwise append to it
         if (reset) {
-          setDebates(data?.propose || []);
+          setDebates(newDebates);
         } else {
-          setDebates([...debates, ...data?.propose]);
+          // Filter out duplicates before adding to prevent key conflicts
+          setDebates(prevDebates => {
+            const existingIds = new Set(prevDebates.map(debate => debate._id));
+            const uniqueNewDebates = newDebates.filter(debate => !existingIds.has(debate._id));
+            return [...prevDebates, ...uniqueNewDebates];
+          });
         }
 
         // Update lastId for pagination
-        const newLastId = data.propose?.[data.propose.length - 1]?._id;
+        const newLastId = newDebates?.[newDebates.length - 1]?._id;
         setLastId(newLastId || null);
 
         // Check if we have more to load
-        setHasMore(data.propose && data.propose.length > 0);
+        setHasMore(newDebates && newDebates.length > 0);
       } else {
         setHasMore(false);
       }
     } catch (err) {
       console.log(err);
       toast.error("Failed to load debates");
+      setHasMore(false);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Infinite scroll handler
+  const handleScroll = useCallback(() => {
+    if (isLoading || !hasMore) return;
+
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+    
+    // Trigger fetch when user is within 200px from bottom
+    if (scrollTop + clientHeight >= scrollHeight - 200) {
+      fetchWribates(false);
+    }
+  }, [isLoading, hasMore, lastId, selectedCategory, user]);
+
   // When category changes, reset and fetch new debates
   useEffect(() => {
     setDebates([]);
     setLastId("");
+    setHasMore(true);
     fetchWribates(true);
   }, [selectedCategory, hook]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -146,13 +176,6 @@ export default function ProposeWribateContent() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  // Handle load more button click
-  const handleLoadMore = () => {
-    if (!isLoading && hasMore) {
-      fetchWribates();
-    }
-  };
 
   // Handle country selection
   const handleCountrySelect = (country) => {
@@ -250,9 +273,9 @@ export default function ProposeWribateContent() {
       {filteredDebates.length > 0 ? (
         <>
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredDebates.map((debate) => (
+            {filteredDebates.map((debate, index) => (
               <DebateCard
-                key={debate._id}
+                key={`${debate._id}-${index}`}
                 user={user}
                 debate={debate}
                 setHook={setHook}
@@ -261,29 +284,25 @@ export default function ProposeWribateContent() {
             ))}
           </div>
 
-          {/* Load More Button */}
-          <div className="flex justify-center mt-8 mb-4">
-            {hasMore && (
-              <Button
-                onClick={handleLoadMore}
-                disabled={isLoading}
-                className="bg-blue-900 text-white hover:bg-blue-800 transition-colors px-8 py-2"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader size={16} className="mr-2 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  'Load More Wribates'
-                )}
-              </Button>
-            )}
+          {/* Loading indicator for infinite scroll */}
+          {isLoading && filteredDebates.length > 0 && (
+            <div className="flex justify-center mt-8 mb-4">
+              <div className="flex items-center text-blue-900">
+                <Loader size={16} className="mr-2 animate-spin" />
+                <span className="text-sm font-medium">Loading more wribates...</span>
+              </div>
+            </div>
+          )}
 
-            {!hasMore && filteredDebates.length > 0 && (
-              <p className="text-gray-500 text-sm">No more wribates to load</p>
-            )}
-          </div>
+          {/* End of content indicator */}
+          {!hasMore && filteredDebates.length > 0 && (
+            <div className="flex justify-center mt-8 mb-4">
+              <div className="flex items-center text-gray-500">
+                <div className="w-2 h-2 bg-gray-300 rounded-full mr-2"></div>
+                <span className="text-sm font-medium">You've reached the end</span>
+              </div>
+            </div>
+          )}
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -296,4 +315,4 @@ export default function ProposeWribateContent() {
       )}
     </div>
   );
-} 
+}

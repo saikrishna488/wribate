@@ -231,6 +231,22 @@ const ChatUI = () => {
         console.error("Socket error:", error);
       });
 
+      // ✅ LISTEN FOR CHAT NOTIFICATIONS
+      socket.on("newMessageNotification", (notificationData) => {
+        console.log("New message notification received:", notificationData);
+        
+        // Update bell notification count in navbar
+        if (window.refreshNotificationCount) {
+          window.refreshNotificationCount();
+        }
+        
+        // Optional: Show toast notification if not in chat with sender
+        if (notificationData.sender !== selectedContact?._id) {
+          toast.success(`New message from ${notificationData.senderName}`);
+        }
+      });
+
+
       // Connect the socket
       socket.connect();
       socketInitialized.current = true;
