@@ -8,8 +8,6 @@ import axios from 'axios';
 
 import Footer from './components/Footer'
 import Header from './components/Home/Header'
-import WribateCard from './components/Home/WribateCard'
-import SectionHeader from './components/Home/SectionHeader'
 import HeroWribate from './components/Home/HeroWribate'
 import SponsoredWribates from './components/Home/SponsoredWribates'
 import CompletedWribates from './components/Home/CompleteWribates'
@@ -50,8 +48,9 @@ export default function WribateDashboard() {
     fetchCategories()
   }, [])
 
-  const handleCardClick = (id) => {
-    router.push(`/wribate/${id}`);
+  const handleCardClick = (id,code) => {
+    console.log("page.js :",code,id)
+    router.push(`/wribate/${code ? code : id}`);
   };
 
   const handleViewMore = (category, type) => {

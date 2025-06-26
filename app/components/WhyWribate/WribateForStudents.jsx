@@ -25,13 +25,13 @@ export default function WribateForStudents() {
             
             {/* Text content on the right */}
             <CardContent className="w-full md:w-3/5 p-6 md:p-10 border-none flex flex-col justify-center bg-white">
-              <h3 className="text-xl md:text-2xl font-semibold mb-6 text-blue-700">
+              <h3 className="text-xl md:text-2xl font-semibold mb-6 text-blue-900">
                 Empowering the Next Generation of Thinkers
               </h3>
               
               <div className="space-y-4 text-slate-700">
                 <p className="leading-relaxed">
-                  In a rapidly changing world, the ability to think critically, communicate effectively, and argue persuasively is more important than ever. At <strong className="text-blue-600 font-bold">Wribate™</strong>, we provide students with the tools and opportunities to hone these essential skills through written debate.
+                  In a rapidly changing world, the ability to think critically, communicate effectively, and argue persuasively is more important than ever. At <strong className="text-blue-900 font-bold">Wribate™</strong>, we provide students with the tools and opportunities to hone these essential skills through written debate.
                 </p>
                 
                 <p className="leading-relaxed">
@@ -39,7 +39,7 @@ export default function WribateForStudents() {
                 </p>
                 
                 <p className="leading-relaxed">
-                  Whether you're a student looking to sharpen your communication, an educator wanting to inspire critical thinking, or a parent seeking to nurture your child's intellectual growth, <strong className="text-blue-600 font-bold">Wribate™</strong> is here to guide you every step of the way.
+                  Whether you're a student looking to sharpen your communication, an educator wanting to inspire critical thinking, or a parent seeking to nurture your child's intellectual growth, <strong className="text-blue-900 font-bold">Wribate™</strong> is here to guide you every step of the way.
                 </p>
               </div>
               

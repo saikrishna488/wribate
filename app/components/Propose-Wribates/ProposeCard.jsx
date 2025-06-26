@@ -134,7 +134,7 @@ function DebateCard({ debate, user, setHook, hook }) {
   console.log(debate.ready, debate.title)
 
   return (
-    <div className="bg-white border-1 cursor-pointer border-gray-300 hover:shadow-xl shadow-md flex flex-col h-full">
+    <div className="bg-white border-1 cursor-pointer rounded-lg border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group shadow-md flex flex-col h-full">
       <LaunchDialog
         isOpen={open}
         onClose={setOpen}

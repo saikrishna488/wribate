@@ -330,7 +330,7 @@ const SubscriptionPage = () => {
     }
 
     return (
-        <div className="bg-gray-50 min-h-screen py-16 px-4">
+        <div className="bg-[#F3F2EF] min-h-screen py-16 px-4">
             <Toaster position="top-right" />
             
             <div className="text-center mb-16 max-w-4xl mx-auto">
@@ -343,7 +343,7 @@ const SubscriptionPage = () => {
             </div>
 
             {/* ✅ COMPACT LAYOUT WITH BIGGER FONTS */}
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-7xl mx-auto ">
                 <div className={`grid gap-8 ${
                     plans.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 
                     plans.length === 2 ? 'grid-cols-1 lg:grid-cols-2 max-w-4xl mx-auto' :
@@ -355,7 +355,7 @@ const SubscriptionPage = () => {
                         const decodedDescription = decodeHtmlEntities(plan.description);
 
                         return (
-                            <div key={plan._id} className="relative">
+                            <div key={plan._id} className="relative shadow-md border hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
                                 {/* ✅ CARD WITH OPTIMIZED SPACING */}
                                 <div 
                                     className={`bg-white rounded-xl shadow-lg overflow-hidden h-full flex flex-col relative p-5
@@ -453,7 +453,7 @@ const SubscriptionPage = () => {
             </div>
 
             {/* Enhanced Why Choose Premium Section */}
-            <div className="mt-20 bg-white border border-gray-200 shadow-lg p-8 rounded-2xl max-w-4xl mx-auto">
+            <div className="mt-20 bg-white border shadow-md p-8 rounded-2xl max-w-4xl mx-auto hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
                 <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Why Choose Premium?</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                     <div className="flex items-start space-x-3">

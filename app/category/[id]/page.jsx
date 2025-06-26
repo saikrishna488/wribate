@@ -84,7 +84,8 @@ const Page = () => {
 
   const handleCardClick = (wribate) => {
     // Navigate to wribate details page
-    router.push(`/wribate/${wribate._id}`);
+    const {_id,code} = wribate
+    router.push(`/wribate/${code? code : _id}`);
   };
 
   const handleBackClick = () => {

@@ -22,7 +22,7 @@ const FreeWribates = ({ wribates, activeCategory, handleViewMore, handleCardClic
                             <WribateCard
                                 key={wribate._id}
                                 wribate={wribate}
-                                onClick={() => handleCardClick(wribate._id)}
+                                onClick={() => handleCardClick(wribate._id, wribate?.code)}
                             />
                         ))}
                     </div>

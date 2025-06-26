@@ -26,19 +26,19 @@ export default function WhyWribateSection() {
           <div className="w-full md:w-1/2">
             <div className="space-y-8">
               <div className="bg-white p-4 py-8 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-                <h3 className="font-semibold text-xl text-blue-700 ">Develop Critical Thinking:</h3>
+                <h3 className="font-semibold text-xl text-blue-900 ">Develop Critical Thinking:</h3>
                 <p className="text-gray-700">
                   <strong>Wribate™</strong> challenges students to analyze complex issues from multiple perspectives, fostering deeper understanding and sharpening their critical thinking skills.
                 </p>
-                <h3 className="font-semibold text-xl text-blue-700 mt-2">Enhance Writing and Communication:</h3>
+                <h3 className="font-semibold text-xl text-blue-900 mt-2">Enhance Writing and Communication:</h3>
                 <p className="text-gray-700">
                   Through structured written debates, students learn to craft persuasive arguments, communicate ideas clearly, and express themselves with confidence.
                 </p>
-                <h3 className="font-semibold text-xl text-blue-700 mt-2">Foster Empathy and Respect:</h3>
+                <h3 className="font-semibold text-xl text-blue-900 mt-2">Foster Empathy and Respect:</h3>
                 <p className="text-gray-700">
                   By engaging with opposing viewpoints, students develop empathy, learning to respect diverse opinions and communicate with grace.
                 </p>
-                <h3 className="font-semibold text-xl text-blue-700 mt-2">Prepare for the Future:</h3>
+                <h3 className="font-semibold text-xl text-blue-900 mt-2">Prepare for the Future:</h3>
                 <p className="text-gray-700">
                   The skills gained through <strong>Wribate™</strong>—critical thinking, research, and persuasive writing—prepare students for academic success and future leadership roles.
                 </p>

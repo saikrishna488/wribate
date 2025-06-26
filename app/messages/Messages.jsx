@@ -146,8 +146,6 @@ const ChatUI = () => {
     };
   }, [contactId, users]);
 
-  // ------------ DATA FETCHING ------------
-  // Fetch all users - Optimized with better error handling and state management
   useEffect(() => {
     let isMounted = true;
     

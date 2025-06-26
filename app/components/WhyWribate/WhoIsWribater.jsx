@@ -41,7 +41,7 @@ export default function WhoIsWribater() {
               </div>
               
               <div className="mt-8 w-full text-center">
-                <Button onClick={()=>router.push('/add-wribate')} className="bg-blue-800 rounded-full hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 px-6 py-2 text-white font-medium">
+                <Button onClick={()=>router.push('/add-wribate')} className="bg-blue-900 rounded-full hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 px-6 py-2 text-white font-medium">
                   Become a Wribater
                 </Button>
               </div>

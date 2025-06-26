@@ -1,177 +1,244 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+  Title,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-  ReferenceLine,
-  ReferenceArea,
-} from "recharts";
+  Filler
+} from "chart.js";
 
-export default function VotesChart({ data, title }) {
-  // Define round colors - consistent across both components
-  const roundColors = {
-    round1: "#3B82F6", // Blue 500 for rounds 1-4
-    round2: "#10B981", // Green 500 for rounds 5-8
-    round3: "#8B5CF6", // Purple 500 for rounds 9-12
-    after: "#F97316"   // Orange 500 for round 13
-  };
-  
-  // Custom tick component for colored x-axis numbers
-  const CustomAxisTick = (props) => {
-    const { x, y, payload } = props;
-    
-    // Determine color based on tick value
-    let tickColor;
-    if (payload.value <= 4) {
-      tickColor = roundColors.round1;
-    } else if (payload.value <= 8) {
-      tickColor = roundColors.round2;
-    } else if (payload.value <= 12) {
-      tickColor = roundColors.round3;
-    } else {
-      tickColor = roundColors.after;
-    }
-    
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text
-          x={0}
-          y={0}
-          dy={16}
-          textAnchor="middle"
-          fill={tickColor}
-          fontWeight="500"
-        >
-          {payload.value}
-        </text>
-      </g>
-    );
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
+export default function VotesChart({ data, title, wribate }) {
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
+
+  // Define section colors
+  const sectionColors = {
+    opening: 'rgba(5, 150, 105, 0.1)',
+    rebuttals: 'rgba(220, 38, 38, 0.1)', 
+    closing: 'rgba(124, 58, 237, 0.1)',
+    after: 'rgba(234, 88, 12, 0.1)'
   };
 
-  // Custom dot component to color dots based on round
-  const CustomDot = (props) => {
-    const { cx, cy, payload } = props;
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+
+    const ctx = chartRef.current.getContext('2d');
     
-    // Determine color based on x value (roundNumber)
-    let dotColor;
-    const roundNumber = payload.roundNumber;
-    
-    if (roundNumber <= 4) {
-      dotColor = roundColors.round1;
-    } else if (roundNumber <= 8) {
-      dotColor = roundColors.round2;
-    } else if (roundNumber <= 12) {
-      dotColor = roundColors.round3;
-    } else {
-      dotColor = roundColors.after;
+    // Destroy existing chart
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
     }
-    
-    return (
-      <circle 
-        cx={cx} 
-        cy={cy} 
-        r={4} 
-        stroke={dotColor} 
-        strokeWidth={2} 
-        fill="white" 
-      />
-    );
-  };
+
+    // Prepare data
+    const labels = data.map(d => `Round ${d.roundNumber}`);
+    const forVotes = data.map(d => d.forVotes);
+    const againstVotes = data.map(d => d.againstVotes);
+
+    console.log(againstVotes)
+
+    // Create background sections plugin
+    const backgroundSections = {
+      id: 'backgroundSections',
+      beforeDraw: (chart) => {
+        const { ctx, chartArea: { left, right, top, bottom }, scales: { x } } = chart;
+        
+        ctx.save();
+        
+        // Define sections (assuming 13 rounds total)
+        const sections = [
+          { start: 0, end: 4, color: sectionColors.opening, label: 'Opening' },
+          { start: 4, end: 8, color: sectionColors.rebuttals, label: 'Rebuttals' }, 
+          { start: 8, end: 12, color: sectionColors.closing, label: 'Closing' },
+          { start: 12, end: 13, color: sectionColors.after, label: 'After' }
+        ];
+
+        sections.forEach(section => {
+          const startX = x.getPixelForValue(section.start);
+          const endX = x.getPixelForValue(section.end);
+          
+          ctx.fillStyle = section.color;
+          ctx.fillRect(startX, top, endX - startX, bottom - top);
+        });
+        
+        ctx.restore();
+      }
+    };
+
+    chartInstance.current = new ChartJS(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'For',
+            data: forVotes,
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 3,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#10B981',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            tension: 0.2,
+            fill: false
+          },
+          {
+            label: 'Against', 
+            data: againstVotes,
+            borderColor: '#EF4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            borderWidth: 3,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#EF4444',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            tension: 0.2,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          title: {
+            display: false
+          },
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              color: '#374151',
+              font: {
+                size: 14,
+                weight: 'bold'
+              },
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(31, 41, 55, 0.95)',
+            titleColor: '#F9FAFB',
+            bodyColor: '#F9FAFB',
+            borderColor: '#6B7280',
+            borderWidth: 1,
+            cornerRadius: 8,
+            displayColors: true,
+            callbacks: {
+              title: function(tooltipItems) {
+                const roundNum = tooltipItems[0].dataIndex + 1;
+                let section = '';
+                if (roundNum <= 4) section = ' (Opening)';
+                else if (roundNum <= 8) section = ' (Rebuttals)';
+                else if (roundNum <= 12) section = ' (Closing)';
+                else section = ' (After)';
+                
+                return `Round ${roundNum}${section}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            display: true,
+            title: {
+              display: true,
+              text: 'Wribate Rounds',
+              color: '#6B7280',
+              font: {
+                size: 12,
+                weight: 'bold'
+              }
+            },
+            ticks: {
+              color: '#6B7280',
+              font: {
+                size: 11
+              },
+              callback: function(value, index) {
+                const roundNum = index + 1;
+                if (roundNum === 2 || roundNum === 6 || roundNum === 10 || roundNum === 13) {
+                  if (roundNum === 2) return 'Opening';
+                  if (roundNum === 6) return 'Rebuttals';  
+                  if (roundNum === 10) return 'Closing';
+                  if (roundNum === 13) return 'After';
+                }
+                return '';
+              }
+            },
+            grid: {
+              color: 'rgba(107, 114, 128, 0.3)',
+              drawBorder: true,
+              borderColor: '#6B7280'
+            }
+          },
+          y: {
+            display: true,
+            title: {
+              display: true,
+              text: 'Votes',
+              color: '#6B7280',
+              font: {
+                size: 12,
+                weight: 'bold'
+              }
+            },
+            ticks: {
+              color: '#6B7280',
+              font: {
+                size: 11
+              }
+            },
+            grid: {
+              color: 'rgba(107, 114, 128, 0.3)',
+              drawBorder: true,
+              borderColor: '#6B7280'
+            }
+          }
+        }
+      },
+      plugins: [backgroundSections]
+    });
+
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+    };
+  }, [data]);
 
   return (
-    <div className="w-full bg-white shadow-lg mb-4 rounded-lg flex flex-col justify-center items-center p-3 md:p-4">
-      <h2 className="text-center text-base md:text-lg font-bold mb-2 md:mb-4">
+    <div className="w-full bg-white shadow-2xl mb-4 rounded-lg flex flex-col justify-center items-center p-4 border border-gray-300">
+      <h2 className="text-center text-lg font-bold mb-4 text-gray-900">
         {title}
       </h2>
-      <div className="w-full h-64 md:h-96">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={data}
-            margin={{ top: 5, right: 10, left: 0, bottom: 35 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis
-              dataKey="roundNumber"
-              tick={<CustomAxisTick />}
-              label={{
-                value: "Round",
-                position: "insideBottomRight",
-                offset: -5,
-                fontSize: 12,
-              }}
-            />
-            <YAxis
-              tick={{ fontSize: 12 }}
-              width={30}
-              label={{
-                value: "Votes",
-                angle: -90,
-                position: "insideLeft",
-                fontSize: 12,
-              }}
-            />
-            <Tooltip
-              contentStyle={{ fontSize: 12 }}
-              labelStyle={{ fontWeight: "bold" }}
-            />
-            <Legend
-              verticalAlign="top"
-              height={36}
-              iconSize={10}
-              wrapperStyle={{ fontSize: 12 }}
-            />
-
-            {/* Round background areas */}
-            <ReferenceArea x1={1} x2={4.5} fill={roundColors.round1} fillOpacity={0.05} />
-            <ReferenceArea x1={4.5} x2={8.5} fill={roundColors.round2} fillOpacity={0.05} />
-            <ReferenceArea x1={8.5} x2={12.5} fill={roundColors.round3} fillOpacity={0.05} />
-            <ReferenceArea x1={12.5} x2={13.5} fill={roundColors.after} fillOpacity={0.05} />
-
-            {/* Divider lines */}
-            <ReferenceLine x={4.5} stroke={roundColors.round1} strokeWidth={2} />
-            <ReferenceLine x={8.5} stroke={roundColors.round2} strokeWidth={2} />
-            <ReferenceLine x={12.5} stroke={roundColors.round3} strokeWidth={2} />
-
-            {/* Group labels */}
-            <text x="12%" y="98%" textAnchor="middle" fill={roundColors.round1} fontSize={12} fontWeight="bold">
-              R1 (1-4)
-            </text>
-            <text x="42%" y="98%" textAnchor="middle" fill={roundColors.round2} fontSize={12} fontWeight="bold">
-              R2 (5-8)
-            </text>
-            <text x="72%" y="98%" textAnchor="middle" fill={roundColors.round3} fontSize={12} fontWeight="bold">
-              R3 (9-12)
-            </text>
-            <text x="92%" y="98%" textAnchor="middle" fill={roundColors.after} fontSize={12} fontWeight="bold">
-              After (12)
-            </text>
-
-            {/* Chart lines with custom dots */}
-            <Line
-              type="linear"
-              dataKey="forVotes"
-              name="For"
-              stroke="#1D4ED8"
-              strokeWidth={3}
-              dot={<CustomDot />}
-              activeDot={{ r: 6, fill: "#1D4ED8" }}
-            />
-            <Line
-              type="linear"
-              dataKey="againstVotes"
-              name="Against"
-              stroke="#DC2626"
-              strokeWidth={3}
-              dot={<CustomDot />}
-              activeDot={{ r: 6, fill: "#DC2626" }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+      <div className="w-full h-96">
+        <canvas ref={chartRef}></canvas>
       </div>
     </div>
   );

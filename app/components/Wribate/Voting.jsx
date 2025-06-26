@@ -70,7 +70,7 @@ const Voting = ({ wribate, selectedVote, votes, user, refetch, setSelectedVote, 
         const voteData = { vote: string };
         
         try {
-            const response = await addVote({ id, data: voteData }).unwrap();
+            const response = await addVote({ id:wribate?._id, data: voteData }).unwrap();
             await refetch();
             toast.success(`Vote cast: ${string}`);
         } catch (err) {
@@ -131,6 +131,7 @@ const Voting = ({ wribate, selectedVote, votes, user, refetch, setSelectedVote, 
                     <VotesChart
                         data={votes?.roundVoteCounts}
                         title={wribate?.title}
+                        wribate={wribate}
                     />
                 )}
                 

@@ -52,7 +52,7 @@ export default function WribateVsDebate() {
     return (
         <div id="wribate-vs-debate" className="w-full  md:min-h-screen py-16 bg-gray-50 overflow-hidden transition-all duration-300">
             <div className="container mx-auto px-4">
-                <h2 className="text-5xl font-bold mb-8 text-center text-blue-800">
+                <h2 className="text-5xl font-bold mb-8 text-center text-blue-900">
                     Wribate  <span className='text-black'>vs. Debate</span>
                 </h2>
                 
@@ -86,7 +86,7 @@ export default function WribateVsDebate() {
                                                 dangerouslySetInnerHTML={{ 
                                                     __html: point.replace(
                                                         /\*\*(.*?)\*\*/g, 
-                                                        '<strong class="text-blue-700">$1</strong>'
+                                                        '<strong class="text-blue-900">$1</strong>'
                                                     ) 
                                                 }}
                                             />

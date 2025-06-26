@@ -11,11 +11,6 @@ import Voting from '../../components/Wribate/Voting'
 import Comments from '../../components/Wribate/Comments'
 import Sidebar from '../../components/Wribate/Sidebar'
 
-// API
-import {
-  useGetVotesQuery,
-} from "../../../app/services/authApi";
-
 // State
 import { chatAtom, userAtom } from "@/app/states/GlobalStates";
 
@@ -36,10 +31,21 @@ export default function WribateContent() {
   const router = useRouter();
   const { id } = useParams();
   const [wribate, setWribate] = useState({});
-  // const { data, isLoading, refetch } = useGetMyWribateByIdQuery(id);
-  const { data: votes, isLoading: votesLoading, refetch: refetchVotes } = useGetVotesQuery(id);
+  // const { data: votes, isLoading: votesLoading, refetch: refetchVotes } = useGetVotesQuery(id);
   const [data, setData] = useState([]);
+  const [votes,setVotes] = useState(null);
   const [isLoading, setIsLoading] = useState(true)
+
+
+  //get votes
+  const getVotes = async()=>{
+    const data = await httpRequest(axios.get(process.env.NEXT_PUBLIC_BACKEND_URL+'/user/getVotes/'+id))
+    setVotes(data)
+  }
+
+  useEffect(()=>{
+    getVotes();
+  },[])
 
 
   //fetch wribate

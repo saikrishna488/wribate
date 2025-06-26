@@ -21,12 +21,12 @@ const OngoingWribate = ({ wribates, activeCategory, handleViewMore, handleCardCl
               onViewMore={() => handleViewMore(activeCategory, "Ongoing")}
             />
             {ongoingWribates.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-6">
                 {ongoingWribates.map((wribate) => (
                   <div
                     key={wribate._id}
-                    onClick={() => handleCardClick(wribate._id)}
-                    className="bg-white cursor-pointer border w-full rounded-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
+                    onClick={() => handleCardClick(wribate._id, wribate?.code)}
+                    className="bg-white cursor-pointer border shadow-md w-full rounded-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
                   >
                     <div className="flex flex-col">
                       <div className="w-full h-40 relative">

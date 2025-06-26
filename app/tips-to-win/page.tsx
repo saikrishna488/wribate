@@ -11,7 +11,7 @@ import Tip8 from "./Tip8";
 import FinalThoughts from "./FinalThoughts";
 const Tips = () => {
   return (
-    <div>
+    <div className="sm:max-w-[80%] p-2 mx-auto">
       <TipsHeader />
       <Tip1 />
       <Tip2 />

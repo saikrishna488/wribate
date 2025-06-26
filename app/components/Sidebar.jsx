@@ -172,7 +172,7 @@ export default function Sidebar() {
                                 <Link key={item.label} href={item.href} onClick={() => setExpand(false)}>
                                     <div
                                         className={`flex items-center px-3 py-3 rounded-lg cursor-pointer transition-all duration-200 ${isActive
-                                            ? 'bg-indigo-50 text-indigo-600'
+                                            ? 'bg-indigo-100 text-indigo-600'
                                             : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600'
                                             } ${expand ? 'justify-start' : 'justify-center'
                                             }`}

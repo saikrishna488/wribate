@@ -19,7 +19,7 @@ const HeroWribate = ({ wribates,handleCardClick }) => {
                     </h2>
                   </div> */}
                     <div
-                        onClick={() => handleCardClick(heroWribate._id)}
+                        onClick={() => handleCardClick(heroWribate._id,heroWribate?.code)}
                         className="bg-white cursor-pointer hover:shadow-lg border ghtransition-shadow duration-300 w-full"
                     >
                         <div className="flex flex-col">

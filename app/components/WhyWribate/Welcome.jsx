@@ -59,7 +59,7 @@ export default function WelcomeSection() {
         {/* Left column - Logo only */}
         <div className="lg:w-1/3 bg-blue-50 flex flex-col px-6 py-4 items-center">
           <div className="relative overflow-hidden w-60 h-60">
-            <img src="/logo/logo.png" alt="Wribate Logo" className="w-full h-full object-contain rounded shadow" />
+            <img src="/logo.svg" alt="Wribate Logo" className="w-full h-full object-contain rounded shadow" />
             <div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50 to-transparent opacity-60"
               style={{
@@ -69,14 +69,14 @@ export default function WelcomeSection() {
               }}
             ></div>
           </div>
-          <strong className="text-indigo-700 text-2xl mt-10">Wribate = Write + Debate</strong>
+          <strong className="text-blue-900 text-2xl mt-10">Wribate = Write + Debate</strong>
         </div>
 
         {/* Right column - Content and static text */}
         <div className="lg:w-2/3 px-6 py-4 flex flex-col items-center bg-blue-50">
           {/* Title */}
           <h2 className="text-3xl md:text-5xl text-center font-bold text-slate-900 border-b border-blue-200 pb-3">
-            Step into the World of <span className="text-indigo-600">Wribate™</span>
+            Step into the World of <span className="text-blue-900">Wribate™</span>
           </h2>
           
           {/* Animated text sequence */}
