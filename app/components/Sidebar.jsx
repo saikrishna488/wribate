@@ -149,6 +149,14 @@ export default function Sidebar() {
                                 <FileText className="w-4 h-4 mr-2" />
                                 Propose Wribate
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={() => router.push('/article')}
+                                className="cursor-pointer py-2"
+                            >
+                                <FileText className="w-4 h-4 mr-2" />
+                                Write Article
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

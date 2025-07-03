@@ -1,53 +1,38 @@
+"use client"
 import React from 'react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { BsThreeDots } from "react-icons/bs";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import { Button } from '../../../components/ui/button';
 import { useRouter } from 'next/navigation';
+import httpRequest from '../../utils/httpRequest';
+import baseUrl from '../../utils/baseUrl';
 
-const Header = ({ wribatesRef, setWribates, activeCategory, setIsLoading, setActiveCategory, topCategories, categories, setCategories, setTopCategories }) => {
+const Header = ({setActiveCategory, activeCategory}) => {
 
-    const categoriesRef = useRef(null);
+    const [categories, setCategories] = useState([]);
     const router = useRouter();
 
 
+    // fetch categories
+    const fetchCategories = async()=>{
+        const data = await httpRequest(axios.get(baseUrl+'/user/getallcategories'))
+        setCategories(data.categories);
+    }
+
+    useEffect(()=>{
+        fetchCategories()
+    },[])
 
 
 
-    useEffect(() => {
-        const fetchWribates = async () => {
-            try {
-                setIsLoading(true);
-                const res = await axios.get(
-                    process.env.NEXT_PUBLIC_BACKEND_URL + '/user/getByCategory/' + activeCategory
-                );
-
-                const data = res.data;
-
-                if (data.res) {
-                    setWribates(data.wribates);
-                    wribatesRef.current && (wribatesRef.current.scrollTop = 0)
-                    setIsLoading(false);
-                } else {
-                    toast.error("Error occurred");
-                }
-            } catch (err) {
-                console.log(err);
-                toast.error("Client error");
-                setIsLoading(false);
-            }
-        };
-        fetchWribates();
-    }, [activeCategory]);
-
+    const topCategories = categories.slice(0,7);
 
     return (
-        <header className="py-4 bg-white border-b border-gray-200 sticky w-full px-2 top-0 z-20">
-            <div className=" relative flex items-center justify-center w-full">
+        <header className=" py-4 bg-white border-b sticky w-full px-2 top-0 z-20">
+            <div className="relative flex items-center justify-center w-full">
                 <div
-                    ref={categoriesRef}
                     className="overflow-x-auto scrollbar-hide flex px-2 relative"
                 >
 
@@ -55,7 +40,7 @@ const Header = ({ wribatesRef, setWribates, activeCategory, setIsLoading, setAct
                         className={`px-3 py-2 mr-4 text-sm font-medium whitespace-nowrap transition-colors  text-gray-600 hover:text-gray-900 `}
                         onClick={() => router.push('/my-wribates')}
                     >
-                        {"My Wribates"}
+                        {"My Articles"}
                     </button>
                     {/* All + Top Categories */}
                     <button

@@ -42,9 +42,11 @@ const formatRelativeTime = (dateString) => {
     return `${diffInMonths} month${diffInMonths === 1 ? '' : 's'} ago`;
   }
 
-  const diffInYears = Math.floor(diffInMonths / 12);
-  return `${diffInYears} year${diffInYears === 1 ? '' : 's'} ago`;
+  // Show full date instead of "x years ago"
+  const options = { day: '2-digit', month: 'short', year: 'numeric' }; // Example: 04 Jul 2025
+  return date.toLocaleDateString('en-US', options);
 };
+
 
 export default function BlogContent() {
   const { id } = useParams();

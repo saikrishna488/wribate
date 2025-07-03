@@ -33,7 +33,7 @@ const ProposePage = () => {
           <>
             <div className="flex justify-center mb-6 sm:mb-8 px-2">
               <div className="bg-white rounded-lg p-1 shadow-md border border-gray-200 w-full sm:w-auto">
-                <div className="grid grid-cols-3">
+                <div className="grid grid-cols-2">
                   <button
                     onClick={() => setSelected("single")}
                     className={`px-4 sm:px-6 py-2.5 sm:py-2 rounded-md font-medium transition-all duration-200 text-sm sm:text-base mb-1 sm:mb-0 ${
@@ -55,17 +55,6 @@ const ProposePage = () => {
                   >
                     {/* Propose Multiple Topics */}
                     Batch Topics
-                  </button>
-                  <button
-                    onClick={() => setSelected("articles")}
-                    className={`px-4 sm:px-6 py-2.5 sm:py-2 rounded-md font-medium transition-all duration-200 text-sm sm:text-base ${
-                      selected === "articles"
-                        ? "bg-blue-900 text-white shadow-sm"
-                        : "text-gray-700 hover:text-blue-900 hover:bg-gray-50"
-                    }`}
-                  >
-                    {/* Propose Multiple Topics */}
-                    Batch Articles
                   </button>
                 </div>
               </div>
