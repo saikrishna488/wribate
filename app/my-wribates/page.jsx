@@ -5,8 +5,8 @@ import { useAtom } from "jotai";
 import { userAtom } from "../states/GlobalStates";
 import { useRouter } from "next/navigation";
 import MyTopics from "./components/MyTopics";
-import ArticlesAssignedByMe from "./components/ArticlesAssigned/ArticlesAssignedByMe";
-import MyArticles from "./components/ArticlesAssigned/MyArticles";
+import ArticlesAssignedByMe from "./components/ArticlesAssignedByMe";
+import MyArticles from "./components/MyArticles";
 
 const page = () => {
   const [selectedPage, setSelectedPage] = useState('My Wribates');
@@ -79,7 +79,7 @@ const page = () => {
       </nav>
 
       {/* Main Content */}
-      <div className="mx-5">
+      <div className="">
         {selectedPage === "My Wribates" && <MyWribates />}
         {selectedPage === "My Proposed Topics" && <MyTopics />}
         {selectedPage === "My Articles" && <MyArticles />}

@@ -6,6 +6,7 @@ import { userAtom } from "../../states/GlobalStates";
 import getAuthHeader from "../../utils/authHeader";
 import httpRequest from "../../utils/httpRequest";
 import WribateCard from "./WribateCard"; // Adjust path as needed
+import { useRouter } from "next/navigation";
 
 const Home = () => {
   const [user] = useAtom(userAtom);
@@ -14,6 +15,7 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   const fetchWribates = async () => {
     try {
@@ -66,9 +68,9 @@ const Home = () => {
   }, [searchQuery, wribates]);
 
   const handleWribateClick = (wribate) => {
-    // Handle wribate card click - navigate to detail page or perform action
-    console.log('Clicked wribate:', wribate);
-    // Example: router.push(`/wribate/${wribate._id}`);
+    const {code, _id} = wribate
+    router.push('/wribate/' + (code ? code : _id));
+
   };
 
   const handleSearchChange = (e) => {

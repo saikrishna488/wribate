@@ -51,18 +51,18 @@ export default function ProposeWribateContent() {
   // Function to fetch wribates
   const fetchWribates = async (reset = false) => {
     if (isLoading || (!hasMore && !reset)) return;
-    
+
     try {
       setIsLoading(true);
       // If reset is true, we're changing categories, so we need to reset debates and lastId
       const id = reset ? "" : lastId;
 
-      const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose/' + selectedCategory + '?lastId=' + id+"&user_id="+user?._id);
+      const res = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/propose/' + selectedCategory + '?lastId=' + id + "&user_id=" + user?._id);
       const data = res.data;
 
       if (data.res) {
         const newDebates = data?.propose || [];
-        
+
         // If we're resetting, replace the debates array, otherwise append to it
         if (reset) {
           setDebates(newDebates);
@@ -100,7 +100,7 @@ export default function ProposeWribateContent() {
     const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
     const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
     const clientHeight = document.documentElement.clientHeight || window.innerHeight;
-    
+
     // Trigger fetch when user is within 200px from bottom
     if (scrollTop + clientHeight >= scrollHeight - 200) {
       fetchWribates(false);
@@ -199,7 +199,7 @@ export default function ProposeWribateContent() {
   return (
     <div className="container mx-auto  min-h-screen bg-[#F3F2EF]">
       {/* Top Categories with Country Filter and Dropdown for more */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2 px-4 py-2 w-full border-b  bg-white mx-auto">
+      <header className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2 px-4 py-2 w-full border-b  bg-white mx-auto">
         {/* Categories Navigation */}
         <div className="w-full sm:flex-grow overflow-hidden">
           <nav className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
@@ -226,7 +226,7 @@ export default function ProposeWribateContent() {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="start" className="p-2">
-                  <div className="grid sm:grid-cols-4 grid-cols-3 gap-2">
+                  <div className="grid sm:grid-cols-4 grid-cols-2 gap-2">
                     {dropdownCategories.map((cat, idx) => (
                       <DropdownMenuItem
                         key={idx}
@@ -269,7 +269,7 @@ export default function ProposeWribateContent() {
             Propose a Topic
           </Button>
         </div>
-      </div>
+      </header>
       {filteredDebates.length > 0 ? (
         <>
           <div className="grid gap-6 grid-cols-1 px-4 sm:grid-cols-2 lg:grid-cols-3">

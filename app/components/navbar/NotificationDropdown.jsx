@@ -186,7 +186,7 @@ export default function NotificationsDropdown() {
     }
 
     return (
-        <div className="relative" ref={notificationRef}>
+        <div className="" ref={notificationRef}>
             <Button
                 variant="ghost"
                 size="icon"

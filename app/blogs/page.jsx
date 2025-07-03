@@ -14,34 +14,36 @@ const formatRelativeTime = (dateString) => {
   const now = new Date();
   const date = new Date(dateString);
   const diffInSeconds = Math.floor((now - date) / 1000);
-  
+
   if (diffInSeconds < 60) {
     return 'just now';
   }
-  
+
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
     return `${diffInMinutes} min${diffInMinutes === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
     return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 30) {
     return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
   }
-  
+
   const diffInMonths = Math.floor(diffInDays / 30);
   if (diffInMonths < 12) {
     return `${diffInMonths} month${diffInMonths === 1 ? '' : 's'} ago`;
   }
-  
-  const diffInYears = Math.floor(diffInMonths / 12);
-  return `${diffInYears} year${diffInYears === 1 ? '' : 's'} ago`;
+
+  // Show full date instead of "x years ago"
+  const options = { day: '2-digit', month: 'short', year: 'numeric' }; // Example: 04 Jul 2025
+  return date.toLocaleDateString('en-US', options);
 };
+
 
 export default function BlogPage() {
   const router = useRouter();
@@ -126,21 +128,21 @@ export default function BlogPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                
+
                 <CardContent className="p-6 flex-grow flex flex-col">
                   <div className="flex-1">
                     <h2 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-900 transition-colors duration-200">
                       {blog.title}
                     </h2>
-                    
-                    <div 
+
+                    <div
                       className="text-gray-600 text-sm leading-relaxed line-clamp-4 mb-4"
-                      dangerouslySetInnerHTML={{ 
-                        __html: he.decode(blog.content.slice(0, 200) + '...') 
+                      dangerouslySetInnerHTML={{
+                        __html: he.decode(blog.content.slice(0, 200) + '...')
                       }}
                     />
                   </div>
-                  
+
                   <div className="mt-auto pt-4 border-t border-gray-100">
                     <div className="flex items-center justify-between text-sm text-gray-500">
                       <div className="flex items-center gap-4">
@@ -154,7 +156,7 @@ export default function BlogPage() {
                         </span>
                       </div>
                     </div>
-                    
+
                     <div className="mt-3 flex items-center">
                       <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center text-white font-semibold text-xs mr-3">
                         {blog.author_name?.charAt(0).toUpperCase()}
@@ -176,7 +178,7 @@ export default function BlogPage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">No blogs published yet</h3>
               <p className="text-gray-500 max-w-md leading-relaxed">
-                Be the first to share your thoughts and insights with our community. 
+                Be the first to share your thoughts and insights with our community.
                 Your stories and expertise are what make this platform special.
               </p>
             </div>
