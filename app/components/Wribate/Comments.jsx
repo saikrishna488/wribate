@@ -103,7 +103,7 @@ const Comments = ({ wribate, scrollContainerRef, user, id, refetch }) => {
 
         const data = { text: message, type: voteSelection };
         try {
-            const response = await addComment({ id, data });
+            const response = await addComment({ id:wribate._id, data });
             if (response?.data?.status === "success") {
                 setMessage("");
                 setVoteSelection(null); // Reset vote selection
