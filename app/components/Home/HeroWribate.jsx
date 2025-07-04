@@ -1,14 +1,14 @@
 import React from 'react'
 
-const HeroWribate = ({ wribates,handleCardClick }) => {
-
+const HeroWribate = ({ wribates, handleCardClick }) => {
     // Extract the most recent wribate for hero
-     // Sort wribates by created date for most recent
-  const sortedWribates = [...wribates].sort((a, b) =>
-    new Date(b.createdAt) - new Date(a.createdAt)
-  );
+    // Sort wribates by created date for most recent
+    const sortedWribates = [...wribates].sort((a, b) =>
+        new Date(b.createdAt) - new Date(a.createdAt)
+    );
 
     const heroWribate = sortedWribates.length > 0 ? sortedWribates[0] : null;
+
     return (
         <>
             {heroWribate && (
@@ -19,8 +19,8 @@ const HeroWribate = ({ wribates,handleCardClick }) => {
                     </h2>
                   </div> */}
                     <div
-                        onClick={() => handleCardClick(heroWribate._id,heroWribate?.code)}
-                        className="bg-white cursor-pointer hover:shadow-lg border ghtransition-shadow duration-300 w-full"
+                        onClick={() => handleCardClick(heroWribate._id, heroWribate?.code)}
+                        className="bg-white cursor-pointer hover:shadow-lg border transition-shadow duration-300 w-full"
                     >
                         <div className="flex flex-col">
                             <div className="w-full h-40 md:h-80 relative">
@@ -34,6 +34,19 @@ const HeroWribate = ({ wribates,handleCardClick }) => {
                                     <h3 className="text-xl sm:text-2xl font-bold text-white p-4">{heroWribate.title}</h3>
                                 </div>
                             </div>
+                            
+                            {/* Footer with leadFor and leadAgainst */}
+                            {(heroWribate.leadFor || heroWribate.leadAgainst) && (
+                                <div className="flex flex-row justify-between gap-2 items-center text-xs text-gray-500 px-3 h-6">
+                                    <span title={heroWribate.leadFor} className="truncate text-red-600">
+                                        {heroWribate.leadFor}
+                                    </span>
+                                    <span className="text-gray-400">vs</span>
+                                    <span title={heroWribate.leadAgainst} className="truncate text-blue-600">
+                                        {heroWribate.leadAgainst}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
