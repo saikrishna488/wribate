@@ -17,7 +17,7 @@ function DebateCard({ debate, user, setHook, hook }) {
   const [forUsers, setForUsers] = useState([]);
   const [againstUsers, setAgainstUsers] = useState([]);
   const [readyToWribate, setReadyToWribate] = useState(null);
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,7 +44,7 @@ function DebateCard({ debate, user, setHook, hook }) {
 
     fetchUsers('for');
     fetchUsers('against');
-  }, [hook])
+  }, [hook, debate._id])
 
   const handleUpvote = async (vote) => {
     try {
@@ -70,7 +70,7 @@ function DebateCard({ debate, user, setHook, hook }) {
           debate.votesAgainst != 0 && (debate.votesAgainst -= 1)
         } else {
           debate.votesAgainst += 1;
-          debate.votesFor != 0 && (debate.votesFor -=1)
+          debate.votesFor != 0 && (debate.votesFor -= 1)
         }
         setReadyToWribate(data.ready)
       } else {
@@ -84,7 +84,6 @@ function DebateCard({ debate, user, setHook, hook }) {
 
   const handleReadyToWribate = async () => {
     try {
-
       const res = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/readytowribate', {
         userId: user?._id,
         proposeId: debate._id
@@ -113,6 +112,18 @@ function DebateCard({ debate, user, setHook, hook }) {
     router.push(`/profile/${debate.username || ''}`);
   };
 
+  // Handler for opening the dialog
+  const handleOpenDialog = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(true);
+  };
+
+  // Handler for closing the dialog
+  const handleCloseDialog = () => {
+    setOpen(false);
+  };
+
   // Truncate context to 120 characters
   const truncatedContext = debate?.context ?
     debate.context.length > 120 ?
@@ -130,70 +141,67 @@ function DebateCard({ debate, user, setHook, hook }) {
     return `${shortNumber.toFixed(1).replace(/\.0$/, "")}${units[index]}`;
   }
 
-
   console.log(debate.ready, debate.title)
 
   return (
-    <div className="bg-white border-1 cursor-pointer rounded-lg border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group shadow-md flex flex-col h-full">
+
+    <>
       <LaunchDialog
         isOpen={open}
-        onClose={setOpen}
+        onClose={handleCloseDialog}
         debate={debate}
       />
-      {/* Category banner */}
-      {/* <div className="bg-blue-900 text-white text-xs px-3 py-1 uppercase tracking-wider font-medium">
-        {debate.category}
-      </div> */}
-
-      <div className="p-4 flex flex-col h-full">
-        {/* User info row with launch button - fixed height */}
-
-        {/* Title with Image - fixed height */}
-        <div className="min-h-[3rem] mb-2 flex items-start gap-3">
+      <div className="bg-white border-1 cursor-pointer rounded-lg border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group shadow-md flex flex-col h-full">
 
 
-          {/* Title */}
-          <div className="flex-1 min-w-0" onClick={() => setOpen(!open)}>
-            <h2 className="text-md font-bold text-gray-900 leading-tight hover:text-blue-900 line-clamp-2">{debate.title}</h2>
+        <div className="p-4 flex flex-col h-full">
+          {/* User info row with launch button - fixed height */}
+
+          {/* Title with Image - fixed height */}
+          <div className="min-h-[3rem] mb-2 flex items-start gap-3">
+            {/* Title */}
+            <div className="flex-1 min-w-0" onClick={handleOpenDialog}>
+              <h2 className="text-md font-bold text-gray-900 leading-tight hover:text-blue-900 line-clamp-2">{debate.title}</h2>
+            </div>
+
+            {/* Small image rectangle */}
+            <div onClick={handleOpenDialog} className="w-18 h-12 flex-shrink-0 rounded overflow-hidden border border-gray-200">
+              {debate.image ? (
+                <img
+                  src={debate.image}
+                  alt="Debate topic"
+                  className="w-full h-full object-fill"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100"></div>
+              )}
+            </div>
           </div>
 
-          {/* Small image rectangle */}
-          <div onClick={() => setOpen(!open)} className="w-18 h-12 flex-shrink-0 rounded overflow-hidden border border-gray-200">
-            {debate.image ? (
-              <img
-                src={debate.image}
-                alt="Debate topic"
-                className="w-full h-full object-fill"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-100"></div>
-            )}
+          {/* Context - fixed height */}
+          <div onClick={handleOpenDialog} className="text-sm text-gray-700 border-l-4 border-gray-200 pl-3 min-h-[3rem] mb-2">
+            <p className="line-clamp-3">{truncatedContext}</p>
           </div>
-        </div>
 
-        {/* Context - fixed height */}
-        <div onClick={() => setOpen(!open)} className="text-sm text-gray-700 border-l-4 border-gray-200 pl-3 min-h-[3rem] mb-2">
-          <p className="line-clamp-3">{truncatedContext}</p>
-        </div>
-
-        {/* Country and tags - fixed height */}
-        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 min-h-[2rem] mb-2">
-          <span className="text-blue-900 font-medium">{debate.country}</span>
-          <span>•</span>
-          <span className="text-blue-900 font-medium">{debate.category}</span>
-          <span>•</span>
-          <div className="flex flex-wrap gap-1">
-            {debate.tags &&
-              Array.isArray(debate.tags) &&
-              debate.tags.slice(0, 2).map((tag, index) => (
-                <Badge key={index} variant="outline" className="bg-gray-50 text-xs">
-                  {tag}
-                </Badge>
-              ))}
+          {/* Country and tags - fixed height */}
+          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 min-h-[2rem] mb-2">
+            <span className="text-blue-900 font-medium">{debate.country}</span>
+            <span>•</span>
+            <span className="text-blue-900 font-medium">{debate.category}</span>
+            <span>•</span>
+            <div className="flex flex-wrap gap-1">
+              {debate.tags &&
+                Array.isArray(debate.tags) &&
+                debate.tags.slice(0, 2).map((tag, index) => (
+                  <Badge key={index} variant="outline" className="bg-gray-50 text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center justify-between mb-2">
-          {/* <div className="flex items-center gap-2 cursor-pointer" onClick={handleProfileClick}>
+
+          <div className="flex items-center justify-between mb-2">
+            {/* <div className="flex items-center gap-2 cursor-pointer" onClick={handleProfileClick}>
               {debate.profilePhoto ? (
               <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
                 <Image
@@ -211,116 +219,128 @@ function DebateCard({ debate, user, setHook, hook }) {
             )}
               <span className="font-medium text-sm text-gray-800">{debate.username || "Anonymous"}</span>
             </div> */}
-          {(readyToWribate || debate.ready) && (
+            {(readyToWribate || debate.ready) && (
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleReadyToWribate();
+                }}
+                variant="default"
+                size="sm"
+                className="flex gap-1 items-center text-white bg-blue-900 hover:bg-blue-800"
+              >
+                <Rocket size={16} /> Ready To Wribate
+              </Button>
+            )}
+
             <Button
-              onClick={handleReadyToWribate}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleLaunch();
+              }}
               variant="default"
               size="sm"
               className="flex gap-1 items-center text-white bg-blue-900 hover:bg-blue-800"
             >
-              <Rocket size={16} /> Ready To Wribate
-            </Button>
-          )}
-
-
-          <Button
-            onClick={handleLaunch}
-            variant="default"
-            size="sm"
-            className="flex gap-1 items-center text-white bg-blue-900 hover:bg-blue-800"
-          >
-            <PlayCircle size={16} /> Quick Launch
-          </Button>
-        </div>
-
-        {/* For/Against buttons */}
-        <div className="">
-          <div className="flex gap-2 mb-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleUpvote("for")}
-              className="flex gap-1 items-center border-red-600 text-red-600 hover:bg-green-50 flex-1"
-            >
-              <ThumbsUp size={14} /> For {` ${formatLikes(debate?.votesFor < 0 ? 0 : debate.votesFor)}`}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleUpvote("against")}
-              className="flex gap-1 items-center border-blue-600 text-blue-600 hover:bg-red-50 flex-1"
-            >
-              <ThumbsDown size={14} /> Against {` ${formatLikes(debate?.votesAgainst < 0 ? 0 : debate.votesAgainst)}`}
+              <PlayCircle size={16} /> Quick Launch
             </Button>
           </div>
 
-
-
-          {/* User avatars for For/Against */}
-          <div className="flex justify-between pt-2">
-            {/* For users */}
-            <div className="flex items-center">
-              <div className="flex -space-x-2 mr-2">
-                {forUsers.slice(0, 4).map((user, i) => (
-                  <div
-                    key={i}
-                    className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden flex-shrink-0"
-                  >
-                    {user?.profilePhoto ? (
-                      <img
-                        src={user.profilePhoto}
-                        alt={`User ${i}`}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-red-600 text-white flex items-center justify-center text-xs uppercase">
-                        {user?.name?.[0] || "?"}
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {forUsers.length > 4 && (
-                  <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">
-                    +{forUsers.length - 4}
-                  </div>
-                )}
-              </div>
+          {/* For/Against buttons */}
+          <div className="">
+            <div className="flex gap-2 mb-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleUpvote("for");
+                }}
+                className="flex gap-1 items-center border-red-600 text-red-600 hover:bg-green-50 flex-1"
+              >
+                <ThumbsUp size={14} /> For {` ${formatLikes(debate?.votesFor < 0 ? 0 : debate.votesFor)}`}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleUpvote("against");
+                }}
+                className="flex gap-1 items-center border-blue-600 text-blue-600 hover:bg-red-50 flex-1"
+              >
+                <ThumbsDown size={14} /> Against {` ${formatLikes(debate?.votesAgainst < 0 ? 0 : debate.votesAgainst)}`}
+              </Button>
             </div>
 
-            {/* Against users */}
-            <div className="flex items-center">
-              <div className="flex -space-x-2 ml-2">
-                {againstUsers.slice(0, 4).map((user, i) => (
-                  <div
-                    key={i}
-                    className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden flex-shrink-0"
-                  >
-                    {user?.profilePhoto ? (
-                      <img
-                        src={user.profilePhoto}
-                        alt={`User ${i}`}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-blue-600 text-white flex items-center justify-center text-xs uppercase">
-                        {user?.name?.[0] || "?"}
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {againstUsers.length > 4 && (
-                  <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">
-                    +{againstUsers.length - 4}
-                  </div>
-                )}
+            {/* User avatars for For/Against */}
+            <div className="flex justify-between pt-2">
+              {/* For users */}
+              <div className="flex items-center">
+                <div className="flex -space-x-2 mr-2">
+                  {forUsers.slice(0, 4).map((user, i) => (
+                    <div
+                      key={`for-user-${user._id || i}`}
+                      className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden flex-shrink-0"
+                    >
+                      {user?.profilePhoto ? (
+                        <img
+                          src={user.profilePhoto}
+                          alt={`User ${i}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-red-600 text-white flex items-center justify-center text-xs uppercase">
+                          {user?.name?.[0] || "?"}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {forUsers.length > 4 && (
+                    <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">
+                      +{forUsers.length - 4}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Against users */}
+              <div className="flex items-center">
+                <div className="flex -space-x-2 ml-2">
+                  {againstUsers.slice(0, 4).map((user, i) => (
+                    <div
+                      key={`against-user-${user._id || i}`}
+                      className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden flex-shrink-0"
+                    >
+                      {user?.profilePhoto ? (
+                        <img
+                          src={user.profilePhoto}
+                          alt={`User ${i}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-blue-600 text-white flex items-center justify-center text-xs uppercase">
+                          {user?.name?.[0] || "?"}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {againstUsers.length > 4 && (
+                    <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">
+                      +{againstUsers.length - 4}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-
-
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

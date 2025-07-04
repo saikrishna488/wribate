@@ -34,17 +34,27 @@ const Page = () => {
         
         // Check if we received new wribates
         if (data.wribates.length > 0) {
-          // Properly merge existing and new wribates
-          setWribates(prevWribates => [...prevWribates, ...data.wribates]);
+          // Filter out duplicates by checking existing IDs
+          setWribates(prevWribates => {
+            const existingIds = new Set(prevWribates.map(w => w._id));
+            const newWribates = data.wribates.filter(w => !existingIds.has(w._id));
+            
+            // If no new wribates after filtering, we've reached the end
+            if (newWribates.length === 0) {
+              setHasMore(false);
+              return prevWribates;
+            }
+            
+            return [...prevWribates, ...newWribates];
+          });
           
           // Set the lastCreatedAt from the last item
           const newLastCreatedAt = data.wribates[data.wribates.length - 1].createdAt;
+          setLastCreatedAt(newLastCreatedAt);
           
-          // Check if we've reached the end (same lastCreatedAt means no more pagination)
-          if (newLastCreatedAt === lastCreatedAt) {
+          // If we received fewer items than expected, we might be at the end
+          if (data.wribates.length < 10) { // Assuming 10 is your page size
             setHasMore(false);
-          } else {
-            setLastCreatedAt(newLastCreatedAt);
           }
         } else {
           // No more wribates to load

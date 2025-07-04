@@ -197,15 +197,15 @@ export default function ProposeWribateContent() {
   }
 
   return (
-    <div className="container mx-auto  min-h-screen bg-[#F3F2EF]">
+    <div className="container mx-auto min-h-screen bg-[#F3F2EF]">
       {/* Top Categories with Country Filter and Dropdown for more */}
-      <header className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2 px-4 py-2 w-full border-b  bg-white mx-auto">
+      <header className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 mb-2 px-4 py-4 w-full border-b bg-white mx-auto">
         {/* Categories Navigation */}
-        <div className="w-full sm:flex-grow overflow-hidden">
+        <div className="w-full overflow-hidden">
           <nav className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
             {visibleCategories.map((cat, idx) => (
               <button
-                key={idx}
+                key={`category-${idx}`}
                 onClick={() => setSelectedCategory(cat)}
                 className={`text-sm px-3 py-1 transition-colors duration-200 whitespace-nowrap flex-shrink-0
                   ${selectedCategory === cat
@@ -218,24 +218,30 @@ export default function ProposeWribateContent() {
             ))}
 
             {dropdownCategories.length > 0 && (
-              <DropdownMenu>
+              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
-                  <button className="text-sm px-3 py-1 transition-colors duration-200 text-gray-700 hover:text-blue-700 focus:outline-none flex-shrink-0">
+                  <button 
+                    className="text-sm px-3 py-1 transition-colors duration-200 text-gray-700 hover:text-blue-700 focus:outline-none flex-shrink-0"
+                    aria-label="More categories"
+                  >
                     <MoreHorizontal size={20} />
                   </button>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="start" className="p-2">
-                  <div className="grid sm:grid-cols-4 grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {dropdownCategories.map((cat, idx) => (
                       <DropdownMenuItem
-                        key={idx}
-                        onSelect={() => setSelectedCategory(cat)}
+                        key={`dropdown-category-${idx}`}
+                        onSelect={() => {
+                          setSelectedCategory(cat);
+                          setIsDropdownOpen(false);
+                        }}
                         className={`text-sm px-2 py-2 rounded transition-colors duration-200 whitespace-nowrap cursor-pointer
-              ${selectedCategory === cat
+                          ${selectedCategory === cat
                             ? 'bg-blue-100 text-blue-800'
                             : 'text-gray-700 hover:bg-gray-100'}
-            `}
+                        `}
                       >
                         {cat}
                       </DropdownMenuItem>
@@ -248,8 +254,8 @@ export default function ProposeWribateContent() {
         </div>
 
         {/* Country Filter Dropdown and Propose Button */}
-        <div className="flex flex-row justify-end gap-4">
-          {/* Country Dropdown - Full width on mobile, auto width on desktop */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+          {/* Country Dropdown */}
           <CountryDropdown
             selectedCountry={selectedCountry}
             onCountrySelect={handleCountrySelect}
@@ -264,12 +270,13 @@ export default function ProposeWribateContent() {
                 toast.error("Please login to propose a topic.");
               }
             }}
-            className="bg-blue-900 "
+            className="bg-blue-900 hover:bg-blue-800 whitespace-nowrap"
           >
             Propose a Topic
           </Button>
         </div>
       </header>
+      
       {filteredDebates.length > 0 ? (
         <>
           <div className="grid gap-6 grid-cols-1 px-4 sm:grid-cols-2 lg:grid-cols-3">

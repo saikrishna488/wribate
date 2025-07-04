@@ -32,20 +32,11 @@ const formatRelativeTime = (dateString) => {
     return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
   }
 
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 30) {
-    return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
-  }
-
-  const diffInMonths = Math.floor(diffInDays / 30);
-  if (diffInMonths < 12) {
-    return `${diffInMonths} month${diffInMonths === 1 ? '' : 's'} ago`;
-  }
-
-  // Show full date instead of "x years ago"
-  const options = { day: '2-digit', month: 'short', year: 'numeric' }; // Example: 04 Jul 2025
+  // If more than 24 hours passed, show the full date
+  const options = { day: '2-digit', month: 'short', year: 'numeric' }; // Example: 01 Jul 2025
   return date.toLocaleDateString('en-US', options);
 };
+
 
 
 export default function BlogContent() {
